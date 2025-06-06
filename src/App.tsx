@@ -1,10 +1,21 @@
+import { DarkModeProvider } from './contexts/DarkModeContext';
+import { SnackbarProvider } from './contexts/SnackbarContext';
+import { LoadingProvider } from './contexts/LoadingContext';
+import Header from './components/Header';
+import Loader from './components/Loader';
+
 function App() {
   return (
-    <>
-      <div className="flex justify-center items-center h-full w-full">
-        <p className="text-6xl text-orange-400">Bentinarly Polls</p>
-      </div>
-    </>
+    <DarkModeProvider>
+      <SnackbarProvider>
+        <LoadingProvider>
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+            <Header />
+           
+          </div>
+        </LoadingProvider>
+      </SnackbarProvider>
+    </DarkModeProvider>
   );
 }
 
