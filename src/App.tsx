@@ -1,8 +1,8 @@
-import { DarkModeProvider } from './contexts/DarkModeContext';
-import { SnackbarProvider } from './contexts/SnackbarContext';
-import { LoadingProvider } from './contexts/LoadingContext';
-import Header from './components/Header';
-import Loader from './components/Loader';
+import { DarkModeProvider } from "./contexts/DarkModeContext";
+import { SnackbarProvider } from "./contexts/SnackbarContext";
+import { LoadingProvider } from "./contexts/LoadingContext";
+import Header from "./components/global/Header";
+import Loader from "./components/global/Loader";
 
 function App() {
   return (
@@ -11,7 +11,6 @@ function App() {
         <LoadingProvider>
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
             <Header />
-           
           </div>
         </LoadingProvider>
       </SnackbarProvider>
