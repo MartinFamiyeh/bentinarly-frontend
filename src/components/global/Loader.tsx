@@ -1,5 +1,5 @@
 import React from 'react';
-import Logo from '../assets/icons/logo.svg';
+import Logo from '../../assets/icons/logo.svg';
 import { Box } from '@mui/material';
 
 interface LoaderProps {
