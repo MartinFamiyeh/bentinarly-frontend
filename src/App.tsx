@@ -2,7 +2,6 @@ import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { SnackbarProvider } from "./contexts/SnackbarContext";
 import { LoadingProvider } from "./contexts/LoadingContext";
 import Header from "./components/global/Header";
-import Loader from "./components/global/Loader";
 import { Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
@@ -17,9 +16,9 @@ function App() {
     <DarkModeProvider>
       <SnackbarProvider>
         <LoadingProvider>
-          <div className="min-h-screen transition-colors duration-200">
+          <div className="min-h-screen bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
             <Header />
-            <main className="pt-20">
+            <main>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
