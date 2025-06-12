@@ -10,6 +10,7 @@ import Contact from "./pages/Contact";
 import Pricing from "./pages/Pricing";
 import Solutions from "./pages/Solutions";
 import NotFound from "./pages/NotFound";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
+            <Footer />
           </div>
         </LoadingProvider>
       </SnackbarProvider>
