@@ -1,0 +1,53 @@
+/* Mobile orbit animation */
+@keyframes orbit-mobile {
+  from {
+    transform: rotate(0deg) translateX(120px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(120px) rotate(-360deg);
+  }
+}
+
+/* Tablet orbit animation */
+@keyframes orbit-tablet {
+  from {
+    transform: rotate(0deg) translateX(160px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(160px) rotate(-360deg);
+  }
+}
+
+/* Desktop orbit animation */
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(200px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(200px) rotate(-360deg);
+  }
+}
+
+.orbit-card {
+  position: absolute;
+  animation: orbit-mobile 30s linear infinite;
+  transform-origin: center center;
+}
+
+/* Tablet breakpoint */
+@media (min-width: 640px) {
+  .orbit-card {
+    animation: orbit-tablet 30s linear infinite;
+  }
+}
+
+/* Desktop breakpoint */
+@media (min-width: 1024px) {
+  .orbit-card {
+    animation: orbit 30s linear infinite;
+  }
+}
+
+.orbit-card-content {
+  transform: rotate(0deg);
+} 
