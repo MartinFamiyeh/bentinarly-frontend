@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
   },
 ];
     return (
-    <footer className="bg-[#F5F5F5] dark:bg-[#0F0F0F] shadow-md z-50">
+    <footer className="bg-[#F5F5F5] dark:bg-[#0F0F0F] shadow-md z-50 py-14">
       <div className="container mx-auto px-4 py-4">
         <section className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-6 gap-4 text-sm text-[#292929] dark:text-[#E5E5E5]">
           {footerLinks.map((col) => (
