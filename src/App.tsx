@@ -2,7 +2,6 @@ import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { SnackbarProvider } from "./contexts/SnackbarContext";
 import { LoadingProvider } from "./contexts/LoadingContext";
 import Header from "./components/global/Header";
-import Loader from "./components/global/Loader";
 import { Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
@@ -11,13 +10,14 @@ import Contact from "./pages/Contact";
 import Pricing from "./pages/Pricing";
 import Solutions from "./pages/Solutions";
 import NotFound from "./pages/NotFound";
+import Footer from "./components/Footer";
 
 function App() {
   return (
     <DarkModeProvider>
       <SnackbarProvider>
         <LoadingProvider>
-          <div className="min-h-screen transition-colors duration-200">
+          <div className="min-h-screen bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
             <Header />
             <main>
               <Routes>
@@ -29,6 +29,7 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
+            <Footer />
           </div>
         </LoadingProvider>
       </SnackbarProvider>

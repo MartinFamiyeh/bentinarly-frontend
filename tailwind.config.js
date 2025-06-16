@@ -6,7 +6,12 @@ export default {
   ],
   darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sofia: ['Sofia Sans', 'system-ui', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 };
