@@ -12,6 +12,38 @@ import { useDarkMode } from "../../contexts/DarkModeContext";
 
 const About: React.FC = () => {
   const { isDarkMode } = useDarkMode();
+
+  const cards = [
+    {
+      lightIcon: Mobile,
+      darkIcon: DarkMobile,
+      title: "70% of Africans own mobile phones",
+      description:
+        "The tools are already in our hands — Bentinarly Poll helps turn access into insight.",
+    },
+    {
+      lightIcon: Africa,
+      darkIcon: DarkAfrica,
+      title: "Less than 1% of global AI data comes from Africa",
+      description:
+        "Bentinarly Poll is changing that by making African data visible, usable, and ours.",
+    },
+    {
+      lightIcon: Face,
+      darkIcon: DarkFace,
+      title: "70% of Sub-Saharan Africa is under 30",
+      description:
+        "We're empowering the youngest population in the world to shape tomorrow's solutions.",
+    },
+    {
+      lightIcon: Globe,
+      darkIcon: DarkGlobe,
+      title: "By 2030, 42% of the world’s youth will be African",
+      description:
+        "With Bentinarly Poll, this generation doesn't just grow up — it leads through data and storytelling.",
+    },
+  ];
+
   return (
     <div className="flex flex-col lg:grid lg:grid-cols-5 gap-[32px] p-4">
       <div className="w-full md:flex justify-between gap-8 lg:col-span-2">
@@ -21,7 +53,7 @@ const About: React.FC = () => {
           className="w-full md:w-[350px] lg:w-[800px] rounded-lg mx-auto"
         />
         <div className="hidden md:block lg:hidden">
-          <p className="text-center md:text-left mb-4 ">
+          <p className="text-center md:text-left mb-4">
             Bentinarly is a transformative DIY research platform committed to illuminating Africa's
             authentic narratives through accessible data, research, and digital storytelling. Our
             DIY research platform empowers businesses, educators, policymakers, and researchers with
@@ -35,9 +67,10 @@ const About: React.FC = () => {
           </p>
         </div>
       </div>
+
       <div className="flex flex-col lg:justify-between lg:col-span-3">
         <div className="mb-8 md:mb-0 md:hidden lg:block">
-          <p className="text-center md:text-left mb-4 md:mb-0 lg:mb-4">
+          <p className="text-center md:text-left mb-4">
             Bentinarly is a transformative DIY research platform committed to illuminating Africa's
             authentic narratives through accessible data, research, and digital storytelling. Our
             DIY research platform empowers businesses, educators, policymakers, and researchers with
@@ -52,51 +85,21 @@ const About: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="about-hero-card">
-            <div className="about-hero-card-icon">
-              <img src={isDarkMode ? Mobile : DarkMobile} alt="" className="w-[32px] h-[32px]" />
+          {cards.map((card, index) => (
+            <div key={index} className="about-hero-card">
+              <div className="about-hero-card-icon">
+                <img
+                  src={isDarkMode ? card.lightIcon : card.darkIcon}
+                  alt=""
+                  className="w-[32px] h-[32px]"
+                />
+              </div>
+              <p className="text-base md:text-[18px] font-bold leading-[100%] tracking-[0%]">
+                {card.title}
+              </p>
+              <p className="text-base leading-[100%] tracking-[0%]">{card.description}</p>
             </div>
-            <p className="text-base md:text-[18px] font-bold leading-[100%] tracking-[0%]">
-              70% of Africans own mobile phones
-            </p>
-            <p className="text-base leading-[100%] tracking-[0%]">
-              The tools are already in our hands — Bentinarly Poll helps turn access into insight.
-            </p>
-          </div>
-          <div className="about-hero-card">
-            <div className="about-hero-card-icon">
-              <img src={isDarkMode ? Africa : DarkAfrica} alt="" className="w-[32px] h-[32px]" />
-            </div>
-            <p className="text-base md:text-[18px] font-bold leading-[100%] tacking-[0%]">
-              Less than 1% of global AI data comes from Africa
-            </p>
-            <p className="text-base leading-[100%] tracking-[0%]">
-              Bentinarly Poll is changing that by making African data visible, usable, and ours.
-            </p>
-          </div>
-          <div className="about-hero-card">
-            <div className="about-hero-card-icon">
-              <img src={isDarkMode ? Face : DarkFace} alt="" className="w-[32px] h-[32px]" />
-            </div>
-            <p className="text-base md:text-[18px] font-bold leading-[100%] tracking-[0%]">
-              70% of Sub-Saharan Africa is under 30
-            </p>
-            <p className="text-base leading-[100%] tracking-[0%]">
-              We're impowering the youngest population in the world to shape tomorrow's solutions
-            </p>
-          </div>
-          <div className="about-hero-card">
-            <div className="about-hero-card-icon">
-              <img src={isDarkMode ? Globe : DarkGlobe} alt="" className="w-[32px] h-[32px]" />
-            </div>
-            <p className="text-base md:text-[18px] font-bold leading-[100%] tracking-[0%]">
-              By 2030, 42% of the world’s youth will be African
-            </p>
-            <p className="leading-[100%] tracking-[0%]">
-              With Bentinarly Poll, this generation doesn't just grow up — it leads through data and
-              storytelling.
-            </p>
-          </div>
+          ))}
         </div>
       </div>
     </div>
