@@ -21,6 +21,36 @@ body {
   min-height: 100vh;
 }
 
+.about-hero {
+  background-image: url("assets/images/about-background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.about-hero-dark {
+  background-image: url("assets/images/about-dark.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.about-hero-card {
+  @apply rounded-lg bg-[#ffffff] dark:bg-[#0B0B0B] border-[1.5px] dark:border-gray-700  dark:shadow-white flex flex-col gap-[12px] p-4;
+}
+
+.about-hero-card-icon {
+  @apply rounded-xl bg-[#f2f2f2] dark:bg-[#151515] w-[58px] h-[48px] flex justify-center items-center;
+}
+
+.about-foundations-card {
+  @apply rounded-lg bg-[#ffffff] dark:bg-[#0B0B0B] border-[1.5px] dark:border-gray-700  dark:shadow-white flex flex-col gap-[12px] p-4;
+}
+
+.about-foundations-icon {
+  @apply rounded-xl bg-[#f2f2f2] dark:bg-[#151515] flex justify-center items-center mb-2 w-[48px] h-[34px] lg:w-[74px] lg:h-[60px] ;
+}
+
 @layer base {
   html {
     @apply bg-[#ffffff] text-[#292929];
@@ -33,7 +63,7 @@ body {
   h5,
   h6,
   p {
-    @apply text-[#292929];
+    @apply text-[#292929] leading-[100%] tracking-[0%];
   }
 
   html.dark {
@@ -47,6 +77,6 @@ body {
   html.dark h5,
   html.dark h6,
   html.dark p {
-    @apply text-[#E5E5E5];
+    @apply text-[#E5E5E5] leading-[100%] tracking-[0%];
   }
 }

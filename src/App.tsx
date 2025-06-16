@@ -19,7 +19,7 @@ function App() {
         <LoadingProvider>
           <div className="min-h-screen transition-colors duration-200">
             <Header />
-            <main className="pt-20">
+            <main>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
