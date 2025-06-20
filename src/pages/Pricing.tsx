@@ -1,9 +1,10 @@
 import React from "react";
+import Hero from "../components/pricing/Hero";
 
 const Pricing: React.FC = () => {
   return (
-    <div>
-      <p>Pricing</p>
+    <div className="dark:bg-[#0B0B0B]">
+      <Hero />
     </div>
   );
 };

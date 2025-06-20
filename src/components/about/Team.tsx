@@ -4,8 +4,8 @@ const Team: React.FC = () => {
   return (
     <div className="space-y-8 p-4">
       <div className="flex items-center flex-col gap-4 mb-10">
-        <div className="w-[100px] h-[24px] rounded-[32px] py-[5px] px-3 bg-[#FFB59436] text-center">
-          <p className="text-xs font-medium leading-[100%] tracking-[0%] text-[#FE5102] dark:text-[#FE5102]">
+        <div className="rounded-[32px] py-3 px-4 bg-[#FFB59436] text-center">
+          <p className="text-sm font-medium leading-[100%] tracking-[0%] text-[#FE5102] dark:text-[#FE5102]">
             Our Team
           </p>
         </div>
