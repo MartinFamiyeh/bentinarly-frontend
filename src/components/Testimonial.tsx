@@ -3,6 +3,7 @@ import pot1 from "../assets/images/pot1.png";
 import pot2 from "../assets/images/pot2.png";
 import pot3 from "../assets/images/pot3.png";
 import pot4 from "../assets/images/pot4.png";
+import {Avatar, AvatarGroup} from '@mui/material';
 
 // Dummy data for testimonials and avatars
 const testimonials = [
@@ -27,6 +28,13 @@ const testimonials = [
     role: "Product Manager",
     initials: "MW",
   },
+  {
+    rating: 2,
+    text: "Lorem ipsum dolor sit amet, consectetur adip iscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.",
+    name: "Maxin Will",
+    role: "Product Manager",
+    initials: "MK",
+  },
 ];
 
 const avatars = [pot1, pot2, pot3, pot4];
@@ -37,7 +45,7 @@ const Testimonials: React.FC = () => {
       {/* Left Side */}
       <div className="flex-1">
         <div className="flex items-center mb-4">
-          {avatars.map((src, idx) => (
+          {/* {avatars.map((src, idx) => (
             <img
               key={idx}
               src={src}
@@ -45,10 +53,42 @@ const Testimonials: React.FC = () => {
               className={`w-12 h-12 rounded-full border-4 border-white -ml-3 first:ml-0`}
               style={{ zIndex: avatars.length - idx }}
             />
+          ))} */}
+          <AvatarGroup
+          total={15015}
+          renderSurplus={(surplus) => (
+            <Avatar
+                sx={{
+                  width: 48,
+                  height: 48,
+                  backgroundColor: '#3E66DF',
+                  color: '#FFFFFF',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  border: '4px solid #FF6A00',
+                  marginLeft: '-12px',   // ✅ Key for overlapping
+                  zIndex: 0,             // Optional: lower behind others
+                }}
+            >
+              {Math.floor(surplus / 1000)}k
+            </Avatar>
+          )}
+          sx={{
+            '& .MuiAvatar-root': {
+              width: 48,
+              height: 48,
+              border: '4px solid #FF6A00',
+              marginLeft: '-12px',
+              '&:first-of-type': {
+                marginLeft: 0,
+              },
+            },
+          }}
+        >
+          {avatars.map((src, idx) => (
+            <Avatar key={idx} alt={`avatar-${idx}`} src={src} />
           ))}
-          {/* <span className="ml-3 w-12 h-12 flex items-center justify-center bg-white text-[#140B07] font-bold text-sm border-2 border-[#FF6A00] rounded-full">
-            15K
-          </span> */}
+        </AvatarGroup>
         </div>
         <h2
           className="font-bold text-[#292929] dark:text-[#E5E5E5] mb-4"
@@ -70,8 +110,8 @@ const Testimonials: React.FC = () => {
         </p>
       </div>
       {/* Right Side */}
-      <div className="flex-1 flex flex-col gap-8 mt-6 md:mt-0">
-        {testimonials.map((t, idx) => (
+      <div className="flex-1 flex flex-col gap-8 mt-6 md:mt-0 overflow-y-auto max-h-[650px] pr-2">
+        {testimonials.slice(0, testimonials.length).map((t, idx) => (
           <div
             key={idx}
             className="bg-[#FFFFFF] dark:bg-[#0B0B0B] rounded-2xl shadow p-6 w-full max-w-md ml-auto "

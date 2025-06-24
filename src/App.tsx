@@ -11,6 +11,7 @@ import Pricing from "./pages/Pricing";
 import Solutions from "./pages/Solutions";
 import NotFound from "./pages/NotFound";
 import Footer from "./components/Footer";
+import Testimonials from "./components/Testimonial";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
+            <Testimonials/>
             <Footer />
           </div>
         </LoadingProvider>
