@@ -50,7 +50,7 @@ const Faqs = () => {
   };
 
   return (
-    <div className="py-12">
+    <div className="py-12 px-4">
       <div>
         <div className="flex justify-center mb-4">
           <span className="capitalize inline-block mb-2 px-2 py-1 sm:px-4 sm:py-1.5 rounded-full bg-[#FFB59436] dark:bg-[#232323] text-[#FE5102] text-xs sm:text-sm font-semibold">
