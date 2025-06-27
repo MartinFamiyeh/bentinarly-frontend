@@ -7,8 +7,8 @@ const Founder: React.FC = () => {
       <div className="space-y-4 md:col-span-3">
         <div className="space-y-2">
           <div className="flex justify-center md:justify-start">
-            <div className="w-[130px] h-[24px] rounded-[32px] py-[5px] px-3 bg-[#FFB59436] text-center ">
-              <p className="text-xs font-medium leading-[100%] tracking-[0%] text-[#FE5102] dark:text-[#FE5102]">
+            <div className="rounded-[32px] py-3 px-4 bg-[#FFB59436] text-center ">
+              <p className="text-sm font-medium leading-[100%] tracking-[0%] text-[#FE5102] dark:text-[#FE5102]">
                 Founder's Story
               </p>
             </div>
