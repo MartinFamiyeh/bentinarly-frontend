@@ -12,6 +12,7 @@ import Solutions from "./pages/Solutions";
 import NotFound from "./pages/NotFound";
 import Footer from "./components/Footer";
 import Testimonials from "./components/Testimonial";
+import PSession from "./components/PSession";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
               </Routes>
             </main>
             <Testimonials/>
+            <PSession />
             <Footer />
           </div>
         </LoadingProvider>
