@@ -41,19 +41,10 @@ const avatars = [pot1, pot2, pot3, pot4];
 
 const Testimonials: React.FC = () => {
   return (
-    <section className="flex flex-col md:flex-row items-center  md:items-start justify-center md:justify-between w-full bg-[#FE51020D] dark:bg-[#151515] px-8 py-6">
+    <section className="flex flex-col md:flex-row items-center md:items-start justify-center md:justify-between w-full max-w-full bg-[#FE51020D] dark:bg-[#151515] px-4 sm:px-8 py-6">
       {/* Left Side */}
-      <div className="flex-1">
-        <div className="flex items-center mb-4">
-          {/* {avatars.map((src, idx) => (
-            <img
-              key={idx}
-              src={src}
-              alt={`avatar-${idx}`}
-              className={`w-12 h-12 rounded-full border-4 border-white -ml-3 first:ml-0`}
-              style={{ zIndex: avatars.length - idx }}
-            />
-          ))} */}
+      <div className="flex-1 w-full max-w-full">
+        <div className="flex items-center mb-4 overflow-x-auto flex-nowrap w-full max-w-full scrollbar-hide">
           <AvatarGroup
           total={15015}
           renderSurplus={(surplus) => (
@@ -66,8 +57,8 @@ const Testimonials: React.FC = () => {
                   fontWeight: 600,
                   fontSize: '0.875rem',
                   border: '4px solid #FF6A00',
-                  marginLeft: '-12px',   // ✅ Key for overlapping
-                  zIndex: 0,             // Optional: lower behind others
+                  marginLeft: '-12px',
+                  zIndex: 0,
                 }}
             >
               {Math.floor(surplus / 1000)}k
@@ -91,19 +82,15 @@ const Testimonials: React.FC = () => {
         </AvatarGroup>
         </div>
         <h2
-          className="font-bold text-[#292929] dark:text-[#E5E5E5] mb-4"
+          className="font-bold text-[#292929] dark:text-[#E5E5E5] mb-4 text-2xl sm:text-3xl lg:text-4xl w-full max-w-full"
           style={{
-            width: 250,
-            height: 48,
-            fontSize: "2rem",
             lineHeight: "48px",
           }}
         >
           Testimonials
         </h2>
         <p
-          className="text-xl text-[#292929] dark:text-[#E5E5E5] mb-4"
-          style={{ width: 610, height: 60 }}
+          className="text-base sm:text-xl text-[#292929] dark:text-[#E5E5E5] mb-4 w-full max-w-full"
         >
           Discover how our platform is transforming the way professionals gather
           insights and make informed decision.
