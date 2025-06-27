@@ -1,4 +1,3 @@
-import React from 'react';
 import { FaQuestionCircle, FaLightbulb, FaUsers } from 'react-icons/fa';
 import HeroImage from './HeroImage';
 import FeatureCard from './FeatureCard';

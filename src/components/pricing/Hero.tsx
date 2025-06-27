@@ -1,11 +1,8 @@
-import { useDarkMode } from "../../contexts/DarkModeContext";
 import License from "../../assets/images/pricing-license.png";
 import Seats from "../../assets/images/pricing-seats.png";
 import Response from "../../assets/images/pricing-response.png";
 
 const Hero = () => {
-  const { isDarkMode } = useDarkMode();
-
   return (
     <div className="px-4 py-20 bg-cover bg-center bg-no-repeat bg-[url('assets/images/about-background.png')] dark:bg-[url('assets/images/about-dark.png')]">
       <div className="md:w-[768px] lg:w-[1024px] mx-auto">

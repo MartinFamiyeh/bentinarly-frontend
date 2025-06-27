@@ -35,7 +35,9 @@ const Loader: React.FC<LoaderProps> = ({ size = 40 }) => {
         justifyContent: 'center'
       }}
     >
-      <Logo style={{ width: '100%', height: '100%' }} />
+      <div style={{ width: '100%', height: '100%' }}>
+        <Logo />
+      </div>
     </Box>
   );
 };

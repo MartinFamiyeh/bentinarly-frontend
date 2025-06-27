@@ -1,9 +1,4 @@
 import React from "react";
-import Logo from "../assets/icons/logo.svg";
-import Twitter from "../assets/icons/twitter.svg";
-import Facebook from "../assets/icons/facebook.svg";
-import Instagram from "../assets/icons/insta.svg";
-
 
 const Footer: React.FC = () => {
   const footerLinks = [
@@ -83,7 +78,7 @@ const Footer: React.FC = () => {
         <hr className="my-10 border-[#EBEBEB] dark:border-[#2D2D2D]" />
         <section className="text-sm text-[#292929] dark:text-[#E5E5E5] mt-8 text-center">
           <div className="flex items-center gap-2 justify-center mb-2">
-            <Logo className="w-35.654052734375 h-27.654651641845703" />
+            <img src="/logo.svg" alt="Logo" className="w-9 h-7" />
             <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
               Bentinarly Poll
             </h1>
@@ -98,7 +93,7 @@ const Footer: React.FC = () => {
               rel="noopener noreferrer"
               className="ml-2 hover:underline"
             >
-              <Twitter className="inline w-5 h-5 text-[#292929] dark:text-[#E5E5E5]" />
+              <img src="/twitter.svg" alt="Twitter" className="inline w-5 h-5" />
             </a>
             <a
               href="https://facebook.com"
@@ -106,7 +101,7 @@ const Footer: React.FC = () => {
               rel="noopener noreferrer"
               className="ml-4 hover:underline"
             >
-              <Facebook className="inline w-5 h-5 text-[#292929] dark:text-[#E5E5E5]" />
+              <img src="/facebook.svg" alt="Facebook" className="inline w-5 h-5" />
             </a>
             <a
               href="https://instagram.com"
@@ -114,7 +109,7 @@ const Footer: React.FC = () => {
               rel="noopener noreferrer"
               className="ml-4 hover:underline"
             >
-              <Instagram className="inline w-5 h-5 text-[#292929] dark:text-[#E5E5E5]" />
+              <img src="/instagram.svg" alt="Instagram" className="inline w-5 h-5" />
             </a>
           </p>
         </section>

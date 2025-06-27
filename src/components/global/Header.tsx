@@ -33,7 +33,7 @@ const Header: React.FC = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <img 
-              src="/src/assets/icons/logo.svg" 
+              src="/logo.svg" 
               alt="Logo" 
               className="w-8 h-8"
             />
