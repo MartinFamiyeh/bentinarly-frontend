@@ -1,8 +1,16 @@
+// App.tsx
+import React, { type JSX } from "react";
+import { Routes, Route, Outlet } from "react-router-dom";
+
 import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { SnackbarProvider } from "./contexts/SnackbarContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { LoadingProvider } from "./contexts/LoadingContext";
+
 import Header from "./components/global/Header";
-import { Routes, Route } from "react-router-dom";
+import Footer from "./components/Footer";
+import Testimonials from "./components/Testimonial";
+import PSession from "./components/PSession";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -10,34 +18,68 @@ import Contact from "./pages/Contact";
 import Pricing from "./pages/Pricing";
 import Solutions from "./pages/Solutions";
 import NotFound from "./pages/NotFound";
-import Footer from "./components/Footer";
-import Testimonials from "./components/Testimonial";
-import PSession from "./components/PSession";
+import Verify from "./pages/Verification";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import Participants from "./pages/Participants";
+import ResetPassword from "./pages/ResetPassword";
+import ResetSuccess from "./pages/ResetSuccess";
 
-function App() {
+function DefaultLayout(): JSX.Element {
   return (
-    <DarkModeProvider>
-      <SnackbarProvider>
-        <LoadingProvider>
-          <div className="min-h-screen bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
-            <Header />
-            <main>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/solutions" element={<Solutions />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/contact" element={<Contact />} />
+    <div className="min-h-screen bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
+      <Header />
+      <main>
+        <Outlet />
+      </main>
+      <Testimonials />
+      <PSession />
+      <Footer />
+    </div>
+  );
+}
+
+function AuthLayout(): JSX.Element {
+  return (
+    <div className="min-h-screen transition-colors">
+      <main>
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+
+function App(): JSX.Element {
+  return (
+    <AuthProvider>
+      <DarkModeProvider>
+        <SnackbarProvider>
+          <LoadingProvider>
+            <Routes>
+              <Route path="/" element={<DefaultLayout />}>
+                <Route index element={<Home />} />
+                <Route path="about" element={<About />} />
+                <Route path="solutions" element={<Solutions />} />
+                <Route path="pricing" element={<Pricing />} />
+                <Route path="contact" element={<Contact />} />
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-            <Testimonials/>
-            <PSession />
-            <Footer />
-          </div>
-        </LoadingProvider>
-      </SnackbarProvider>
-    </DarkModeProvider>
+              </Route>
+
+              <Route path="/" element={<AuthLayout />}>
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Signup />} />
+                <Route path="participant" element={<Participants />} />
+                <Route path="verification" element={<Verify />} />
+                <Route path="forgotpassword" element={<ForgotPassword />} />
+                <Route path="/resetpassword" element={<ResetPassword />} />
+                <Route path="/reset-success" element={<ResetSuccess />} />
+              </Route>
+            </Routes>
+          </LoadingProvider>
+        </SnackbarProvider>
+      </DarkModeProvider>
+    </AuthProvider>
   );
 }
 
