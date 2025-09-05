@@ -20,24 +20,22 @@ const Header: React.FC = () => {
   };
 
   const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/solutions', label: 'Solutions' },
-    { path: '/about', label: 'About Us' },
-    { path: '/pricing', label: 'Pricing' },
-    { path: '/contact', label: 'Contact Us' },
+    { path: "/", label: "Home" },
+    { path: "/solutions", label: "Solutions" },
+    { path: "/about", label: "About Us" },
+    { path: "/pricing", label: "Pricing" },
+    { path: "/contact", label: "Contact Us" },
   ];
-  
+
   return (
     <>
       <header className="fixed top-0 left-0 right-0 bg-white dark:bg-[#0B0B0B] shadow-sm z-50 mt-2 rounded-full border-2 border-gray-100 dark:border-[#232323] w-[90%] mx-auto px-4">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <img 
-              src="/logo.svg" 
-              alt="Logo" 
-              className="w-8 h-8"
-            />
-            <h1 className="text-lg sm:text-2xl font-semibold text-gray-800 dark:text-white font-sofia">Bentinarly Poll</h1>
+            <img src="/logo.svg" alt="Logo" className="w-8 h-8" />
+            <h1 className="text-lg sm:text-2xl font-semibold text-gray-800 dark:text-white font-sofia">
+              Bentinarly Poll
+            </h1>
           </div>
 
           {/* Desktop Navigation */}
@@ -48,31 +46,30 @@ const Header: React.FC = () => {
                 to={link.path}
                 className={`text-base font-regular transition-colors duration-200 ${
                   location.pathname === link.path
-                    ? 'text-[#FE5102] dark:text-[#FE5102] font-semibold'
-                    : 'text-gray-600 hover:text-[#FE5102] dark:text-gray-300 dark:hover:text-[#FE5102]'
-                }`}
-              >
+                    ? "text-[#FE5102] dark:text-[#FE5102] font-semibold"
+                    : "text-gray-600 hover:text-[#FE5102] dark:text-gray-300 dark:hover:text-[#FE5102]"
+                }`}>
                 {link.label}
               </Link>
             ))}
           </nav>
 
           <div className="flex items-center gap-4">
-            <IconButton 
-              color="inherit" 
+            <IconButton
+              color="inherit"
               onClick={handleThemeToggle}
-              className="text-gray-600 dark:text-gray-300 hover:text-[#FE5102] dark:hover:text-[#FE5102]"
-            >
+              className="text-gray-600 dark:text-gray-300 hover:text-[#FE5102] dark:hover:text-[#FE5102]">
               {isDarkMode ? <DarkModeIcon /> : <LightModeIcon />}
             </IconButton>
-            <button className="hidden lg:block bg-[#FE5102] text-white dark:text-black px-6 py-2 rounded-full font-medium hover:opacity-90 transition-all">
-              Login
-            </button>
+            <Link to="/login">
+              <button className="hidden lg:block bg-[#FE5102] text-white dark:text-black px-6 py-2 rounded-full font-medium hover:opacity-90 transition-all">
+                Login
+              </button>
+            </Link>
             {/* Hamburger Menu Button */}
-            <button 
+            <button
               className="lg:hidden text-[#FE5102] hover:opacity-80 transition-all"
-              onClick={toggleMenu}
-            >
+              onClick={toggleMenu}>
               {isMenuOpen ? <HiX size={24} /> : <HiMenu size={24} />}
             </button>
           </div>
@@ -85,10 +82,9 @@ const Header: React.FC = () => {
           <div className="fixed right-0 top-0 h-full w-64 bg-white dark:bg-[#0B0B0B] shadow-lg transform transition-transform duration-300 ease-in-out">
             <div className="p-6">
               <div className="flex justify-end">
-                <button 
+                <button
                   onClick={toggleMenu}
-                  className="text-gray-600 dark:text-gray-300 hover:text-[#FE5102] dark:hover:text-[#FE5102]"
-                >
+                  className="text-gray-600 dark:text-gray-300 hover:text-[#FE5102] dark:hover:text-[#FE5102]">
                   <HiX size={24} />
                 </button>
               </div>
@@ -100,19 +96,19 @@ const Header: React.FC = () => {
                     onClick={toggleMenu}
                     className={`text-base font-regular transition-colors duration-200 ${
                       location.pathname === link.path
-                        ? 'text-[#FE5102] dark:text-[#FE5102] font-semibold'
-                        : 'text-gray-600 hover:text-[#FE5102] dark:text-gray-300 dark:hover:text-[#FE5102]'
-                    }`}
-                  >
+                        ? "text-[#FE5102] dark:text-[#FE5102] font-semibold"
+                        : "text-gray-600 hover:text-[#FE5102] dark:text-gray-300 dark:hover:text-[#FE5102]"
+                    }`}>
                     {link.label}
                   </Link>
                 ))}
-                <button 
-                  onClick={toggleMenu}
-                  className="mt-4 w-full bg-[#FE5102] text-white dark:text-black px-6 py-2 rounded-full font-medium hover:opacity-90 transition-all"
-                >
-                  Login
-                </button>
+                <Link to="/login">
+                  <button
+                    onClick={toggleMenu}
+                    className="mt-4 w-full bg-[#FE5102] text-white dark:text-black px-6 py-2 rounded-full font-medium hover:opacity-90 transition-all">
+                    Login
+                  </button>
+                </Link>
               </nav>
             </div>
           </div>

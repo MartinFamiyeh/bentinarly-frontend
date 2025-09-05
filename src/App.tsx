@@ -26,6 +26,16 @@ import Participants from "./pages/Participants";
 import ResetPassword from "./pages/ResetPassword";
 import ResetSuccess from "./pages/ResetSuccess";
 
+import DashboardLayout from "./layouts/DashboardLayout";
+import Projects from "./pages/Projects";
+import Analytics from "./pages/Analytics";
+import Templates from "./pages/Templates";
+
+import SurveyLayout from "./layouts/SurveyLayout";
+import SurveyAnalytics from "./pages/SurveyAnalytics";
+import Demographics from "./pages/Demographics";
+import Questionnaires from "./pages/Questionnaires";
+
 function DefaultLayout(): JSX.Element {
   return (
     <div className="min-h-screen bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
@@ -63,7 +73,6 @@ function App(): JSX.Element {
                 <Route path="solutions" element={<Solutions />} />
                 <Route path="pricing" element={<Pricing />} />
                 <Route path="contact" element={<Contact />} />
-                <Route path="*" element={<NotFound />} />
               </Route>
 
               <Route path="/" element={<AuthLayout />}>
@@ -75,6 +84,21 @@ function App(): JSX.Element {
                 <Route path="/resetpassword" element={<ResetPassword />} />
                 <Route path="/reset-success" element={<ResetSuccess />} />
               </Route>
+
+              <Route element={<DashboardLayout />}>
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/projects/:projectId" element={<Projects />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/templates" element={<Templates />} />
+              </Route>
+
+              <Route element={<SurveyLayout />}>
+                <Route path="/survey/questionnaires" element={<Questionnaires />} />
+                <Route path="/survey/demographics" element={<Demographics />} />
+                <Route path="/survey/analytics" element={<SurveyAnalytics />} />
+              </Route>
+
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </LoadingProvider>
         </SnackbarProvider>
