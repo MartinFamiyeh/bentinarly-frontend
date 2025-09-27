@@ -1,9 +1,9 @@
-// src/layouts/DashboardLayout.tsx
-import React, { useState } from "react";
+// src/layouts/SurveyLayout.tsx
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import SurveySidebar from "../components/dashboard/SurveySidebar";
 
-const DashboardLayout = () => {
+const SurveyLayout = () => {
   const [isSidebarMinimized, setSidebarMinimized] = useState(false);
 
   const toggleSidebar = () => {
@@ -26,4 +26,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout;
+export default SurveyLayout;

@@ -1,30 +1,30 @@
 /* Mobile orbit animation */
 @keyframes orbit-mobile {
   from {
-    transform: rotate(0deg) translateX(120px) rotate(0deg);
+    transform: rotate(0deg) translateX(80px) rotate(0deg);
   }
   to {
-    transform: rotate(360deg) translateX(120px) rotate(-360deg);
+    transform: rotate(360deg) translateX(80px) rotate(-360deg);
   }
 }
 
 /* Tablet orbit animation */
 @keyframes orbit-tablet {
   from {
-    transform: rotate(0deg) translateX(160px) rotate(0deg);
+    transform: rotate(0deg) translateX(100px) rotate(0deg);
   }
   to {
-    transform: rotate(360deg) translateX(160px) rotate(-360deg);
+    transform: rotate(360deg) translateX(100px) rotate(-360deg);
   }
 }
 
 /* Desktop orbit animation */
 @keyframes orbit {
   from {
-    transform: rotate(0deg) translateX(200px) rotate(0deg);
+    transform: rotate(0deg) translateX(160px) rotate(0deg);
   }
   to {
-    transform: rotate(360deg) translateX(200px) rotate(-360deg);
+    transform: rotate(360deg) translateX(160px) rotate(-360deg);
   }
 }
 

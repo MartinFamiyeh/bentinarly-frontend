@@ -6,7 +6,7 @@ const HeroImage = () => {
   const { isDarkMode } = useDarkMode();
   return (
     <div className="relative order-first md:order-none mb-8 md:mb-0">
-      <div className="aspect-[1.5/1] rounded-[250px] flex items-center justify-center w-[150%] sm:w-[175%] lg:w-[200%] -ml-[25%] sm:-ml-[37.5%] lg:-ml-[50%] max-w-[1200px] mx-auto">
+      <div className="aspect-[1.5/1] rounded-[250px] flex items-center justify-center w-[120%] sm:w-[140%] lg:w-[160%] -ml-[10%] sm:-ml-[20%] lg:-ml-[30%] max-w-[1200px] mx-auto overflow-hidden">
         <div className="max-w-[300px] sm:max-w-[400px] lg:max-w-[500px]">
           <img
             src={isDarkMode ? heroDarkImage : heroImage}

@@ -33,7 +33,7 @@ const Hero = () => {
 
   return (
     <div 
-      className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16"
+      className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 overflow-hidden"
       style={{
         backgroundImage: `url(${isDarkMode ? heroDarkBackground : heroBackground})`,
         backgroundSize: 'cover',
