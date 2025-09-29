@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { NavLink, Link, useMatch } from "react-router-dom";
 import { createPortal } from "react-dom";
+import CreateSurvey from "./CreateSurvey";
+
 import { FiPlus } from "react-icons/fi";
 
 import Expand from "../../assets/icons/expand.png";
@@ -27,6 +29,7 @@ import Plus from "../../assets/icons/plus-dark.png";
 import Manage from "../../assets/icons/manage-account.png";
 import Logout from "../../assets/icons/logout.png";
 import ArrowRight from "../../assets/icons/arrow-right.png";
+import { useProjects } from "../../contexts/ProjectsContext";
 
 interface NavLinkItem {
   to: string;
@@ -49,6 +52,7 @@ const Sidebar = ({ isMinimized, toggle }: SidebarProps) => {
   const [isProjectsOpen, setProjectsOpen] = useState(true);
   const [isHelpMenuOpen, setHelpMenuOpen] = useState(false);
   const [isUserMenuOpen, setUserMenuOpen] = useState(false);
+  const [isCreateSurveyModalOpen, setIsCreateSurveyModalOpen] = useState(false);
   const [openProjectMenu, setOpenProjectMenu] = useState<number | null>(null);
 
   const [helpMenuPos, setHelpMenuPos] = useState<{ top: number; left: number } | null>(null);
@@ -57,11 +61,18 @@ const Sidebar = ({ isMinimized, toggle }: SidebarProps) => {
     [key: number]: { top: number; left: number } | null;
   }>({});
 
+  const { projects } = useProjects();
+
   const helpButtonRef = useRef<HTMLButtonElement>(null);
   const userButtonRef = useRef<HTMLButtonElement>(null);
 
   const navLinks: NavLinkItem[] = [
-    { to: "/projects", activeIcon: ProjectActive, inactiveIcon: Project, text: "Projects" },
+    {
+      to: "/projects/dashboard",
+      activeIcon: ProjectActive,
+      inactiveIcon: Project,
+      text: "Projects",
+    },
     { to: "/analytics", activeIcon: AnalyticsActive, inactiveIcon: Analytics, text: "Analytics" },
     { to: "/templates", activeIcon: TemplatesActive, inactiveIcon: Templates, text: "Templates" },
   ];
@@ -197,9 +208,7 @@ const Sidebar = ({ isMinimized, toggle }: SidebarProps) => {
               <div className={`flex items-center justify-between hover:bg-gray-100 py-2 px-4`}>
                 <div className="flex gap-3 items-center">
                   <img src={Logout} alt="" className="w-5 h-5" />
-                  <a
-                    href="#"
-                    className="flex items-center text-sm text-red-600">
+                  <a href="#" className="flex items-center text-sm text-red-600">
                     Logout Account
                   </a>
                 </div>
@@ -237,7 +246,7 @@ const Sidebar = ({ isMinimized, toggle }: SidebarProps) => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 h-full rounded-r-xl bg-white shadow-sm flex flex-col transition-all duration-300 ease-in-out z-40 overflow-visible ${
+      className={`h-screen rounded-r-xl bg-white shadow-sm flex flex-col transition-all duration-300 ease-in-out z-40 overflow-visible ${
         isMinimized ? "w-20" : "w-64"
       }`}>
       <div
@@ -256,7 +265,9 @@ const Sidebar = ({ isMinimized, toggle }: SidebarProps) => {
       </div>
 
       <div className="flex flex-col flex-grow px-4 overflow-y-auto">
-        <button className="btn bg-gradient-to-r from-[#FE5102] to-[#B148F3] mb-4 mx-auto border-none">
+        <button
+          className="btn bg-gradient-to-r from-[#FE5102] to-[#B148F3] mb-4 mx-auto border-none"
+          onClick={() => setIsCreateSurveyModalOpen(true)}>
           <img src={PlusLight} className={isMinimized ? "" : "hidden"} />
           <span className={isMinimized ? "hidden" : "inline"}>Create Survey</span>
         </button>
@@ -295,29 +306,34 @@ const Sidebar = ({ isMinimized, toggle }: SidebarProps) => {
 
                     {!isMinimized && isProjectsOpen && (
                       <ul className="mt-1">
-                        {[1, 2].map((id) => (
-                          <li key={id}>
-                            <div className="flex justify-between items-center text-sm p-2 rounded-md hover:bg-gray-100 relative">
-                              <NavLink
-                                to={`/projects/${id}`}
-                                className={({ isActive }) =>
-                                  isActive
-                                    ? "text-[#FE5102] font-medium"
-                                    : "text-gray-400 hover:text-gray-800"
-                                }>
-                                Project {id}
-                              </NavLink>
-                              <button
-                                onClick={(e) =>
-                                  handleSubMenuClick(e, id, e.currentTarget as HTMLButtonElement)
-                                }
-                                className="text-gray-400 hover:text-gray-700">
-                                <img src={Menu} />
-                              </button>
-                              <ProjectDropdownMenu projectId={id} />
-                            </div>
-                          </li>
-                        ))}
+                        {projects &&
+                          projects.map((project) => (
+                            <li key={project.id}>
+                              <div className="flex justify-between items-center text-sm p-2 rounded-md hover:bg-gray-100 relative">
+                                <NavLink
+                                  to={`/projects/${project.id}`}
+                                  className={({ isActive }) =>
+                                    isActive
+                                      ? "text-[#FE5102] font-medium"
+                                      : "text-gray-400 hover:text-gray-800"
+                                  }>
+                                  {project.name}
+                                </NavLink>
+                                <button
+                                  onClick={(e) =>
+                                    handleSubMenuClick(
+                                      e,
+                                      project.id,
+                                      e.currentTarget as HTMLButtonElement
+                                    )
+                                  }
+                                  className="text-gray-400 hover:text-gray-700">
+                                  <img src={Menu} />
+                                </button>
+                                <ProjectDropdownMenu projectId={project.id} />
+                              </div>
+                            </li>
+                          ))}
                         <li className="mt-1">
                           <button className="flex items-center gap-1 text-xs text-gray-800 p-2 w-full hover:bg-gray-100 rounded-md">
                             <FiPlus /> Add project
@@ -401,6 +417,11 @@ const Sidebar = ({ isMinimized, toggle }: SidebarProps) => {
         </button>
         <UserDropdownMenu />
       </div>
+
+      <CreateSurvey
+        isOpen={isCreateSurveyModalOpen}
+        onClose={() => setIsCreateSurveyModalOpen(false)}
+      />
     </aside>
   );
 };

@@ -1,5 +1,4 @@
-// App.tsx
-import React, { type JSX } from "react";
+import  { type JSX } from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
 
 import { DarkModeProvider } from "./contexts/DarkModeContext";
@@ -35,6 +34,7 @@ import SurveyLayout from "./layouts/SurveyLayout";
 import SurveyAnalytics from "./pages/SurveyAnalytics";
 import Demographics from "./pages/Demographics";
 import Questionnaires from "./pages/Questionnaires";
+import { ProjectsProvider } from "./contexts/ProjectsContext";
 
 function DefaultLayout(): JSX.Element {
   return (
@@ -66,40 +66,42 @@ function App(): JSX.Element {
       <DarkModeProvider>
         <SnackbarProvider>
           <LoadingProvider>
-            <Routes>
-              <Route path="/" element={<DefaultLayout />}>
-                <Route index element={<Home />} />
-                <Route path="about" element={<About />} />
-                <Route path="solutions" element={<Solutions />} />
-                <Route path="pricing" element={<Pricing />} />
-                <Route path="contact" element={<Contact />} />
-              </Route>
+            <ProjectsProvider>
+              <Routes>
+                <Route path="/" element={<DefaultLayout />}>
+                  <Route index element={<Home />} />
+                  <Route path="about" element={<About />} />
+                  <Route path="solutions" element={<Solutions />} />
+                  <Route path="pricing" element={<Pricing />} />
+                  <Route path="contact" element={<Contact />} />
+                </Route>
 
-              <Route path="/" element={<AuthLayout />}>
-                <Route path="login" element={<Login />} />
-                <Route path="register" element={<Signup />} />
-                <Route path="participant" element={<Participants />} />
-                <Route path="verification" element={<Verify />} />
-                <Route path="forgotpassword" element={<ForgotPassword />} />
-                <Route path="/resetpassword" element={<ResetPassword />} />
-                <Route path="/reset-success" element={<ResetSuccess />} />
-              </Route>
+                <Route path="/" element={<AuthLayout />}>
+                  <Route path="login" element={<Login />} />
+                  <Route path="register" element={<Signup />} />
+                  <Route path="participant" element={<Participants />} />
+                  <Route path="verification" element={<Verify />} />
+                  <Route path="forgotpassword" element={<ForgotPassword />} />
+                  <Route path="/resetpassword" element={<ResetPassword />} />
+                  <Route path="/reset-success" element={<ResetSuccess />} />
+                </Route>
 
-              <Route element={<DashboardLayout />}>
-                <Route path="/dashboard" element={<Projects />} />
-                <Route path="/projects/:projectId" element={<Projects />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/templates" element={<Templates />} />
-              </Route>
+                <Route element={<DashboardLayout />}>
+                  <Route path="/projects/dashboard" element={<Projects />} />
+                  <Route path="/projects/:projectId" element={<Projects />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/templates" element={<Templates />} />
+                </Route>
 
-              <Route element={<SurveyLayout />}>
-                <Route path="/survey/questionnaires" element={<Questionnaires />} />
-                <Route path="/survey/demographics" element={<Demographics />} />
-                <Route path="/survey/analytics" element={<SurveyAnalytics />} />
-              </Route>
+                <Route element={<SurveyLayout />}>
+                  <Route path="/survey/questionnaires" element={<Questionnaires />} />
+                  <Route path="/survey/demographics" element={<Demographics />} />
+                  <Route path="/survey/analytics" element={<SurveyAnalytics />} />
+                </Route>
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ProjectsProvider>
           </LoadingProvider>
         </SnackbarProvider>
       </DarkModeProvider>
