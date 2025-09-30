@@ -67,6 +67,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
 
   const addProject = (project: ProjectType) => {
     setProjects((prev) => (prev ? [...prev, project] : [project]));
+    setSelectedProject(project);
   };
 
   const removeProject = (id: number) => {

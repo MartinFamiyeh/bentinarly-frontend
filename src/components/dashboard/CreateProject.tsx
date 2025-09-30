@@ -1,14 +1,37 @@
 import { useState } from "react";
+import { useProjects } from "../../contexts/ProjectsContext";
 
-type CreateSurveyModalProps = { isOpen: boolean; onClose: () => void };
+type CreateProjectModalProps = { isOpen: boolean; onClose: () => void };
 
-const CreateSurvey = ({ isOpen, onClose }: CreateSurveyModalProps) => {
+type SurveyType = {
+  id: string;
+  name: string;
+  members: number;
+  status: "draft" | "scheduled" | "live" | "paused" | "closed" | "completed";
+  createdAt: number;
+};
+
+type ProjectType = {
+  id: number;
+  name: string;
+  surveys: SurveyType[] | null;
+};
+
+const CreateProject = ({ isOpen, onClose }: CreateProjectModalProps) => {
   const [name, setname] = useState<string>("");
+  const { addProject } = useProjects();
 
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    console.log("name:", name);
+    const projectdata: ProjectType = {
+      id: Math.floor(Math.random() * 1000000),
+      name: name,
+      surveys: [],
+    };
+
+    addProject(projectdata);
+    onClose();
   };
 
   return (
@@ -40,4 +63,4 @@ const CreateSurvey = ({ isOpen, onClose }: CreateSurveyModalProps) => {
   );
 };
 
-export default CreateSurvey;
+export default CreateProject;

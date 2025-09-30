@@ -88,7 +88,6 @@ function App(): JSX.Element {
 
                 <Route element={<DashboardLayout />}>
                   <Route path="/projects/dashboard" element={<Projects />} />
-                  <Route path="/projects/:projectId" element={<Projects />} />
                   <Route path="/analytics" element={<Analytics />} />
                   <Route path="/templates" element={<Templates />} />
                 </Route>
