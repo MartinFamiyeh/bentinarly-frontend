@@ -145,7 +145,7 @@ const HelpAndRefreshSection: React.FC<HelpAndRefreshSectionProps> = ({ isMinimiz
         onMouseEnter={(e) => handleMouseEnter("Help Center", e)}
         onMouseLeave={handleMouseLeave}>
         <div className="flex items-center gap-2">
-          <img src={isHelpMenuOpen ? HelpActive : Help} className="w-5 h-5" />
+          <img src={isHelpMenuOpen ? Help : Help} className="w-5 h-5" />
           {!isMinimized && "Help Center"}
         </div>
 

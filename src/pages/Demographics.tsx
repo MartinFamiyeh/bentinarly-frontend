@@ -1,2 +1,4 @@
-const Demographics = () => <div>Demograpgics Page Content</div>;
+import UnderConstruction from "../components/global/UnderConstruction";
+
+const Demographics = () => <UnderConstruction />;
 export default Demographics;

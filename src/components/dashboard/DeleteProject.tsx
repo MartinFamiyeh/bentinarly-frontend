@@ -17,7 +17,6 @@ const DeleteProject = ({ isOpen, onClose, projectId, projectName }: DeleteProjec
   const handleDelete = () => {
     removeProject(projectId);
     showSnackbar("Project deleted successfully.", "success");
-    showSnackbar("Something went wrong", "error");
     onClose();
   };
 

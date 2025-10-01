@@ -101,12 +101,12 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
 
   return (
     <nav className="flex-grow">
-      <button
-        className="btn bg-gradient-to-r from-[#FE5102] to-[#B148F3] mb-4 mx-auto border-none"
-        onClick={() => setIsCreateSurveyModalOpen(true)}>
-        <img src={PlusLight} className={isMinimized ? "" : "hidden"} />
-        <span className={isMinimized ? "hidden" : "inline"}>Create Survey</span>
-      </button>
+      <NavLink to={"/survey/questionnaires"}>
+        <button className="btn bg-gradient-to-r from-[#FE5102] to-[#B148F3] mb-4 mx-auto border-none">
+          <img src={PlusLight} className={isMinimized ? "" : "hidden"} />
+          <span className={isMinimized ? "hidden" : "inline"}>Create Survey</span>
+        </button>
+      </NavLink>
       <ul>
         {navLinks.map((item) => {
           const isProjectsActive = useMatch("/projects/*");

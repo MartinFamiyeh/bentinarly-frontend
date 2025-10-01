@@ -1,2 +1,4 @@
-const Analytics = () => <div>Analytics Page Content</div>;
+import UnderConstruction from "../components/global/UnderConstruction";
+
+const Analytics = () => <UnderConstruction />;
 export default Analytics;

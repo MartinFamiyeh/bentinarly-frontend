@@ -1,2 +1,4 @@
-const Templates = () => <div>Project Templates</div>;
+import UnderConstruction from "../components/global/UnderConstruction";
+
+const Templates = () => <UnderConstruction />;
 export default Templates;
