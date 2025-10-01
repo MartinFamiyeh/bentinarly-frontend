@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Wrench } from "lucide-react";
+import { Wrench } from "lucide-react";
 
 const UnderConstruction: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -7,14 +7,6 @@ const UnderConstruction: React.FC = () => {
   useEffect(() => {
     setIsVisible(true);
   }, []);
-
-  const handleGoBack = () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = "/";
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FE5102]/60 via-purple-400/70 to-[#B148F3]/60 flex items-center justify-center p-4 relative overflow-hidden">

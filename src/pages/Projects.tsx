@@ -19,7 +19,7 @@ type SurveyType = {
 
 const Projects = () => {
   const { showLoading, hideLoading } = useLoading();
-  const { selectedProject, projects, setProjectsList, selectProject } = useProjects();
+  const { selectedProject, setProjectsList, selectProject } = useProjects();
   const [activeFilter, setActiveFilter] = useState("All");
   const [surveys, setSurveys] = useState<SurveyType[] | null | undefined>(selectedProject?.surveys);
 
