@@ -1,6 +1,6 @@
 import React from "react";
-import Expand from "../../assets/icons/expand.png";
-import Minimize from "../../assets/icons/minimize.png";
+import Expand from "../../assets/icons/expand_nav.svg";
+import Minimize from "../../assets/icons/collapse_nav.svg";
 
 interface SidebarHeaderProps {
   isMinimized: boolean;
@@ -19,9 +19,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ isMinimized, toggle }) =>
           <span className="font-medium text-xl text-[#292929]">Bentinarly Poll</span>
         )}
       </div>
-      <button onClick={toggle}>
-        <img src={isMinimized ? Expand : Minimize} className="w-6 h-6" />
-      </button>
+      <button onClick={toggle}>{isMinimized ? <Expand /> : <Minimize />}</button>
     </div>
   );
 };

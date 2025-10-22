@@ -65,7 +65,7 @@ const QuestionTypeSelector: React.FC<QuestionTypeSelectorProps> = ({
                     <typeConfig.icon className="w-4 h-4" />
                   )}
                   <div>
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm text-gray-500">
                       {typeConfig.label}
                     </div>
                     <div className="text-xs text-gray-500">

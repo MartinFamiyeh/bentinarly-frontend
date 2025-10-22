@@ -1,5 +1,5 @@
-import SurveyImage from "../../assets/icons/survey.png";
-import Menu from "../../assets/icons/menu.png";
+import SurveyImage from "../../assets/icons/survey_file.svg";
+import Menu from "../../assets/icons/more.svg";
 import { formatDate } from "../../functions";
 import { createPortal } from "react-dom";
 import { useState, useRef, useEffect } from "react";
@@ -95,7 +95,7 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
     <>
       <div className="grid grid-cols-12 items-center py-4 px-6 border border-[#2929291A]/10 rounded-md bg-[#FFFFFF] text-sm">
         <div className="col-span-4 flex items-center gap-4">
-          <img src={SurveyImage} alt="survey-icon" />
+          <SurveyImage />
           <div>
             <p className="font-medium text-sm text-[#292929] leading-[18px] text-nowrap w-[18rem] overflow-hidden text-ellipsis">
               {survey.name}
@@ -126,8 +126,8 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
           <button
             ref={buttonRef}
             onClick={toggleMenu}
-            className="text-gray-400 hover:text-gray-600">
-            <img src={Menu} alt="menu-icon" className="rotate-90" />
+            className="text-gray-400 hover:text-gray-600  p-2">
+            <Menu />
           </button>
         </div>
       </div>

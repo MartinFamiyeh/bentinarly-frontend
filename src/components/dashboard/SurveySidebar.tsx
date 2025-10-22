@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink, Link, useMatch } from "react-router-dom";
-import Expand from "../../assets/icons/expand.png";
-import Minimize from "../../assets/icons/minimize.png";
+import Expand from "../../assets/icons/expand_nav.svg";
+import Minimize from "../../assets/icons/collapse_nav.svg";
 import Questionnaire from "../../assets/icons/questionnaire.png";
 import QuestionnaireActive from "../../assets/icons/questionnaire-active.png";
 
@@ -11,16 +11,7 @@ import DemographicActive from "../../assets/icons/demographics-active.png";
 import Analytics from "../../assets/icons/analytics.png";
 import AnalyticsActive from "../../assets/icons/analytics-active.png";
 
-import Templates from "../../assets/icons/templates.png";
-import TemplatesActive from "../../assets/icons/templates-active.png";
-
-import Settings from "../../assets/icons/refresh.png";
-import HelpActive from "../../assets/icons/help-active.png";
-import Help from "../../assets/icons/help.png";
-
-import Arrow from "../../assets/icons/chevron-down.png";
-
-import Survey from "../../assets/icons/survey.png";
+import Survey from "../../assets/icons/survey_file.svg";
 
 interface NavLinkItem {
   to: string;
@@ -47,7 +38,7 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
       to: "/survey/demographics",
       activeIcon: DemographicActive,
       inactiveIcon: Demographic,
-      text: "Demographics",
+      text: "Target Audience",
     },
     {
       to: "/survey/analytics",
@@ -59,7 +50,7 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 h-full rounded-r-xl bg-white shadow-sm flex flex-col transition-all duration-300 ease-in-out z-40 ${
+      className={`h-screen rounded-r-xl bg-white shadow-sm flex flex-col transition-all duration-300 ease-in-out z-40 ${
         isMinimized ? "w-20" : "w-64"
       }`}>
       <div
@@ -75,32 +66,24 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
             Bentinarly Poll
           </span>
         </div>
-        <button onClick={toggle}>
-          {isMinimized ? (
-            <img src={Expand} className="w-[24px] h-[24px]" />
-          ) : (
-            <img src={Minimize} className="w-[24px] h-[24px]" />
-          )}
-        </button>
+        <button onClick={toggle}>{isMinimized ? <Expand /> : <Minimize />}</button>
       </div>
 
-      <div className="p-4">
-        {/* Make this div the hoverable group */}
+      {/* <div className="p-4">
         <div
           className={`relative flex items-center gap-2 group ${
             isMinimized ? "justify-center" : ""
           }`}>
-          <img src={Survey} alt="" className="h-5 w-5" />
+          <Survey  />
           <span className={isMinimized ? "hidden" : "inline"}>Survey Name</span>
 
-          {/* Tooltip (shows on hover when minimized) */}
           {isMinimized && (
             <span className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-[#FFF5F0] text-[#FE5102] text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-md">
               Survey Name
             </span>
           )}
         </div>
-      </div>
+      </div> */}
 
       <div className="flex flex-col flex-grow px-4 overflow-hiden">
         <nav className="flex-grow">

@@ -8,6 +8,7 @@ import { useProjects } from "../contexts/ProjectsContext";
 import { sampleProjects } from "../data/projects";
 import { sampleQuestions } from "../data/questions";
 import { useLoading } from "../contexts/LoadingContext";
+import { useDarkMode } from "../contexts/DarkModeContext";
 
 type SurveyType = {
   id: string;
@@ -18,6 +19,7 @@ type SurveyType = {
 };
 
 const Projects = () => {
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { showLoading, hideLoading } = useLoading();
   const { selectedProject, setProjectsList, selectProject } = useProjects();
   const [activeFilter, setActiveFilter] = useState("All");
@@ -35,6 +37,12 @@ const Projects = () => {
   useEffect(() => {
     setIsQuestionnaireModalOpen(true);
   }, []);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      toggleDarkMode();
+    }
+  });
 
   const handleQuestionnaireSubmit = (answers: Record<string, string | string[]>) => {
     console.log("Questionnaire Answers:", answers);

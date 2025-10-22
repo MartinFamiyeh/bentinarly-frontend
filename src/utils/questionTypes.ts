@@ -1,17 +1,21 @@
-import type { QuestionType } from '../types/question';
+import type { QuestionType } from "../types/question";
 
 // Import SVG icons
-import SingleChoiceIcon from '../assets/icons/single_choice.svg';
-import MultipleChoiceIcon from '../assets/icons/multiple_choice.svg';
-import ShortAnswerIcon from '../assets/icons/short_answer.svg';
-import LongAnswerIcon from '../assets/icons/long_answer.svg';
-import RatingScaleIcon from '../assets/icons/rating_scale.svg';
-import YesNoIcon from '../assets/icons/yes_no.svg';
-import DateIcon from '../assets/icons/date.svg';
-import TimeIcon from '../assets/icons/time.svg';
-import DropdownIcon from '../assets/icons/arrow_down.svg';
-import FileUploadIcon from '../assets/icons/file_upload.svg';
-import MatrixIcon from '../assets/icons/matrix.svg';
+import SingleChoiceIcon from "../assets/icons/single_choice.svg";
+import MultipleChoiceIcon from "../assets/icons/multiple_choice.svg";
+import ShortAnswerIcon from "../assets/icons/short_answer.svg";
+import LongAnswerIcon from "../assets/icons/long_answer.svg";
+import RatingScaleIcon from "../assets/icons/rating_scale.svg";
+import YesNoIcon from "../assets/icons/yes_no.svg";
+import DateIcon from "../assets/icons/date.svg";
+import TimeIcon from "../assets/icons/time.svg";
+import DropdownIcon from "../assets/icons/dropdown.svg";
+import FileUploadIcon from "../assets/icons/upload.svg";
+import MatrixIcon from "../assets/icons/matrix.svg";
+import SliderIcon from "../assets/icons/slider.svg"
+import SingleGridIcon from "../assets/icons/single-matrix.svg"
+import LikertIcon from "../assets/icons/likert.svg"
+import RankingIcon from "../assets/icons/ranking.svg"
 
 export const QUESTION_TYPES: Array<{
   type: QuestionType;
@@ -23,111 +27,147 @@ export const QUESTION_TYPES: Array<{
   hasMatrix: boolean;
 }> = [
   {
-    type: 'single-choice',
-    label: 'Single Choice',
+    type: "single-choice",
+    label: "Single Choice",
     icon: SingleChoiceIcon,
-    description: 'Choose one option from a list',
+    description: "",
     hasOptions: true,
     hasRating: false,
     hasMatrix: false,
   },
   {
-    type: 'multiple-choice',
-    label: 'Multiple Choice',
+    type: "multiple-choice",
+    label: "Multiple Choice",
     icon: MultipleChoiceIcon,
-    description: 'Choose multiple options from a list',
+    description: "",
     hasOptions: true,
     hasRating: false,
     hasMatrix: false,
   },
   {
-    type: 'short-answer',
-    label: 'Short Answer',
+    type: "short-answer",
+    label: "Short Answer",
     icon: ShortAnswerIcon,
-    description: 'Brief text response',
+    description: "",
     hasOptions: false,
     hasRating: false,
     hasMatrix: false,
   },
   {
-    type: 'long-answer',
-    label: 'Long Answer',
+    type: "long-answer",
+    label: "Long Answer",
     icon: LongAnswerIcon,
-    description: 'Detailed text response',
+    description: "",
     hasOptions: false,
     hasRating: false,
     hasMatrix: false,
   },
   {
-    type: 'rating-scale',
-    label: 'Rating Scale',
+    type: "yes-no",
+    label: "Yes or No",
+    icon: YesNoIcon,
+    description: "",
+    hasOptions: false,
+    hasRating: false,
+    hasMatrix: false,
+  },
+  {
+    type: "rating-scale",
+    label: "Rating",
     icon: RatingScaleIcon,
-    description: 'Rate on a scale',
+    description: "",
     hasOptions: false,
     hasRating: true,
     hasMatrix: false,
   },
   {
-    type: 'yes-no',
-    label: 'Yes or No',
-    icon: YesNoIcon,
-    description: 'Simple yes/no response',
+    type: "ranking",
+    label: "Ranking",
+    icon: RankingIcon,
+    description: "",
     hasOptions: false,
-    hasRating: false,
+    hasRating: true,
     hasMatrix: false,
   },
   {
-    type: 'date',
-    label: 'Date',
-    icon: DateIcon,
-    description: 'Select a date',
+    type: "likert-scale",
+    label: "Likert Scale",
+    icon: LikertIcon,
+    description: "",
     hasOptions: false,
-    hasRating: false,
+    hasRating: true,
     hasMatrix: false,
   },
   {
-    type: 'time',
-    label: 'Time',
-    icon: TimeIcon,
-    description: 'Select a time',
-    hasOptions: false,
-    hasRating: false,
-    hasMatrix: false,
-  },
-  {
-    type: 'dropdown',
-    label: 'Dropdown',
+    type: "dropdown",
+    label: "Dropdown",
     icon: DropdownIcon,
-    description: 'Select from dropdown',
+    description: "",
     hasOptions: true,
     hasRating: false,
     hasMatrix: false,
   },
   {
-    type: 'file-upload',
-    label: 'File Upload',
+    type: "file-upload",
+    label: "File Upload",
     icon: FileUploadIcon,
-    description: 'Upload a file',
+    description: "",
     hasOptions: false,
     hasRating: false,
     hasMatrix: false,
   },
   {
-    type: 'matrix',
-    label: 'Matrix',
-    icon: MatrixIcon,
-    description: 'Grid of questions',
+    type: "single-grid",
+    label: "Single Choice Grid",
+    icon: SingleGridIcon,
+    description: "",
     hasOptions: false,
     hasRating: false,
     hasMatrix: true,
+  },
+  {
+    type: "multiple-grid",
+    label: "Multiple Choice Grid",
+    icon: MatrixIcon,
+    description: "",
+    hasOptions: false,
+    hasRating: false,
+    hasMatrix: true,
+  },
+  {
+    type: "slider-scale",
+    label: "Slider Scale",
+    icon: SliderIcon,
+    description: "",
+    hasOptions: false,
+    hasRating: false,
+    hasMatrix: true,
+  },
+  {
+    type: "date",
+    label: "Date Picker",
+    icon: DateIcon,
+    description: "",
+    hasOptions: false,
+    hasRating: false,
+    hasMatrix: false,
+  },
+  {
+    type: "time",
+    label: "Time Picker",
+    icon: TimeIcon,
+    description: "",
+    hasOptions: false,
+    hasRating: false,
+    hasMatrix: false,
   },
 ];
 
 export const DEFAULT_RATING_SCALE = {
   min: 1,
   max: 5,
-  minLabel: 'Poor',
-  maxLabel: 'Excellent',
+  minLabel: "Poor",
+  maxLabel: "Excellent",
   step: 1,
 };
 
@@ -142,40 +182,46 @@ export const VALIDATION_LIMITS = {
 };
 
 export function getQuestionTypeConfig(type: QuestionType) {
-  return QUESTION_TYPES.find(qt => qt.type === type);
+  return QUESTION_TYPES.find((qt) => qt.type === type);
 }
 
 export function createDefaultQuestion(type: QuestionType, order: number) {
   const baseQuestion = {
     id: `question_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     type,
-    title: '',
+    title: "",
     required: false,
     order,
     validation: {},
   };
 
   switch (type) {
-    case 'single-choice':
-    case 'multiple-choice':
-    case 'dropdown':
+    case "single-choice":
+    case "multiple-choice":
+    case "dropdown":
       return {
         ...baseQuestion,
-        options: [
-          { id: 'option_1', text: 'Option 1', isOther: false },
-        ],
+        options: [{ id: "option_1", text: "Option 1", isOther: false }],
       };
-    case 'rating-scale':
+    case "rating-scale":
       return {
         ...baseQuestion,
         ratingScale: DEFAULT_RATING_SCALE,
       };
-    case 'matrix':
+    case "single-grid":
       return {
         ...baseQuestion,
         matrix: {
-          rows: ['Row 1', 'Row 2'],
-          columns: ['Column 1', 'Column 2'],
+          rows: ["Row 1", "Row 2"],
+          columns: ["Column 1", "Column 2"],
+        },
+      };
+    case "multiple-grid":
+      return {
+        ...baseQuestion,
+        matrix: {
+          rows: ["Row 1", "Row 2"],
+          columns: ["Column 1", "Column 2"],
         },
       };
     default:

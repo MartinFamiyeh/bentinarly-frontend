@@ -1,4 +1,4 @@
-import  { type JSX } from "react";
+import { type JSX } from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
 
 import { DarkModeProvider } from "./contexts/DarkModeContext";
@@ -35,6 +35,12 @@ import SurveyAnalytics from "./pages/SurveyAnalytics";
 import Demographics from "./pages/Demographics";
 import Questionnaires from "./pages/Questionnaires";
 import { ProjectsProvider } from "./contexts/ProjectsContext";
+
+import ParticipantsLayout from "./layouts/ParticipantsLayout";
+import Surveys from "./pages/Surveys";
+import Profile from "./pages/Profile";
+import Rewards from "./pages/Rewards";
+import Notifications from "./pages/Notifications";
 
 function DefaultLayout(): JSX.Element {
   return (
@@ -96,6 +102,13 @@ function App(): JSX.Element {
                   <Route path="/survey/questionnaires" element={<Questionnaires />} />
                   <Route path="/survey/demographics" element={<Demographics />} />
                   <Route path="/survey/analytics" element={<SurveyAnalytics />} />
+                </Route>
+
+                <Route element={<ParticipantsLayout />}>
+                  <Route path="/surveys/allsurveys" element={<Surveys />} />
+                  <Route path="/surveys/profile" element={<Profile />} />
+                  <Route path="/surveys/rewards" element={<Rewards />} />
+                  <Route path="/surveys/notifications" element={<Notifications />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />

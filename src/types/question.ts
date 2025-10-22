@@ -1,17 +1,21 @@
-export type QuestionType = 
-  | 'single-choice' 
-  | 'multiple-choice' 
-  | 'short-answer' 
-  | 'long-answer' 
-  | 'rating-scale' 
-  | 'yes-no'
-  | 'date'
-  | 'time'
-  | 'email'
-  | 'phone'
-  | 'dropdown'
-  | 'file-upload'
-  | 'matrix';
+export type QuestionType =
+  | "single-choice"
+  | "multiple-choice"
+  | "short-answer"
+  | "long-answer"
+  | "rating-scale"
+  | "yes-no"
+  | "date"
+  | "time"
+  | "email"
+  | "phone"
+  | "dropdown"
+  | "file-upload"
+  | "single-grid"
+  | "ranking"
+  | "multiple-grid"
+  | "slider-scale"
+  | "likert-scale";
 
 export interface QuestionOption {
   id: string;
@@ -57,7 +61,7 @@ export interface Question {
 export interface BranchingCondition {
   id: string;
   optionId?: string;
-  action: 'skip' | 'show';
+  action: "skip" | "show";
   targetQuestionId?: string;
 }
 
@@ -74,5 +78,5 @@ export interface Survey {
   };
   createdAt: string;
   updatedAt: string;
-  status: 'draft' | 'published' | 'closed';
+  status: "draft" | "published" | "closed";
 }

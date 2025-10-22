@@ -1,12 +1,13 @@
 // src/pages/Login.tsx
 import { useState, type FormEvent, type ChangeEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 
 const Login = () => {
   // 1. Consolidated state into a single object.
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -26,7 +27,7 @@ const Login = () => {
     setError(""); // Clear previous errors
     console.log("Logging in with:", formData);
     // Add your API call and navigation logic here
-    // navigate('/dashboard');
+    navigate("/projects/dashboard");
   };
 
   const handleSocialLogin = (provider: "google" | "facebook") => {

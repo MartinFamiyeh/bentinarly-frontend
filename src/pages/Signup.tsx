@@ -1,9 +1,10 @@
 // src/pages/Signup.tsx
 import { useState, type FormEvent, type ChangeEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 
 const Signup = () => {
+  const navigate = useNavigate()
   // 1. Consolidated state into a single object for easier management.
   const [formData, setFormData] = useState({
     firstName: "",
@@ -44,6 +45,7 @@ const Signup = () => {
     }
     setError(""); // Clear error on successful validation
     console.log("Submitting form with data:", formData);
+    navigate("/projects/dashboard")
     // You would typically call an API here and navigate on success
     // navigate('/verification');
   };
