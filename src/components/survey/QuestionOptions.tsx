@@ -1,11 +1,11 @@
-import React from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import type { QuestionOption, QuestionType } from '../../types/question';
-import ImgSelector from '../../assets/icons/img_selector.svg';
-import Close from '../../assets/icons/close.svg';
-import OptionDrag from '../../assets/icons/option_drag.svg';
+import React from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import type { QuestionOption, QuestionType } from "../../types/question";
+import ImgSelector from "../../assets/icons/img_selector.svg";
+import Close from "../../assets/icons/close.svg";
+import OptionDrag from "../../assets/icons/option_drag.svg";
 
 interface OptionItemProps {
   option: QuestionOption;
@@ -38,14 +38,7 @@ const OptionItem: React.FC<OptionItemProps> = ({
   questionId,
 }) => {
   // @dnd-kit sortable hook
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: option.id,
     disabled: disabled || !isActive,
   });
@@ -68,20 +61,15 @@ const OptionItem: React.FC<OptionItemProps> = ({
   };
 
   return (
-    <div 
+    <div
       ref={setNodeRef}
       style={style}
       className={`flex items-center gap-4 ${
-        isDragging ? 'opacity-50 scale-105 shadow-2xl border-blue-500 z-50' : ''
-      } ${!isActive ? 'ml-8' : ''}`}
-    >
+        isDragging ? "opacity-50 scale-105 shadow-2xl border-blue-500 z-50" : ""
+      } ${!isActive ? "ml-8" : ""}`}>
       {/* Drag Handle */}
       {isActive && (
-        <div 
-          className="cursor-move ml-2"
-          {...attributes}
-          {...listeners}
-        >
+        <div className="cursor-move ml-2" {...attributes} {...listeners}>
           <OptionDrag />
         </div>
       )}
@@ -98,7 +86,7 @@ const OptionItem: React.FC<OptionItemProps> = ({
             disabled={disabled}
             maxLength={100}
           />
-          
+
           {option.image ? (
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white w-8 h-8 rounded-md flex items-center justify-center">
               <img
@@ -110,8 +98,7 @@ const OptionItem: React.FC<OptionItemProps> = ({
                 type="button"
                 onClick={() => handleRemoveImage(option.id)}
                 disabled={disabled}
-                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
                 ×
               </button>
             </div>
@@ -119,16 +106,17 @@ const OptionItem: React.FC<OptionItemProps> = ({
             <button
               type="button"
               onClick={() => {
-                const input = document.getElementById(`image-${questionId}-${option.id}`) as HTMLInputElement;
+                const input = document.getElementById(
+                  `image-${questionId}-${option.id}`
+                ) as HTMLInputElement;
                 input?.click();
               }}
               disabled={disabled}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white w-8 h-8 rounded-md flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white w-8 h-8 rounded-md flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
               <ImgSelector />
             </button>
           )}
-          
+
           <input
             id={`image-${questionId}-${option.id}`}
             type="file"
@@ -145,8 +133,7 @@ const OptionItem: React.FC<OptionItemProps> = ({
             type="button"
             onClick={() => onRemove(option.id)}
             disabled={disabled}
-            className="p-2 text-gray-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+            className="p-2 text-gray-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
             <Close />
           </button>
         )}
@@ -168,10 +155,10 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
       text: `Option ${options.length + 1}`,
       isOther: false,
     };
-    
+
     // Find the index of the first "Other" option
-    const otherIndex = options.findIndex(option => option.isOther);
-    
+    const otherIndex = options.findIndex((option) => option.isOther);
+
     if (otherIndex === -1) {
       // No "Other" option exists, add at the end
       onOptionsChange([...options, newOption]);
@@ -186,14 +173,14 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
   const addOtherOption = () => {
     const otherOption: QuestionOption = {
       id: `option_other_${Date.now()}`,
-      text: 'Other',
+      text: "Other",
       isOther: true,
     };
     onOptionsChange([...options, otherOption]);
   };
 
   const updateOption = (optionId: string, updates: Partial<QuestionOption>) => {
-    const updatedOptions = options.map(option =>
+    const updatedOptions = options.map((option) =>
       option.id === optionId ? { ...option, ...updates } : option
     );
     onOptionsChange(updatedOptions);
@@ -201,10 +188,9 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
 
   const removeOption = (optionId: string) => {
     if (options.length > 1) {
-      onOptionsChange(options.filter(option => option.id !== optionId));
+      onOptionsChange(options.filter((option) => option.id !== optionId));
     }
   };
-
 
   const handleImageUpload = (optionId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -220,7 +206,7 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
 
   return (
     <div className="space-y-3">
-      <SortableContext items={options.map(o => o.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={options.map((o) => o.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-2">
           {options.map((option, index) => (
             <OptionItem
@@ -228,9 +214,9 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
               option={option}
               index={index}
               options={options}
-            onUpdate={updateOption}
-            onRemove={removeOption}
-            disabled={disabled}
+              onUpdate={updateOption}
+              onRemove={removeOption}
+              disabled={disabled}
               isActive={isActive}
               questionId={questionId}
             />
@@ -245,29 +231,23 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
             type="button"
             onClick={addOption}
             disabled={disabled || options.length >= 20}
-            className="flex items-center gap-1 px-2 py-1 text-[#292929] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#FE5102]"
-          >
+            className="flex items-center gap-1 px-2 py-1 text-[#292929] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#FE5102]">
             Add Option
           </button>
-          
+
           <span>or</span>
-          
+
           <button
             type="button"
             onClick={addOtherOption}
-            disabled={disabled || options.some(opt => opt.isOther)}
-            className="px-2 py-1 text-[#292929] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#FE5102]"
-          >
+            disabled={disabled || options.some((opt) => opt.isOther)}
+            className="px-2 py-1 text-[#292929] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#FE5102]">
             Add Other
           </button>
         </div>
       )}
 
-      {options.length >= 20 && (
-        <p className="text-xs text-amber-600">
-          Maximum 20 options allowed
-        </p>
-      )}
+      {options.length >= 20 && <p className="text-xs text-amber-600">Maximum 20 options allowed</p>}
     </div>
   );
 };

@@ -60,6 +60,7 @@ interface QuestionToolbarProps {
   onPreview: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  onOpenComment: ()=> void;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   isExpanded: boolean;
@@ -73,6 +74,7 @@ const QuestionToolbar: React.FC<QuestionToolbarProps> = ({
   onPreview,
   onDuplicate,
   onDelete,
+  onOpenComment,
   onMoveUp,
   onMoveDown,
   isExpanded,
@@ -115,7 +117,7 @@ const QuestionToolbar: React.FC<QuestionToolbarProps> = ({
       <ToolbarBtn
         defaultIcon={Comment_Default}
         activeIcon={Comment_Active}
-        onClick={() => {}}
+        onClick={onOpenComment}
         label="Add Comments"
         disabled={disabled}
         className="text-gray-400 hover:text-gray-600 hover:bg-gray-50"

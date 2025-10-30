@@ -12,10 +12,10 @@ import TimeIcon from "../assets/icons/time.svg";
 import DropdownIcon from "../assets/icons/dropdown.svg";
 import FileUploadIcon from "../assets/icons/upload.svg";
 import MatrixIcon from "../assets/icons/matrix.svg";
-import SliderIcon from "../assets/icons/slider.svg"
-import SingleGridIcon from "../assets/icons/single-matrix.svg"
-import LikertIcon from "../assets/icons/likert.svg"
-import RankingIcon from "../assets/icons/ranking.svg"
+import SliderIcon from "../assets/icons/slider.svg";
+import SingleGridIcon from "../assets/icons/single-matrix.svg";
+import LikertIcon from "../assets/icons/likert.svg";
+import RankingIcon from "../assets/icons/ranking.svg";
 
 export const QUESTION_TYPES: Array<{
   type: QuestionType;
@@ -67,7 +67,7 @@ export const QUESTION_TYPES: Array<{
     label: "Yes or No",
     icon: YesNoIcon,
     description: "",
-    hasOptions: false,
+    hasOptions: true,
     hasRating: false,
     hasMatrix: false,
   },
@@ -85,8 +85,8 @@ export const QUESTION_TYPES: Array<{
     label: "Ranking",
     icon: RankingIcon,
     description: "",
-    hasOptions: false,
-    hasRating: true,
+    hasOptions: true,
+    hasRating: false,
     hasMatrix: false,
   },
   {
@@ -140,8 +140,8 @@ export const QUESTION_TYPES: Array<{
     icon: SliderIcon,
     description: "",
     hasOptions: false,
-    hasRating: false,
-    hasMatrix: true,
+    hasRating: true,
+    hasMatrix: false,
   },
   {
     type: "date",
@@ -199,31 +199,110 @@ export function createDefaultQuestion(type: QuestionType, order: number) {
     case "single-choice":
     case "multiple-choice":
     case "dropdown":
+    case "ranking":
       return {
         ...baseQuestion,
-        options: [{ id: "option_1", text: "Option 1", isOther: false }],
+        options: [
+          { id: "option_1", text: "Option 1", isOther: false },
+          { id: "option_2", text: "Option 2", isOther: false },
+        ],
       };
+
+    case "yes-no":
+      return {
+        ...baseQuestion,
+        options: [
+          { id: "yes", text: "Yes" },
+          { id: "no", text: "No" },
+        ],
+      };
+
+    case "short-answer":
+      return {
+        ...baseQuestion,
+        validation: { maxLength: VALIDATION_LIMITS.shortAnswer.max },
+      };
+
+    case "long-answer":
+      return {
+        ...baseQuestion,
+        validation: { maxLength: VALIDATION_LIMITS.longAnswer.max },
+      };
+
     case "rating-scale":
       return {
         ...baseQuestion,
-        ratingScale: DEFAULT_RATING_SCALE,
+        ratingScale: { ...DEFAULT_RATING_SCALE },
       };
+
+    case "likert-scale":
+      return {
+        ...baseQuestion,
+        likertScale: {
+          min: 0,
+          max: 10,
+          step: 1,
+          minLabel: "",
+          maxLabel: "",
+        },
+      };
+
     case "single-grid":
       return {
         ...baseQuestion,
         matrix: {
-          rows: ["Row 1", "Row 2"],
-          columns: ["Column 1", "Column 2"],
+          rows: ["Row 1", "row 2"],
+          columns: ["Column 1"],
         },
       };
+
     case "multiple-grid":
       return {
         ...baseQuestion,
         matrix: {
-          rows: ["Row 1", "Row 2"],
-          columns: ["Column 1", "Column 2"],
+          rows: ["Row 1"],
+          columns: ["Column 1"],
         },
       };
+
+    case "slider-scale":
+      return {
+        ...baseQuestion,
+        slider: {
+          min: 0,
+          max: 10,
+          step: 1,
+          minLabel: "",
+          maxLabel: "",
+        },
+      };
+
+    case "file-upload":
+      return {
+        ...baseQuestion,
+        fileSettings: {
+          maxFiles: 1,
+          allowedTypes: ["image/*", "application/pdf"],
+          maxSizeMB: 10,
+        },
+      };
+
+    case "date":
+      return {
+        ...baseQuestion,
+        dateSettings: {
+          format: "YYYY-MM-DD",
+        },
+      };
+
+    case "time":
+      return {
+        ...baseQuestion,
+        timeSettings: {
+          format: "HH:mm",
+        },
+      };
+
     default:
       return baseQuestion;
   }

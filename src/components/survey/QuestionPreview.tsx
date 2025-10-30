@@ -1,6 +1,10 @@
-import React from 'react';
-import type { Question } from '../../types/question';
-import { X } from 'lucide-react';
+import React from "react";
+import type { Question } from "../../types/question";
+import { ChevronDown, X } from "lucide-react";
+import DragIcon from "../../assets/icons/drag-vertical.svg";
+import Folder from "../../assets/icons/folder.svg";
+import Divider from "../../assets/icons/divider.svg";
+import { div } from "framer-motion/client";
 
 interface QuestionPreviewProps {
   question: Question;
@@ -8,14 +12,10 @@ interface QuestionPreviewProps {
   onClose: () => void;
 }
 
-const QuestionPreview: React.FC<QuestionPreviewProps> = ({
-  question,
-  questionNumber,
-  onClose,
-}) => {
+const QuestionPreview: React.FC<QuestionPreviewProps> = ({ question, questionNumber, onClose }) => {
   const renderQuestionContent = () => {
     switch (question.type) {
-      case 'single-choice':
+      case "single-choice":
         return (
           <div className="space-y-2">
             {question.options?.map((option) => (
@@ -28,41 +28,29 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
                 />
                 <span className="text-sm">{option.text}</span>
                 {option.image && (
-                  <img
-                    src={option.image}
-                    alt="Option"
-                    className="w-8 h-8 object-cover rounded"
-                  />
+                  <img src={option.image} alt="Option" className="w-8 h-8 object-cover rounded" />
                 )}
               </label>
             ))}
           </div>
         );
 
-      case 'multiple-choice':
+      case "multiple-choice":
         return (
           <div className="space-y-2">
             {question.options?.map((option) => (
               <label key={option.id} className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 text-blue-600 rounded"
-                  disabled
-                />
+                <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" disabled />
                 <span className="text-sm">{option.text}</span>
                 {option.image && (
-                  <img
-                    src={option.image}
-                    alt="Option"
-                    className="w-8 h-8 object-cover rounded"
-                  />
+                  <img src={option.image} alt="Option" className="w-8 h-8 object-cover rounded" />
                 )}
               </label>
             ))}
           </div>
         );
 
-      case 'short-answer':
+      case "short-answer":
         return (
           <input
             type="text"
@@ -72,7 +60,7 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
           />
         );
 
-      case 'long-answer':
+      case "long-answer":
         return (
           <textarea
             placeholder="Your answer"
@@ -82,32 +70,39 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
           />
         );
 
-      case 'rating-scale':
+      case "rating-scale":
         return (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">
-                {question.ratingScale?.minLabel || 'Poor'}
+                {question.ratingScale?.minLabel || "Poor"}
               </span>
               <div className="flex gap-1">
-                {Array.from({ length: (question.ratingScale?.max || 5) - (question.ratingScale?.min || 1) + 1 }, (_, i) => (
-                  <input
-                    key={i}
-                    type="radio"
-                    name={`rating_${question.id}`}
-                    className="w-4 h-4 text-blue-600"
-                    disabled
-                  />
-                ))}
+                {Array.from(
+                  {
+                    length: (question.ratingScale?.max || 5) - (question.ratingScale?.min || 1) + 1,
+                  },
+                  (_, i) => (
+                    <span
+                      key={i}
+                      title={`${i + (question.ratingScale?.min || 1)} / ${
+                        question.ratingScale?.max || 5
+                      }`}
+                      className="w-5 h-5 inline-flex items-center justify-center text-gray-400 text-lg"
+                      aria-hidden="true">
+                      ★
+                    </span>
+                  )
+                )}
               </div>
               <span className="text-sm text-gray-600">
-                {question.ratingScale?.maxLabel || 'Excellent'}
+                {question.ratingScale?.maxLabel || "Excellent"}
               </span>
             </div>
           </div>
         );
 
-      case 'yes-no':
+      case "yes-no":
         return (
           <div className="space-y-2">
             <label className="flex items-center gap-3">
@@ -131,7 +126,65 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
           </div>
         );
 
-      case 'date':
+      case "ranking":
+        return (
+          <div className="space-y-2">
+            {question.options?.map((option, index) => (
+              <div
+                key={option.id}
+                className="rounded border border-gray-100 p-2 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <DragIcon />
+                  <div className="bg-[#FE51020A] text-[#FE5102] w-6 h-6 flex items-center justify-center rounded-md font-medium">
+                    {index + 1}
+                  </div>
+                  <span className="text-sm">{option.text}</span>
+                </div>
+                <div>
+                  <ChevronDown color="gray" size={15} />
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case "likert-scale":
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">
+                {question.ratingScale?.minLabel || ""}
+              </span>
+              <div className="flex gap-4">
+                {Array.from(
+                  {
+                    length: (question.likertScale?.max || 5) - (question.likertScale?.min || 1) + 1,
+                  },
+                  (_, i) => (
+                    <div className="flex flex-col items-center">
+                      <p className="text-sm font-medium">{i +1}</p>
+                      <input
+                        type="radio"
+                        key={i}
+                        title={`${i + (question.likertScale?.min || 1)} / ${
+                          question.likertScale?.max || 5
+                        }`}
+                        className="w-5 h-5 inline-flex items-center justify-center text-gray-400 text-lg"
+                        aria-hidden="true"
+                        disabled
+                      />
+                    </div>
+                  )
+                )}
+              </div>
+              <span className="text-sm text-gray-600">
+                {question.ratingScale?.maxLabel || ""}
+              </span>
+            </div>
+          </div>
+        );
+
+      case "date":
         return (
           <input
             type="date"
@@ -140,7 +193,7 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
           />
         );
 
-      case 'time':
+      case "time":
         return (
           <input
             type="time"
@@ -149,7 +202,7 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
           />
         );
 
-      case 'email':
+      case "email":
         return (
           <input
             type="email"
@@ -159,7 +212,7 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
           />
         );
 
-      case 'phone':
+      case "phone":
         return (
           <input
             type="tel"
@@ -169,12 +222,9 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
           />
         );
 
-      case 'dropdown':
+      case "dropdown":
         return (
-          <select
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-            disabled
-          >
+          <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" disabled>
             <option>Select an option</option>
             {question.options?.map((option) => (
               <option key={option.id}>{option.text}</option>
@@ -182,14 +232,19 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
           </select>
         );
 
-      case 'file-upload':
+      case "file-upload":
         return (
-          <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
+          <div className="border-2 border-dashed border-gray-300 rounded-md p-4 flex flex-col justify-center items-center space-y-4">
+            <Folder />
             <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
+            <Divider />
+            <button className="border border-[#FE5102] text-[#FE5102] px-3 py-1 rounded-lg text-xs hover:bg-gray-100">
+              Browse
+            </button>
           </div>
         );
 
-      case 'matrix':
+      case "single-grid":
         return (
           <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-300 rounded-md">
@@ -197,7 +252,9 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
                 <tr className="bg-gray-50">
                   <th className="px-3 py-2 text-left text-xs font-medium text-gray-500"></th>
                   {question.matrix?.columns.map((col, index) => (
-                    <th key={index} className="px-3 py-2 text-center text-xs font-medium text-gray-500">
+                    <th
+                      key={index}
+                      className="px-3 py-2 text-center text-xs font-medium text-gray-500">
                       {col}
                     </th>
                   ))}
@@ -233,30 +290,29 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Question Preview</h3>
+        <div className="flex items-center justify-between p-3 border-b border-gray-200">
+          <h3 className="text-sm font-medium">Question Preview</h3>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md"
-          >
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-3">
           <div className="space-y-4">
             {/* Question Title */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Q{questionNumber}. {question.title || 'Untitled Question'}
+              <label className="block text-base font-medium text-gray-700 mb-2">
+                Q{questionNumber}. {question.title || "Untitled Question"}
                 {question.required && <span className="text-red-500 ml-1">*</span>}
               </label>
-              
+
               {question.description && (
                 <p className="text-sm text-gray-600 mb-4">{question.description}</p>
               )}
-              
+
               {question.image && (
                 <img
                   src={question.image}
@@ -267,21 +323,18 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
             </div>
 
             {/* Question Content */}
-            <div>
-              {renderQuestionContent()}
-            </div>
+            <div>{renderQuestionContent()}</div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
+        {/* <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-          >
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
             Close
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -37,6 +37,16 @@ export interface MatrixQuestion {
   columns: string[];
 }
 
+export interface DateQuestion {
+  format: string;
+}
+
+export interface FileQuestion {
+  maxFiles: number;
+  allowedTypes: string[];
+  maxSizeMB: number;
+}
+
 export interface Question {
   id: string;
   type: QuestionType;
@@ -45,7 +55,11 @@ export interface Question {
   required: boolean;
   options?: QuestionOption[];
   ratingScale?: RatingScale;
+  likertScale?: RatingScale;
   matrix?: MatrixQuestion;
+  dateSettings?: DateQuestion;
+  timeSettings?: DateQuestion;
+  slider?: RatingScale;
   validation?: {
     minLength?: number;
     maxLength?: number;

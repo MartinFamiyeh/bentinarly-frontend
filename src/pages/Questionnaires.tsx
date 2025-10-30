@@ -26,6 +26,8 @@ import Profile from "../assets/icons/profile.svg";
 import QuestionMark from "../assets/icons/question.svg";
 import AddQuestion from "../assets/icons/add-question.svg";
 
+import ShareModal from "../components/survey/ShareModal";
+
 const Questionnaires: React.FC = () => {
   const [survey, setSurvey] = useState<Survey>({
     id: "survey_1",
@@ -45,6 +47,7 @@ const Questionnaires: React.FC = () => {
 
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -184,7 +187,7 @@ const Questionnaires: React.FC = () => {
     try {
       await handleSave();
       setSurvey((prev) => ({ ...prev, status: "published" }));
-      console.log("Survey published!");
+      console.log("Survey published!", survey);
     } catch (error) {
       console.error("Error publishing survey:", error);
     }
@@ -231,7 +234,9 @@ const Questionnaires: React.FC = () => {
             <Preview />
             <p className="text-[14px]">Preview</p>
           </div>
-          <div className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3">
+          <div
+            className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3 cursor-pointer"
+            onClick={() => setIsShareModalOpen(true)}>
             <Share />
             <p className="text-[14px]">Share</p>
           </div>
@@ -340,12 +345,14 @@ const Questionnaires: React.FC = () => {
       </DndContext>
       <div className="flex py-4 justify-between items-center">
         <p className="text-[#292929]">
-          Total Questions: <span className="font-bold">1</span>
+          Total Questions: <span className="font-bold">{survey.questions.length}</span>
         </p>
         <div className="cursor-pointer">
           <QuestionMark />
         </div>
       </div>
+
+      <ShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} />
     </div>
   );
 };
