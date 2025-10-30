@@ -27,6 +27,7 @@ import QuestionMark from "../assets/icons/question.svg";
 import AddQuestion from "../assets/icons/add-question.svg";
 
 import ShareModal from "../components/survey/ShareModal";
+import PreviewSurvey from "../components/survey/PreviewSurvey";
 
 const Questionnaires: React.FC = () => {
   const [survey, setSurvey] = useState<Survey>({
@@ -49,6 +50,7 @@ const Questionnaires: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
+  const [isPreviewSurvey, setIsPreviewSurvey] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -230,7 +232,9 @@ const Questionnaires: React.FC = () => {
             <Redo />
             <p className="text-[14px]">Redo</p>
           </div>
-          <div className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3">
+          <div
+            className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3 cursor-pointer"
+            onClick={() => setIsPreviewSurvey(true)}>
             <Preview />
             <p className="text-[14px]">Preview</p>
           </div>

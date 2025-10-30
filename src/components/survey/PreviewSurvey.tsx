@@ -7,13 +7,12 @@ import Divider from "../../assets/icons/divider.svg";
 import { div } from "framer-motion/client";
 
 interface QuestionPreviewProps {
-  question: Question;
-  questionNumber: number;
+  questions: Question[];
   onClose: () => void;
 }
 
-const QuestionPreview: React.FC<QuestionPreviewProps> = ({ question, questionNumber, onClose }) => {
-  const renderQuestionContent = () => {
+const SurveyPreview: React.FC<QuestionPreviewProps> = ({ questions, onClose }) => {
+  const renderQuestionContent = (question: Question) => {
     switch (question.type) {
       case "single-choice":
         return (
@@ -329,31 +328,33 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({ question, questionNum
         </div>
 
         {/* Content */}
-        <div className="p-3">
-          <div className="space-y-4">
-            {/* Question Title */}
-            <div>
-              <label className="block text-base font-medium text-gray-700 mb-2">
-                Q{questionNumber}. {question.title || "Untitled Question"}
-                {question.required && <span className="text-red-500 ml-1">*</span>}
-              </label>
+        <div className="space-y-8">
+          {questions.map((question, index) => (
+            <div key={question.id} className="p-3">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">
+                    Q{index + 1}. {question.title || "Untitled Question"}
+                    {question.required && <span className="text-red-500 ml-1">*</span>}
+                  </label>
 
-              {question.description && (
-                <p className="text-sm text-gray-600 mb-4">{question.description}</p>
-              )}
+                  {question.description && (
+                    <p className="text-sm text-gray-600 mb-4">{question.description}</p>
+                  )}
 
-              {question.image && (
-                <img
-                  src={question.image}
-                  alt="Question"
-                  className="max-w-full h-48 object-cover rounded-md border border-gray-200 mb-4"
-                />
-              )}
+                  {question.image && (
+                    <img
+                      src={question.image}
+                      alt="Question"
+                      className="max-w-full h-48 object-cover rounded-md border border-gray-200 mb-4"
+                    />
+                  )}
+                </div>
+
+                <div>{renderQuestionContent(question)}</div>
+              </div>
             </div>
-
-            {/* Question Content */}
-            <div>{renderQuestionContent()}</div>
-          </div>
+          ))}
         </div>
 
         {/* Footer */}
@@ -369,4 +370,4 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({ question, questionNum
   );
 };
 
-export default QuestionPreview;
+export default SurveyPreview;
