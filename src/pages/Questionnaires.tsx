@@ -28,6 +28,7 @@ import AddQuestion from "../assets/icons/add-question.svg";
 
 import ShareModal from "../components/survey/ShareModal";
 import PreviewSurvey from "../components/survey/PreviewSurvey";
+import { Link } from "react-router-dom";
 
 const Questionnaires: React.FC = () => {
   const [survey, setSurvey] = useState<Survey>({
@@ -232,12 +233,14 @@ const Questionnaires: React.FC = () => {
             <Redo />
             <p className="text-[14px]">Redo</p>
           </div>
-          <div
-            className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3 cursor-pointer"
-            onClick={() => setIsPreviewSurvey(true)}>
-            <Preview />
-            <p className="text-[14px]">Preview</p>
-          </div>
+          <Link to="/survey/preview">
+            <div
+              className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3 cursor-pointer"
+              onClick={() => setIsPreviewSurvey(true)}>
+              <Preview />
+              <p className="text-[14px]">Preview</p>
+            </div>
+          </Link>
           <div
             className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3 cursor-pointer"
             onClick={() => setIsShareModalOpen(true)}>

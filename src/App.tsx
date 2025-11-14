@@ -42,6 +42,8 @@ import Profile from "./pages/Profile";
 import Rewards from "./pages/Rewards";
 import Notifications from "./pages/Notifications";
 
+import PreviewSurvey from "./components/survey/TakeSurvey"
+
 function DefaultLayout(): JSX.Element {
   return (
     <div className="min-h-screen bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
@@ -102,6 +104,7 @@ function App(): JSX.Element {
                   <Route path="/survey/questionnaires" element={<Questionnaires />} />
                   <Route path="/survey/demographics" element={<Demographics />} />
                   <Route path="/survey/analytics" element={<SurveyAnalytics />} />
+                  <Route path="/survey/preview" element={<PreviewSurvey />} />
                 </Route>
 
                 <Route element={<ParticipantsLayout />}>
