@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import Accounts from "../../assets/icons/accounts.svg";
 import Edit from "../../assets/icons/edit.svg";
 import { ChevronRight } from "lucide-react";
@@ -7,6 +8,9 @@ import Lock from "../../assets/icons/change_pass.svg";
 import Bell from "../../assets/icons/notifications.svg";
 import Moon from "../../assets/icons/dark_moon.svg";
 import Logout from "../../assets/icons/logout.svg";
+import { useAuth } from "../../contexts/AuthContext";
+import { useDarkMode } from "../../contexts/DarkModeContext";
+import { useSnackbar } from "../../contexts/SnackbarContext";
 
 const Portal = ({ children }: { children: React.ReactNode }) => {
   return createPortal(children, document.body);
@@ -34,10 +38,13 @@ const userAccounts = [
 ];
 
 const UserProfileSection: React.FC<UserProfileSectionProps> = ({ isMinimized }) => {
+  const { user, signout } = useAuth();
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const { showSnackbar } = useSnackbar();
+  const navigate = useNavigate();
   const [isUserMenuOpen, setUserMenuOpen] = useState(false);
   const [showAccountsModal, setShowAccountsModal] = useState(false);
   const [userMenuPos, setUserMenuPos] = useState<{ top: number; left: number } | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const userButtonRef = useRef<HTMLButtonElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null); 
@@ -94,10 +101,18 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({ isMinimized }) 
           className="w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]">
           <div className="px-4 py-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <img src="https://i.pravatar.cc/40?img=1" alt="User" className="w-8 h-8 rounded-lg" />
+              <img 
+                src={user?.profilePicture || "https://i.pravatar.cc/40?img=1"} 
+                alt="User" 
+                className="w-8 h-8 rounded-lg" 
+              />
               <div>
-                <p className="text-sm font-medium text-gray-900">Jennifer Clomin</p>
-                <p className="text-xs text-gray-500">jennifer.clom@email.com</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {user?.firstName && user?.lastName 
+                    ? `${user.firstName} ${user.lastName}` 
+                    : user?.email || "User"}
+                </p>
+                <p className="text-xs text-gray-500">{user?.email || ""}</p>
               </div>
             </div>
           </div>
@@ -114,7 +129,12 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({ isMinimized }) 
             </div>
 
             {/* Edit Profile */}
-            <div className="flex items-center justify-between hover:bg-gray-100 py-2 px-4 cursor-pointer border-b border-gray-100">
+            <div 
+              onClick={() => {
+                navigate("/surveys/profile");
+                setUserMenuOpen(false);
+              }}
+              className="flex items-center justify-between hover:bg-gray-100 py-2 px-4 cursor-pointer border-b border-gray-100">
               <div className="flex gap-3 items-center">
                 <Edit />
                 <span className="text-sm text-[#696969]">Edit Profile</span>
@@ -162,7 +182,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({ isMinimized }) 
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsDarkMode(!isDarkMode);
+                  toggleDarkMode();
                 }}
                 className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
                   isDarkMode ? "bg-gray-700" : "bg-gray-300"
@@ -176,7 +196,18 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({ isMinimized }) 
             </div>
 
             {/* Logout */}
-            <div className="flex items-center justify-between hover:bg-gray-100 py-2 px-4 cursor-pointer">
+            <div 
+              onClick={async () => {
+                try {
+                  await signout();
+                  showSnackbar("Logged out successfully", "success");
+                  navigate("/login");
+                } catch (error) {
+                  showSnackbar("Failed to logout", "error");
+                }
+                setUserMenuOpen(false);
+              }}
+              className="flex items-center justify-between hover:bg-gray-100 py-2 px-4 cursor-pointer">
               <div className="flex gap-3 items-center">
                 <Logout />
                 <span className="text-sm text-red-600">Logout Account</span>
@@ -243,12 +274,20 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({ isMinimized }) 
         ref={userButtonRef}
         onClick={toggleUserMenu}
         className="flex items-center gap-2 w-full">
-        <img src="https://i.pravatar.cc/40?img=1" className="w-10 h-10 rounded-lg" alt="User" />
+        <img 
+          src={user?.profilePicture || "https://i.pravatar.cc/40?img=1"} 
+          className="w-10 h-10 rounded-lg" 
+          alt="User" 
+        />
         {!isMinimized && (
           <>
             <div className="flex flex-col text-left">
-              <p className="font-semibold text-sm">Jennifer Clomin</p>
-              <p className="text-xs text-gray-500">jennifer.clom@email.com</p>
+              <p className="font-semibold text-sm">
+                {user?.firstName && user?.lastName 
+                  ? `${user.firstName} ${user.lastName}` 
+                  : user?.email || "User"}
+              </p>
+              <p className="text-xs text-gray-500">{user?.email || ""}</p>
             </div>
             <svg
               className={`w-4 h-4 text-gray-400 transition-transform ${

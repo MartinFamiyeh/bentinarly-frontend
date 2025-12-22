@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, Link, useMatch } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import Expand from "../../assets/icons/expand_nav.svg";
 import Minimize from "../../assets/icons/collapse_nav.svg";
 import Questionnaire from "../../assets/icons/questionnaire.png";
@@ -12,6 +12,7 @@ import Analytics from "../../assets/icons/analytics.png";
 import AnalyticsActive from "../../assets/icons/analytics-active.png";
 
 import Survey from "../../assets/icons/survey_file.svg";
+import { useSurveyEditing } from "../../contexts/SurveyEditingContext";
 
 interface NavLinkItem {
   to: string;
@@ -27,6 +28,7 @@ interface SidebarProps {
 }
 
 const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
+  const { autoSaveStatus, lastSavedAt } = useSurveyEditing();
   const navLinks: NavLinkItem[] = [
     {
       to: "/survey/questionnaires",
@@ -126,6 +128,28 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
             })}
           </ul>
         </nav>
+
+        {/* Auto-save status at bottom of sidebar */}
+        <div className="py-3 text-xs text-gray-500 border-t border-gray-100 mt-2">
+          {!isMinimized && (
+            <>
+              {autoSaveStatus === "saving" && <p>Auto saving...</p>}
+              {autoSaveStatus === "saved" && (
+                <p>
+                  All changes saved
+                  {lastSavedAt
+                    ? ` · ${new Date(lastSavedAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}`
+                    : ""}
+                </p>
+              )}
+              {autoSaveStatus === "error" && <p className="text-red-500">Auto-save failed</p>}
+              {autoSaveStatus === "idle" && !lastSavedAt && <p>Draft not saved yet</p>}
+            </>
+          )}
+        </div>
       </div>
     </aside>
   );

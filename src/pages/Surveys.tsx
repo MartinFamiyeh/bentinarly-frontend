@@ -4,69 +4,20 @@ import EmptySurvey from "../assets/images/empty-survey.png";
 import SurveyCard from "../components/participants/SurveyCard";
 import Topbar from "../components/participants/Topbar";
 import { useDarkMode } from "../contexts/DarkModeContext";
-
-type SurveyType = {
-  id: string;
-  name: string;
-  description: string;
-  status: "all" | "available" | "progress" | "completed";
-  price: number;
-  createdAt: number;
-};
+import { useSurveysApi } from "../services/apiClient";
+import { useLoading } from "../contexts/LoadingContext";
+import { useSnackbar } from "../contexts/SnackbarContext";
+import { useAuth } from "../contexts/AuthContext";
+import * as ApiTypes from "../types/api";
 
 const Surveys = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const { user } = useAuth();
+  const surveysApi = useSurveysApi();
+  const { showLoading, hideLoading } = useLoading();
+  const { showSnackbar } = useSnackbar();
   const [activeFilter, setActiveFilter] = useState("All");
-  const [surveys, setSurveys] = useState<SurveyType[] | null | undefined>([
-    {
-      id: "string",
-      name: "string",
-      description: "string",
-      status: "completed",
-      price: 23.0,
-      createdAt: 234,
-    },
-    {
-      id: "wwww",
-      name: "string",
-      description: "string",
-      status: "completed",
-      price: 23.0,
-      createdAt: 234,
-    },
-    {
-      id: "wwww",
-      name: "string",
-      description: "string",
-      status: "completed",
-      price: 23.0,
-      createdAt: 234,
-    },
-    {
-      id: "wwww",
-      name: "string",
-      description: "string",
-      status: "completed",
-      price: 23.0,
-      createdAt: 234,
-    },
-    {
-      id: "wwww",
-      name: "string",
-      description: "string",
-      status: "completed",
-      price: 23.0,
-      createdAt: 234,
-    },
-    {
-      id: "wwww",
-      name: "string",
-      description: "string",
-      status: "completed",
-      price: 23.0,
-      createdAt: 234,
-    },
-  ]);
+  const [surveys, setSurveys] = useState<ApiTypes.SurveyDto[]>([]);
 
   const [sortOrder, setSortOrder] = useState<
     "Newest to Oldest" | "Oldest to Newest" | "A - Z" | "Z - A"
@@ -78,24 +29,54 @@ const Surveys = () => {
     }
   });
 
-  const filteredSurveys = (surveys ?? [])
+  useEffect(() => {
+    const fetchSurveys = async () => {
+      showLoading();
+      try {
+        // Fetch available surveys for participants
+        const response = await surveysApi.getSurveys({
+          status: 2, // 2 = Published/Live
+          page: 1,
+          pageSize: 100,
+        });
+        setSurveys(response.items || []);
+      } catch (error: any) {
+        console.error("Failed to fetch surveys:", error);
+        showSnackbar("Failed to load surveys.", "error");
+        setSurveys([]);
+      } finally {
+        hideLoading();
+      }
+    };
+
+    fetchSurveys();
+  }, []);
+
+  const filteredSurveys = surveys
     .filter((survey) => {
       if (activeFilter === "All") return true;
-      return survey.status === activeFilter.toLowerCase();
+      // Map filter to survey status
+      // SurveyStatus is a numeric type: 1 = Draft, 2 = Published/Live, 3 = Closed, 4 = Archived
+      const statusMap: Record<string, ApiTypes.SurveyStatus> = {
+        available: 2, // Published/Live
+        progress: 2,  // In progress = still live
+        completed: 3, // Closed
+      };
+      return survey.status === statusMap[activeFilter.toLowerCase()];
     })
     .sort((a, b) => {
       switch (sortOrder) {
         case "Newest to Oldest":
-          return (b.createdAt ?? 0) - (a.createdAt ?? 0);
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
         case "Oldest to Newest":
-          return (a.createdAt ?? 0) - (b.createdAt ?? 0);
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 
         case "A - Z":
-          return a.name.localeCompare(b.name);
+          return (a.title || "").localeCompare(b.title || "");
 
         case "Z - A":
-          return b.name.localeCompare(a.name);
+          return (b.title || "").localeCompare(a.title || "");
 
         default:
           return 0;
@@ -118,7 +99,7 @@ const Surveys = () => {
             backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${GreetingBackground})`,
           }}>
           <h2 className="text-lg font-semibold text-[#FFFEFE] tracking-normal leading-normal">
-            Good Morning Eric Joel,
+            Good Morning {user?.firstName || "User"},
           </h2>
           <p className="text-[#FFFEFE] text-sm">
             Let’s get your research moving. Craft better surveys, find the right participants, and

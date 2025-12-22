@@ -4,10 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { useAuthApi } from "../services/apiClient";
+import { useAuth } from "../contexts/AuthContext";
 
 const Login = () => {
   // 1. Consolidated state into a single object.
   const navigate = useNavigate();
+  const authApi = useAuthApi();
+  const { signin } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -15,6 +19,7 @@ const Login = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // 2. A single, reusable handler for all standard inputs.
   const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -22,16 +27,36 @@ const Login = () => {
   };
 
   // 3. Form submission logic.
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
-    console.log("Logging in with:", formData);
-    // Add your API call and navigation logic here
-    navigate("/projects/dashboard");
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const result = await authApi.login({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (result.success && result.user && result.token) {
+        signin(result.user, result.token, result.refreshToken || undefined);
+        navigate("/projects/dashboard");
+      } else {
+        setError(result.errors?.[0] || "Login failed. Please try again.");
+      }
+    } catch (error: any) {
+      setError(error.response?.data?.detail || "Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSocialLogin = (provider: "google" | "facebook") => {
-    console.log(`Logging in with ${provider}`);
+    if (provider === "google") {
+      window.location.href = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:7141"}/api/auth/google-login?returnUrl=${encodeURIComponent(window.location.origin + "/projects/dashboard")}`;
+    } else {
+      console.log(`Facebook login not implemented yet`);
+    }
   };
 
   const isFormDisabled = !formData.email || !formData.password;
@@ -102,8 +127,8 @@ const Login = () => {
               </div>
 
               <div>
-                <button type="submit" disabled={isFormDisabled} className="btn btn-primary">
-                  Login
+                <button type="submit" disabled={isFormDisabled || isLoading} className="btn btn-primary">
+                  {isLoading ? "Logging in..." : "Login"}
                 </button>
               </div>
             </form>

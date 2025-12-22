@@ -3,29 +3,32 @@ import Menu from "../../assets/icons/more.svg";
 import { formatDate } from "../../functions";
 import { createPortal } from "react-dom";
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import RenameSurvey from "./RenameSurvey";
 import MoveSurvey from "./MoveSurvey";
+import DeleteSurvey from "./DeleteSurvey";
+import SurveySettings from "./SurveySettings";
 import { useSnackbar } from "../../contexts/SnackbarContext";
+import { useSurveysApi } from "../../services/apiClient";
+import { useProjects } from "../../contexts/ProjectsContext";
+import * as ApiTypes from "../../types/api";
 
 type SurveyCardProps = {
-  survey: SurveyType;
-};
-
-type SurveyType = {
-  id: string;
-  name: string;
-  members: number;
-  status: "draft" | "scheduled" | "live" | "paused" | "closed" | "completed";
-  createdAt: number;
+  survey: ApiTypes.SurveyDto;
+  onSurveyDeleted?: (surveyId: string) => void;
+  onSurveyUpdated?: (survey: ApiTypes.SurveyDto) => void;
 };
 
 const Portal = ({ children }: { children: React.ReactNode }) => {
   return createPortal(children, document.body);
 };
 
-const SurveyCard = ({ survey }: SurveyCardProps) => {
+const SurveyCard = ({ survey, onSurveyDeleted, onSurveyUpdated }: SurveyCardProps) => {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const navigate = useNavigate();
+  const surveysApi = useSurveysApi();
+  const { selectedProject } = useProjects();
   const [coords, setCoords] = useState<{ top: number; left: number }>({
     top: 0,
     left: 0,
@@ -33,6 +36,7 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
   const [isRenameSurveyModalOpen, setIsRenameSurveyModalOpen] = useState(false);
   const [isMoveSurveyModalOpen, setIsMoveSurveyModalOpen] = useState(false);
   const [isDeleteSurveyModalOpen, setIsDeleteSurveyModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const { showSnackbar } = useSnackbar();
 
   const toggleMenu = () => {
@@ -43,36 +47,77 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
     setOpen((prev) => !prev);
   };
 
-  const closeMenu = (e: MouseEvent) => {
-    if (buttonRef.current && !buttonRef.current.contains(e.target as Node) && open) {
-      setOpen(false);
+  const handleDuplicate = async () => {
+    setOpen(false);
+    try {
+      const surveyData = await surveysApi.getSurvey(survey.id);
+      const newSurvey = await surveysApi.createSurvey({
+        title: `${surveyData.title} (Copy)`,
+        description: surveyData.description || "",
+        projectId: selectedProject?.id, // Use selected project for the duplicate
+        settings: surveyData.settings,
+        expectedResponses: surveyData.expectedResponses,
+        rewardPerResponse: surveyData.rewardPerResponse,
+        isTemplate: surveyData.isTemplate,
+      });
+      showSnackbar("Survey duplicated successfully.", "success");
+      if (onSurveyUpdated) {
+        onSurveyUpdated(newSurvey);
+      }
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === 'object' && 'response' in error
+        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+        : undefined;
+      showSnackbar(errorMessage || "Failed to duplicate survey.", "error");
     }
   };
 
-  const handleDuplicate = () => {
-    showSnackbar("Survey duplicated successfully.", "success");
+  const handleDelete = async () => {
+    try {
+      await surveysApi.deleteSurvey(survey.id);
+      showSnackbar("Survey deleted successfully.", "success");
+      setIsDeleteSurveyModalOpen(false);
+      setOpen(false);
+      if (onSurveyDeleted) {
+        onSurveyDeleted(survey.id);
+      }
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === 'object' && 'response' in error
+        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+        : undefined;
+      showSnackbar(errorMessage || "Failed to delete survey.", "error");
+    }
+  };
+
+  const handleClick = () => {
+    navigate(`/survey/questionnaires/${survey.id}`);
   };
 
   useEffect(() => {
-    document.addEventListener("click", closeMenu);
+    if (!open) return;
+    
+    const handleClickOutside = (e: MouseEvent) => {
+      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    
+    document.addEventListener("click", handleClickOutside);
     return () => {
-      document.removeEventListener("click", closeMenu);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [open]);
 
-  const getStatusColors = (status: SurveyType["status"]) => {
+  const getStatusColors = (status: ApiTypes.SurveyStatus) => {
+    // SurveyStatus is a numeric type: 1 = Draft, 2 = Published/Live, 3 = Closed, 4 = Archived
     switch (status) {
-      case "draft":
+      case 1: // Draft
         return { bg: "bg-[#6A6A6A0A]", text: "text-[#6A6A6A]" };
-      case "scheduled":
-        return { bg: "bg-[#4F46E50A]", text: "text-[#4F46E5]" };
-      case "live":
+      case 2: // Published/Live
         return { bg: "bg-[#02E1090A]", text: "text-[#02E109]" };
-      case "paused":
-        return { bg: "bg-[#E691000A]", text: "text-[#E69100]" };
-      case "closed":
+      case 3: // Closed
         return { bg: "bg-[#FD246D0A]", text: "text-[#FD246D]" };
-      case "completed":
+      case 4: // Archived
         return { bg: "bg-[#027B000A]", text: "text-[#027B00]" };
       default:
         return { bg: "bg-[#F3F4F6]", text: "text-[#4B5563]" };
@@ -80,27 +125,36 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
   };
 
   const { bg, text } = getStatusColors(survey.status);
+  
+  const getStatusLabel = (status: ApiTypes.SurveyStatus) => {
+    // SurveyStatus is a numeric type: 1 = Draft, 2 = Published/Live, 3 = Closed, 4 = Archived, 5 = Paused
+    const labels: Record<number, string> = {
+      1: "Draft",
+      2: "Published",
+      3: "Closed",
+      4: "Archived",
+      5: "Paused",
+    };
+    return labels[status] || "Unknown";
+  };
 
-  const completion = "0/1000";
-  const createdBy = "Emmanuella";
-  const access = survey.name.includes("1")
-    ? "Owner"
-    : survey.name.includes("2")
-    ? "Edit Only"
-    : survey.name.includes("3")
-    ? "Co-owner"
-    : "View Only";
+  const completion = `${survey.responseCount || 0}/${survey.expectedResponses || 0}`;
+  const createdBy = survey.creatorName || "Unknown";
+  const access = "Owner"; // TODO: Determine based on project membership
 
   return (
     <>
-      <div className="grid grid-cols-12 items-center py-4 px-6 border border-[#2929291A]/10 rounded-md bg-[#FFFFFF] text-sm">
+      <div 
+        className="grid grid-cols-12 items-center py-4 px-6 border border-[#2929291A]/10 rounded-md bg-[#FFFFFF] text-sm cursor-pointer hover:bg-gray-50"
+        onClick={handleClick}
+      >
         <div className="col-span-4 flex items-center gap-4">
           <SurveyImage />
           <div>
             <p className="font-medium text-sm text-[#292929] leading-[18px] text-nowrap w-[18rem] overflow-hidden text-ellipsis">
-              {survey.name}
+              {survey.title || "Untitled Survey"}
             </p>
-            <p className="text-[#696969] text-xs">{survey.members} Member(s)</p>
+            <p className="text-[#696969] text-xs">{survey.questionCount || 0} Question(s)</p>
           </div>
         </div>
         <div className="col-span-2">
@@ -109,13 +163,13 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
         </div>
         <div className="col-span-1 flex ">
           <span className={`px-3 py-1 rounded-lg text-xs ${bg} ${text}`}>
-            {survey.status.charAt(0).toUpperCase() + survey.status.slice(1)}
+            {getStatusLabel(survey.status)}
           </span>
         </div>
         <div className="col-span-3 ml-2">
           <p className="text-xs text-[#696969]"> Created By</p>
           <p className="text-sm text-[#292929]">
-            <span>{createdBy}</span> | {formatDate(survey.createdAt)}
+            <span>{createdBy}</span> | {formatDate(new Date(survey.createdAt).getTime())}
           </p>
         </div>
         <div className="col-span-1 text-gray-700">
@@ -125,8 +179,11 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
         <div className="col-span-1 text-right">
           <button
             ref={buttonRef}
-            onClick={toggleMenu}
-            className="text-gray-400 hover:text-gray-600  p-2">
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent click from bubbling to parent div
+              toggleMenu();
+            }}
+            className="text-gray-400 hover:text-gray-600 p-2 rounded-md hover:bg-gray-100 transition-colors">
             <Menu />
           </button>
         </div>
@@ -135,9 +192,45 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
       <RenameSurvey
         isOpen={isRenameSurveyModalOpen}
         onClose={() => setIsRenameSurveyModalOpen(false)}
+        surveyId={survey.id}
+        currentName={survey.title || ""}
+        onRenameComplete={(updatedSurvey) => {
+          if (onSurveyUpdated) {
+            onSurveyUpdated(updatedSurvey);
+          }
+        }}
       />
 
-      <MoveSurvey isOpen={isMoveSurveyModalOpen} onClose={() => setIsMoveSurveyModalOpen(false)} />
+      <MoveSurvey 
+        isOpen={isMoveSurveyModalOpen} 
+        onClose={() => setIsMoveSurveyModalOpen(false)}
+        surveyId={survey.id}
+        onMoveComplete={(updatedSurvey) => {
+          if (onSurveyUpdated) {
+            onSurveyUpdated(updatedSurvey);
+          }
+        }}
+      />
+
+      <DeleteSurvey
+        isOpen={isDeleteSurveyModalOpen}
+        onClose={() => setIsDeleteSurveyModalOpen(false)}
+        surveyId={survey.id}
+        surveyName={survey.title || ""}
+        onDelete={handleDelete}
+      />
+
+      <SurveySettings
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        surveyId={survey.id}
+        currentSettings={survey.settings}
+        onSettingsUpdated={(updatedSurvey) => {
+          if (onSurveyUpdated) {
+            onSurveyUpdated(updatedSurvey);
+          }
+        }}
+      />
 
       {open && (
         <Portal>
@@ -153,15 +246,24 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
                 onClick={() => setIsRenameSurveyModalOpen(true)}>
                 Rename
               </li>
-              <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleDuplicate}>
+              <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleDuplicate(); }}>
                 Duplicate
               </li>
               <li
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => setIsMoveSurveyModalOpen(true)}>
+                onClick={(e) => { e.stopPropagation(); setIsMoveSurveyModalOpen(true); }}>
                 Move to
               </li>
-              <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Delete</li>
+              <li
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={(e) => { e.stopPropagation(); setIsSettingsModalOpen(true); setOpen(false); }}>
+                Settings
+              </li>
+              <li 
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={(e) => { e.stopPropagation(); setIsDeleteSurveyModalOpen(true); }}>
+                Delete
+              </li>
               <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Download Questionnaire</li>
             </ul>
           </div>

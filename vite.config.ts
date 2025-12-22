@@ -9,5 +9,15 @@ export default defineConfig({
     svgr({
       include: '**/*.svg'
     })
-  ]
+  ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://localhost:7141',
+        changeOrigin: true,
+        secure: false, // Allow self-signed certificates
+        ws: true,
+      }
+    }
+  }
 })

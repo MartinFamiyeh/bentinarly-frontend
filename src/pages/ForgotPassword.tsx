@@ -2,26 +2,40 @@
 import { useState, type FormEvent, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
+import { useAuthApi } from "../services/apiClient";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const authApi = useAuthApi();
 
   const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!email) {
       setError("Please enter your email address.");
       return;
     }
     setError("");
-    console.log("Password reset requested for:", email);
-    // On success, navigate to the verification page, passing the email in the state
-    navigate("/verification", { state: { email } });
+    setIsLoading(true);
+
+    try {
+      await authApi.forgotPassword({ email });
+      setSuccess(true);
+      setTimeout(() => {
+        navigate("/verification", { state: { email } });
+      }, 2000);
+    } catch (error: any) {
+      setError(error.response?.data?.detail || "Failed to send reset email. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -49,6 +63,7 @@ const ForgotPassword = () => {
             </div>
 
             {error && <p className="text-sm text-center text-red-500">{error}</p>}
+            {success && <p className="text-sm text-center text-green-500">Reset email sent! Redirecting...</p>}
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="form-group">
@@ -64,11 +79,12 @@ const ForgotPassword = () => {
                   value={email}
                   onChange={handleValueChange}
                   className="form-input"
+                  disabled={isLoading || success}
                 />
               </div>
               <div>
-                <button type="submit" disabled={!email} className="btn btn-primary">
-                  Next
+                <button type="submit" disabled={!email || isLoading || success} className="btn btn-primary">
+                  {isLoading ? "Sending..." : success ? "Email Sent!" : "Next"}
                 </button>
               </div>
             </form>

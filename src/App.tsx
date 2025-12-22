@@ -70,9 +70,9 @@ function AuthLayout(): JSX.Element {
 
 function App(): JSX.Element {
   return (
-    <AuthProvider>
+    <SnackbarProvider>
       <DarkModeProvider>
-        <SnackbarProvider>
+        <AuthProvider>
           <LoadingProvider>
             <ProjectsProvider>
               <Routes>
@@ -102,6 +102,7 @@ function App(): JSX.Element {
 
                 <Route element={<SurveyLayout />}>
                   <Route path="/survey/questionnaires" element={<Questionnaires />} />
+                  <Route path="/survey/questionnaires/:surveyId" element={<Questionnaires />} />
                   <Route path="/survey/demographics" element={<Demographics />} />
                   <Route path="/survey/analytics" element={<SurveyAnalytics />} />
                   <Route path="/survey/preview" element={<PreviewSurvey />} />
@@ -118,9 +119,9 @@ function App(): JSX.Element {
               </Routes>
             </ProjectsProvider>
           </LoadingProvider>
-        </SnackbarProvider>
+        </AuthProvider>
       </DarkModeProvider>
-    </AuthProvider>
+    </SnackbarProvider>
   );
 }
 

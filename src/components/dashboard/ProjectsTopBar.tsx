@@ -10,6 +10,8 @@ type ProjectsTopBarProps = {
   setActiveFilter?: (filter: string) => void;
   sortOrder?: "Newest to Oldest" | "Oldest to Newest" | "A - Z" | "Z - A";
   setSortOrder?: (order: "Newest to Oldest" | "Oldest to Newest" | "A - Z" | "Z - A") => void;
+  searchTerm?: string;
+  setSearchTerm?: (term: string) => void;
 };
 
 const filters = ["All", "Draft", "Scheduled", "Live", "Paused", "Closed", "Completed"];
@@ -19,6 +21,8 @@ const ProjectsTopBar: React.FC<ProjectsTopBarProps> = ({
   setActiveFilter = () => {},
   sortOrder = "Newest to Oldest",
   setSortOrder = () => {},
+  searchTerm = "",
+  setSearchTerm = () => {},
 }) => {
   const { projects, selectedProject, selectProject, renameProject } = useProjects();
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
@@ -134,6 +138,8 @@ const ProjectsTopBar: React.FC<ProjectsTopBarProps> = ({
           <input
             type="text"
             placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 pr-4 py-1 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
           />
         </div>

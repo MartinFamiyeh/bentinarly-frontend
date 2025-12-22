@@ -1,20 +1,28 @@
 // src/pages/ResetPassword.tsx
 import { useState, type FormEvent, type ChangeEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { IoArrowBack } from "react-icons/io5";
+import { useAuthApi } from "../services/apiClient";
 
 const ResetPassword = () => {
   const [formData, setFormData] = useState({ password: "", confirmPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const authApi = useAuthApi();
+  
+  // Get email and token from location state or URL params
+  const email = location.state?.email || new URLSearchParams(location.search).get("email");
+  const token = location.state?.token || new URLSearchParams(location.search).get("token");
 
   const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
@@ -24,10 +32,25 @@ const ResetPassword = () => {
       setError("Password must be at least 8 characters long.");
       return;
     }
+    if (!email || !token) {
+      setError("Missing reset token. Please request a new password reset.");
+      return;
+    }
     setError("");
-    console.log("Setting new password...");
-    // On success, navigate to the final success screen
-    navigate("/reset-success");
+    setIsLoading(true);
+
+    try {
+      await authApi.resetPassword({
+        email,
+        token,
+        newPassword: formData.password,
+      });
+      navigate("/reset-success");
+    } catch (error: any) {
+      setError(error.response?.data?.detail || "Failed to reset password. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isFormDisabled = !formData.password || !formData.confirmPassword;
@@ -98,8 +121,8 @@ const ResetPassword = () => {
               </div>
 
               <div className="pt-2">
-                <button type="submit" disabled={isFormDisabled} className="btn btn-primary">
-                  Reset Password
+                <button type="submit" disabled={isFormDisabled || isLoading} className="btn btn-primary">
+                  {isLoading ? "Resetting..." : "Reset Password"}
                 </button>
               </div>
             </form>

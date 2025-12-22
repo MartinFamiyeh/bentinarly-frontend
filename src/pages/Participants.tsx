@@ -1,9 +1,14 @@
-// src/pages/Signup.tsx
 import { useState, type FormEvent, type ChangeEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { useAuthApi } from "../services/apiClient";
+import { useSnackbar } from "../contexts/SnackbarContext";
+import * as ApiTypes from "../types/api";
 
 const Participants = () => {
+  const navigate = useNavigate();
+  const authApi = useAuthApi();
+  const { showSnackbar } = useSnackbar();
   // 1. Consolidated state into a single object for better organization
   const [formData, setFormData] = useState({
     firstName: "",
@@ -37,16 +42,43 @@ const Participants = () => {
     !formData.confirmPassword ||
     !formData.agreedToTerms;
 
+  const [isLoading, setIsLoading] = useState(false);
+
   // 4. Renamed handler and added password matching logic
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-    setError(""); // Clear previous errors
-    console.log("Signing up with:", formData);
-    // navigate('/verification'); // Example navigation on success
+    setError("");
+    setIsLoading(true);
+    
+    try {
+      const registerData: ApiTypes.RegisterParticipantCommand = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        gender: formData.gender || undefined,
+        dateOfBirth: formData.dob || undefined,
+        mobileNumber: formData.email, // Using email as mobile for now
+      };
+
+      const result = await authApi.registerParticipant(registerData);
+      if (result.success) {
+        showSnackbar("Registration successful! Please verify your email.", "success");
+        navigate("/verification", { state: { email: formData.email } });
+      } else {
+        setError(result.errors?.join(", ") || "Registration failed.");
+        showSnackbar(result.errors?.join(", ") || "Registration failed.", "error");
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.detail || "An unexpected error occurred.");
+      showSnackbar(err.response?.data?.detail || "Registration failed.", "error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -220,8 +252,11 @@ const Participants = () => {
               </div>
 
               <div>
-                <button type="submit" disabled={isFormDisabled} className="btn btn-primary">
-                  Sign Up
+                <button 
+                  type="submit" 
+                  disabled={isFormDisabled || isLoading} 
+                  className="btn btn-primary">
+                  {isLoading ? "Signing Up..." : "Sign Up"}
                 </button>
               </div>
             </form>

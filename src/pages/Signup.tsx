@@ -2,9 +2,14 @@
 import { useState, type FormEvent, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { useAuthApi } from "../services/apiClient";
+import { useAuth } from "../contexts/AuthContext";
+import type { UserRole } from "../types/api";
 
 const Signup = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const authApi = useAuthApi();
+  const { signin } = useAuth();
   // 1. Consolidated state into a single object for easier management.
   const [formData, setFormData] = useState({
     firstName: "",
@@ -17,6 +22,7 @@ const Signup = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // 2. Separate, simple handlers for different input types.
   const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -37,17 +43,39 @@ const Signup = () => {
     !formData.agreedToTerms;
 
   // 4. Renamed handler and added crucial password matching logic.
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match. Please try again.");
       return;
     }
-    setError(""); // Clear error on successful validation
-    console.log("Submitting form with data:", formData);
-    navigate("/projects/dashboard")
-    // You would typically call an API here and navigate on success
-    // navigate('/verification');
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const result = await authApi.register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        role: 2 as UserRole, // Assuming 2 is the default user role
+      });
+
+      if (result.success && result.user && result.token) {
+        signin(result.user, result.token, result.refreshToken || undefined);
+        navigate("/verification", { state: { email: formData.email } });
+      } else {
+        setError(result.errors?.[0] || "Registration failed. Please try again.");
+      }
+    } catch (error: any) {
+      setError(error.response?.data?.detail || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -186,8 +214,8 @@ const Signup = () => {
               </div>
 
               <div>
-                <button type="submit" disabled={isFormDisabled} className="btn btn-primary">
-                  Sign Up
+                <button type="submit" disabled={isFormDisabled || isLoading} className="btn btn-primary">
+                  {isLoading ? "Signing up..." : "Sign Up"}
                 </button>
               </div>
             </form>

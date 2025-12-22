@@ -9,14 +9,18 @@ import React, {
 } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
+import { useAuthApi } from "../services/apiClient";
 
 const Verify = () => {
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const navigate = useNavigate();
   const location = useLocation();
+  const authApi = useAuthApi();
   const email = location.state?.email; // Get email from previous page
 
   // If user lands here without an email, redirect them
@@ -48,7 +52,7 @@ const Verify = () => {
     }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const verificationCode = otp.join("");
     if (verificationCode.length < 6) {
@@ -56,9 +60,34 @@ const Verify = () => {
       return;
     }
     setError("");
-    console.log("Verifying code:", verificationCode, "for email:", email);
-    // On successful verification, navigate to reset password page
-    navigate("/resetpassword");
+    setIsLoading(true);
+
+    try {
+      await authApi.verifyEmail({
+        email: email!,
+        token: verificationCode,
+      });
+      // On successful verification, navigate to reset password page
+      navigate("/resetpassword", { state: { email, token: verificationCode } });
+    } catch (error: any) {
+      setError(error.response?.data?.detail || "Invalid verification code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) return;
+    setIsResending(true);
+    try {
+      await authApi.resendVerification({ email });
+      setError("");
+      // Show success message
+    } catch (error: any) {
+      setError(error.response?.data?.detail || "Failed to resend code. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
   };
 
   return (
@@ -102,13 +131,17 @@ const Verify = () => {
               </div>
               <p className="text-center text-sm text-gray-500">
                 Didn't receive a code?{" "}
-                <button type="button" className="font-medium text-[#FE5102] hover:underline">
-                  Resend
+                <button 
+                  type="button" 
+                  onClick={handleResend}
+                  disabled={isResending}
+                  className="font-medium text-[#FE5102] hover:underline disabled:opacity-50">
+                  {isResending ? "Resending..." : "Resend"}
                 </button>
               </p>
               <div className="mt-6">
-                <button type="submit" className="btn btn-primary">
-                  Verify
+                <button type="submit" disabled={isLoading} className="btn btn-primary">
+                  {isLoading ? "Verifying..." : "Verify"}
                 </button>
               </div>
             </form>
