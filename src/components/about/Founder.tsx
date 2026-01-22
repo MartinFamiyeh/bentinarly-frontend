@@ -1,5 +1,5 @@
 import React from "react";
-import FounderImage from "../../assets/images/about-founder.png";
+import FounderImage from "../../assets/images/elizabeth.jpg";
 
 const Founder: React.FC = () => {
   return (
@@ -39,7 +39,7 @@ const Founder: React.FC = () => {
         </div>
       </div>
       <div className="md:col-span-2 md:flex items-center">
-        <img src={FounderImage} alt="founder" className="mx-auto" />
+        <img src={FounderImage} alt="founder" className="mx-auto rounded-md" />
       </div>
     </div>
   );
