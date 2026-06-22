@@ -47,15 +47,17 @@ import TakeSurvey from "./components/participants/TakeSurvey";
 
 function DefaultLayout(): JSX.Element {
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
-      <Header />
-      <main>
-        <Outlet />
-      </main>
-      <Testimonials />
-      <PSession />
-      <Footer />
-    </div>
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
+  <Header />
+  <main className="w-full max-w-full overflow-x-hidden">
+    <Outlet />
+  </main>
+  <div className="w-full max-w-full overflow-x-hidden">
+    <Testimonials />
+    <PSession />
+    <Footer />
+  </div>
+</div>
   );
 }
 
