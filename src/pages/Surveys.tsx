@@ -9,12 +9,14 @@ import { useLoading } from "../contexts/LoadingContext";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import { useAuth } from "../contexts/AuthContext";
 import * as ApiTypes from "../types/api";
+// import CircularProgress from "@mui/material/CircularProgress";
 
 const Surveys = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { user } = useAuth();
   const surveysApi = useSurveysApi();
   const { showLoading, hideLoading } = useLoading();
+  // const [isLoading, setIsLoading] = useState(true);
   const { showSnackbar } = useSnackbar();
   const [activeFilter, setActiveFilter] = useState("All");
   const [surveys, setSurveys] = useState<ApiTypes.SurveyDto[]>([]);
@@ -34,11 +36,7 @@ const Surveys = () => {
       showLoading();
       try {
         // Fetch available surveys for participants
-        const response = await surveysApi.getSurveys({
-          status: 2, // 2 = Published/Live
-          page: 1,
-          pageSize: 100,
-        });
+        const response = await surveysApi.getSurveys({});
         setSurveys(response.items || []);
       } catch (error: any) {
         console.error("Failed to fetch surveys:", error);
@@ -46,6 +44,7 @@ const Surveys = () => {
         setSurveys([]);
       } finally {
         hideLoading();
+        //setIsLoading(false);
       }
     };
 
@@ -59,7 +58,7 @@ const Surveys = () => {
       // SurveyStatus is a numeric type: 1 = Draft, 2 = Published/Live, 3 = Closed, 4 = Archived
       const statusMap: Record<string, ApiTypes.SurveyStatus> = {
         available: 2, // Published/Live
-        progress: 2,  // In progress = still live
+        progress: 2, // In progress = still live
         completed: 3, // Closed
       };
       return survey.status === statusMap[activeFilter.toLowerCase()];
@@ -82,6 +81,10 @@ const Surveys = () => {
           return 0;
       }
     });
+
+  // if (isLoading) {
+  //   return <CircularProgress />;
+  // }
 
   return (
     <div className="h-screen rounded-l-xl bg-white shadow-sm overflow-y-auto">

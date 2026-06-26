@@ -66,7 +66,7 @@ export const useSurveysApi = () => {
     createSurvey: (data: ApiTypes.CreateSurveyDto) =>
       api.post<ApiTypes.SurveyDto>("/api/surveys", data),
 
-    getSurvey: (id: string, params?: { includeQuestions?: boolean; includeAnalytics?: boolean }) =>
+    getSurvey: (id: string | null, params?: { includeQuestions?: boolean; includeAnalytics?: boolean }) =>
       api.get<ApiTypes.SurveyDto>(`/api/surveys/${id}`, params),
 
     updateSurvey: (id: string, data: ApiTypes.UpdateSurveyDto) =>

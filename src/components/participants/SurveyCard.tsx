@@ -15,7 +15,7 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
     if (survey.shareableLink) {
       window.open(survey.shareableLink, "_blank");
     } else {
-      navigate(`/survey/preview?surveyId=${survey.id}`);
+      navigate(`/surveys/takesurvey?surveyId=${survey.id}`);
     }
   };
 

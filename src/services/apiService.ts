@@ -3,7 +3,11 @@
  * Handles authentication, token refresh, and error handling
  */
 
-import axios, { type AxiosError, type InternalAxiosRequestConfig, type AxiosRequestConfig } from "axios";
+import axios, {
+  type AxiosError,
+  type InternalAxiosRequestConfig,
+  type AxiosRequestConfig,
+} from "axios";
 // @ts-ignore - axios-auth-refresh doesn't have perfect TypeScript support
 import createAuthRefreshInterceptor from "axios-auth-refresh";
 import { useSnackbar } from "../contexts/SnackbarContext";
@@ -26,7 +30,7 @@ const getBaseURL = (): string => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  return import.meta.env.DEV ? '' : 'https://localhost:7141';
+  return "http://localhost:5136";
 };
 
 const BASE_URL = getBaseURL();
@@ -36,21 +40,21 @@ const refreshAxios = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Public endpoints that don't require authentication
 const PUBLIC_ENDPOINTS = [
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/register/participant',
-  '/api/auth/forgot-password',
-  '/api/auth/reset-password',
-  '/api/auth/verify-email',
-  '/api/auth/resend-verification',
-  '/api/auth/google-login',
-  '/api/auth/google-response',
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/register/participant",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
+  "/api/auth/verify-email",
+  "/api/auth/resend-verification",
+  "/api/auth/google-login",
+  "/api/auth/google-response",
 ] as const;
 
 // Main API instance
@@ -67,7 +71,7 @@ const api = axios.create({
  */
 const isPublicEndpoint = (url: string | undefined): boolean => {
   if (!url) return false;
-  return PUBLIC_ENDPOINTS.some(endpoint => url.startsWith(endpoint));
+  return PUBLIC_ENDPOINTS.some((endpoint) => url.startsWith(endpoint));
 };
 
 /**
@@ -76,7 +80,7 @@ const isPublicEndpoint = (url: string | undefined): boolean => {
  */
 const refreshAuthLogic = async (failedRequest: AxiosError): Promise<string> => {
   const refreshToken = localStorage.getItem("refreshToken");
-  
+
   if (!refreshToken) {
     throw new Error("No refresh token available");
   }
@@ -84,12 +88,12 @@ const refreshAuthLogic = async (failedRequest: AxiosError): Promise<string> => {
   try {
     // Use separate axios instance to avoid interceptors
     const response = await refreshAxios.post<{ token: string; refreshToken?: string }>(
-      '/api/auth/refresh',
+      "/api/auth/refresh",
       { refreshToken }
     );
 
     const { token, refreshToken: newRefreshToken } = response.data;
-    
+
     if (!token) {
       throw new Error("No token in refresh response");
     }
@@ -110,17 +114,18 @@ const refreshAuthLogic = async (failedRequest: AxiosError): Promise<string> => {
     // Refresh failed - clear tokens and redirect to login
     localStorage.removeItem("authToken");
     localStorage.removeItem("refreshToken");
-    
+
     // Only redirect if not already on auth pages
     const currentPath = window.location.pathname;
-    const isAuthPage = currentPath.includes('/login') || 
-                      currentPath.includes('/register') || 
-                      currentPath.includes('/participant');
-    
+    const isAuthPage =
+      currentPath.includes("/login") ||
+      currentPath.includes("/register") ||
+      currentPath.includes("/participant");
+
     if (!isAuthPage) {
       window.location.href = "/login";
     }
-    
+
     throw error;
   }
 };
@@ -172,7 +177,7 @@ const proactiveRefresh = async (): Promise<string | null> => {
   } catch (error) {
     // Silent fail - let reactive refresh handle it
   }
-  
+
   return null;
 };
 
@@ -186,7 +191,7 @@ api.interceptors.request.use(
 
     // Add auth token
     let token = localStorage.getItem("authToken");
-    
+
     // Proactively refresh if token is expiring soon (within 5 minutes)
     if (token && isTokenExpiringSoon(token, 300)) {
       const newToken = await proactiveRefresh();
@@ -194,11 +199,11 @@ api.interceptors.request.use(
         token = newToken;
       }
     }
-    
+
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -207,7 +212,10 @@ api.interceptors.request.use(
 /**
  * Handle API errors and show user-friendly messages
  */
-const handleError = (error: unknown, showSnackbar: (message: string, severity?: AlertColor) => void): void => {
+const handleError = (
+  error: unknown,
+  showSnackbar: (message: string, severity?: AlertColor) => void
+): void => {
   if (!axios.isAxiosError(error)) {
     showSnackbar(FRIENDLY_MESSAGES["UNKNOWN"], "error");
     return;
@@ -218,10 +226,15 @@ const handleError = (error: unknown, showSnackbar: (message: string, severity?: 
 
   if (axiosError.response) {
     const status = axiosError.response.status;
-    const data = axiosError.response.data as { detail?: string; message?: string; title?: string; errors?: string[] };
-    
+    const data = axiosError.response.data as {
+      detail?: string;
+      message?: string;
+      title?: string;
+      errors?: string[];
+    };
+
     const backendMessage = data?.detail || data?.message || data?.title || data?.errors?.[0];
-    
+
     if (isPublicEndpoint(axiosError.config?.url) && backendMessage) {
       message = backendMessage;
     } else {
@@ -246,13 +259,19 @@ const handleError = (error: unknown, showSnackbar: (message: string, severity?: 
 export const useApiService = () => {
   const { showSnackbar } = useSnackbar();
 
-  const get = async <T>(url: string, params?: Record<string, unknown>, options?: { silent?: boolean }): Promise<T> => {
+  const get = async <T>(
+    url: string,
+    params?: Record<string, unknown>,
+    options?: { silent?: boolean }
+  ): Promise<T> => {
     try {
       // Remove undefined/null values from params
-      const cleanParams = params ? Object.fromEntries(
-        Object.entries(params).filter(([_, value]) => value !== undefined && value !== null)
-      ) : undefined;
-      
+      const cleanParams = params
+        ? Object.fromEntries(
+            Object.entries(params).filter(([_, value]) => value !== undefined && value !== null)
+          )
+        : undefined;
+
       const { data } = await api.get<T>(url, { params: cleanParams });
       return data;
     } catch (error) {
@@ -263,7 +282,11 @@ export const useApiService = () => {
     }
   };
 
-  const post = async <T>(url: string, body?: unknown, options?: { silent?: boolean }): Promise<T> => {
+  const post = async <T>(
+    url: string,
+    body?: unknown,
+    options?: { silent?: boolean }
+  ): Promise<T> => {
     try {
       const { data } = await api.post<T>(url, body);
       return data;
@@ -275,7 +298,11 @@ export const useApiService = () => {
     }
   };
 
-  const put = async <T>(url: string, body?: unknown, options?: { silent?: boolean }): Promise<T> => {
+  const put = async <T>(
+    url: string,
+    body?: unknown,
+    options?: { silent?: boolean }
+  ): Promise<T> => {
     try {
       const { data } = await api.put<T>(url, body);
       return data;
@@ -287,7 +314,11 @@ export const useApiService = () => {
     }
   };
 
-  const del = async <T>(url: string, body?: unknown, options?: { silent?: boolean }): Promise<T> => {
+  const del = async <T>(
+    url: string,
+    body?: unknown,
+    options?: { silent?: boolean }
+  ): Promise<T> => {
     try {
       const { data } = await api.delete<T>(url, { data: body });
       return data;

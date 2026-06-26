@@ -43,6 +43,7 @@ import Rewards from "./pages/Rewards";
 import Notifications from "./pages/Notifications";
 
 import PreviewSurvey from "./components/survey/TakeSurvey"
+import TakeSurvey from "./components/participants/TakeSurvey";
 
 function DefaultLayout(): JSX.Element {
   return (
@@ -113,6 +114,7 @@ function App(): JSX.Element {
                   <Route path="/surveys/profile" element={<Profile />} />
                   <Route path="/surveys/rewards" element={<Rewards />} />
                   <Route path="/surveys/notifications" element={<Notifications />} />
+                  <Route path="/surveys/takesurvey" element={<TakeSurvey />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />

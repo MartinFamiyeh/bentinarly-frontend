@@ -94,3 +94,22 @@ export interface Survey {
   updatedAt: string;
   status: "draft" | "published" | "closed";
 }
+
+// export interface SurveyQuestion {
+//   id: string;
+//   surveyId: string;
+//   type: QuestionType;
+//   title: string;
+//   description: string | null;
+//   isRequired: boolean;
+//   order: number;
+//   imageUrl: string | null;
+//   validation: QuestionValidation | null;
+//   branching: BranchingCondition | null;
+//   ratingScale: RatingScale | null;
+//   matrix: QuestionMatrix | null;
+//   options: QuestionOption[];
+//   createdAt: string; // ISO date
+//   updatedAt: string; // ISO date
+// }
+
