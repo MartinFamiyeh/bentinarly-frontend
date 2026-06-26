@@ -43,18 +43,21 @@ import Rewards from "./pages/Rewards";
 import Notifications from "./pages/Notifications";
 
 import PreviewSurvey from "./components/survey/TakeSurvey"
+import TakeSurvey from "./components/participants/TakeSurvey";
 
 function DefaultLayout(): JSX.Element {
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
-      <Header />
-      <main>
-        <Outlet />
-      </main>
-      <Testimonials />
-      <PSession />
-      <Footer />
-    </div>
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
+  <Header />
+  <main className="w-full max-w-full overflow-x-hidden">
+    <Outlet />
+  </main>
+  <div className="w-full max-w-full overflow-x-hidden">
+    <Testimonials />
+    <PSession />
+    <Footer />
+  </div>
+</div>
   );
 }
 
@@ -113,6 +116,7 @@ function App(): JSX.Element {
                   <Route path="/surveys/profile" element={<Profile />} />
                   <Route path="/surveys/rewards" element={<Rewards />} />
                   <Route path="/surveys/notifications" element={<Notifications />} />
+                  <Route path="/surveys/takesurvey" element={<TakeSurvey />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />

@@ -55,7 +55,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="pt-12">
+    <div className="pt-12 w-full max-w-full overflow-x-hidden">
       <Hero />
       {featureSections.map((section, index) => (
         <FeatureSection 
