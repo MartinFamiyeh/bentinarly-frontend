@@ -23,6 +23,17 @@ export function decodeJWT(token: string): any | null {
   }
 }
 
+export function isTokenExpired(token: string | null): boolean {
+  if (!token) return true;
+
+  const decoded = decodeJWT(token);
+  if (!decoded || !decoded.exp) {
+    return false;
+  }
+
+  return decoded.exp * 1000 <= Date.now();
+}
+
 /**
  * Check if a JWT token is expired or will expire soon
  * @param token - JWT token string

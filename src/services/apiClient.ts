@@ -18,8 +18,8 @@ export const useAuthApi = () => {
     login: (data: ApiTypes.LoginCommand) =>
       api.post<ApiTypes.AuthResultDto>("/api/auth/login", data),
 
-    refresh: (data: ApiTypes.RefreshTokenCommand) =>
-      api.post<ApiTypes.AuthResultDto>("/api/auth/refresh", data),
+    refresh: (data: ApiTypes.RefreshTokenCommand, options?: { silent?: boolean }) =>
+      api.post<ApiTypes.AuthResultDto>("/api/auth/refresh", data, options),
 
     logout: () =>
       api.post<void>("/api/auth/logout"),

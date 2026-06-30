@@ -55,6 +55,7 @@ const PUBLIC_ENDPOINTS = [
   "/api/auth/resend-verification",
   "/api/auth/google-login",
   "/api/auth/google-response",
+  "/api/auth/refresh",
   "/api/public/",
 ] as const;
 

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useAuthApi } from "../services/apiClient";
 import type { UserDto } from "../types/api";
+import { isTokenExpired } from "../utils/tokenUtils";
 
 type AuthContextType = {
   user: UserDto | null;
@@ -31,19 +32,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadUser = async () => {
       const token = localStorage.getItem("authToken");
-      if (token) {
-        try {
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      if (!token && !refreshToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        if ((!token || isTokenExpired(token)) && refreshToken) {
+          const refreshResult = await authApi.refresh({ refreshToken }, { silent: true });
+          if (refreshResult.success && refreshResult.token) {
+            localStorage.setItem("authToken", refreshResult.token);
+            if (refreshResult.refreshToken) {
+              localStorage.setItem("refreshToken", refreshResult.refreshToken);
+            }
+            if (refreshResult.user) {
+              setUser(refreshResult.user);
+            }
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        if (token) {
           const userData = await authApi.getMe();
           setUser(userData);
-        } catch (error: any) {
-          // Token invalid or expired, clear it silently
-          // Don't show error snackbar for this - it's expected behavior
-          console.log("Token validation failed, clearing stored tokens");
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("refreshToken");
         }
+      } catch {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("refreshToken");
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     loadUser();
   }, []);
