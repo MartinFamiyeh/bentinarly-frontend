@@ -1,10 +1,11 @@
 // src/pages/Login.tsx
 import { useState, type FormEvent, type ChangeEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useAuthApi } from "../services/apiClient";
 import { useAuth } from "../contexts/AuthContext";
+import { getPostLoginRedirect } from "../utils/routeUtils";
 
 type ApiErrorResponse = {
   response?: {
@@ -26,8 +27,8 @@ const getLoginErrorMessage = (error: unknown): string => {
 };
 
 const Login = () => {
-  // 1. Consolidated state into a single object.
   const navigate = useNavigate();
+  const location = useLocation();
   const authApi = useAuthApi();
   const { signin } = useAuth();
   const [formData, setFormData] = useState({
@@ -58,7 +59,8 @@ const Login = () => {
 
       if (result.success && result.user && result.token) {
         signin(result.user, result.token, result.refreshToken || undefined);
-        navigate("/projects/dashboard");
+        const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+        navigate(getPostLoginRedirect(fromPath, result.user.role), { replace: true });
       } else {
         setError(result.errors?.[0] || "Login failed. Please try again.");
       }

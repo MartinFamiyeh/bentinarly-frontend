@@ -43,22 +43,30 @@ import Profile from "./pages/Profile";
 import Rewards from "./pages/Rewards";
 import Notifications from "./pages/Notifications";
 
-import PreviewSurvey from "./components/survey/TakeSurvey"
+import PreviewSurvey from "./components/survey/TakeSurvey";
 import TakeSurvey from "./components/participants/TakeSurvey";
+
+import ProtectedRoute from "./routes/ProtectedRoutes";
+import RoleRoute from "./routes/RoleRoute";
+import GuestRoute from "./routes/GuestRoute";
+import {
+  PARTICIPANT_PORTAL_ROLES,
+  RESEARCHER_WORKSPACE_ROLES,
+} from "./constants/userRoles";
 
 function DefaultLayout(): JSX.Element {
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-white dark:bg-[#0B0B0B] transition-colors duration-200">
-  <Header />
-  <main className="w-full max-w-full overflow-x-hidden">
-    <Outlet />
-  </main>
-  <div className="w-full max-w-full overflow-x-hidden">
-    <Testimonials />
-    <PSession />
-    <Footer />
-  </div>
-</div>
+      <Header />
+      <main className="w-full max-w-full overflow-x-hidden">
+        <Outlet />
+      </main>
+      <div className="w-full max-w-full overflow-x-hidden">
+        <Testimonials />
+        <PSession />
+        <Footer />
+      </div>
+    </div>
   );
 }
 
@@ -88,37 +96,63 @@ function App(): JSX.Element {
                   <Route path="contact" element={<Contact />} />
                 </Route>
 
+                <Route element={<GuestRoute />}>
+                  <Route path="/" element={<AuthLayout />}>
+                    <Route path="login" element={<Login />} />
+                    <Route path="register" element={<Signup />} />
+                    <Route path="participant" element={<Participants />} />
+                  </Route>
+                </Route>
+
                 <Route path="/" element={<AuthLayout />}>
-                  <Route path="login" element={<Login />} />
                   <Route path="auth/google/callback" element={<GoogleCallback />} />
-                  <Route path="register" element={<Signup />} />
-                  <Route path="participant" element={<Participants />} />
                   <Route path="verification" element={<Verify />} />
                   <Route path="forgotpassword" element={<ForgotPassword />} />
                   <Route path="/resetpassword" element={<ResetPassword />} />
                   <Route path="/reset-success" element={<ResetSuccess />} />
                 </Route>
 
-                <Route element={<DashboardLayout />}>
-                  <Route path="/projects/dashboard" element={<Projects />} />
-                  <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/templates" element={<Templates />} />
+                <Route path="/surveys/takesurvey" element={<TakeSurvey />} />
+
+                <Route element={<ProtectedRoute />}>
+                  <Route
+                    element={
+                      <RoleRoute
+                        allowedRoles={RESEARCHER_WORKSPACE_ROLES}
+                        fallbackPath="/surveys/allsurveys"
+                      />
+                    }>
+                    <Route element={<DashboardLayout />}>
+                      <Route path="/projects/dashboard" element={<Projects />} />
+                      <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/templates" element={<Templates />} />
+                    </Route>
+
+                    <Route element={<SurveyLayout />}>
+                      <Route path="/survey/questionnaires" element={<Questionnaires />} />
+                      <Route path="/survey/questionnaires/:surveyId" element={<Questionnaires />} />
+                      <Route path="/survey/demographics" element={<Demographics />} />
+                      <Route path="/survey/analytics" element={<SurveyAnalytics />} />
+                      <Route path="/survey/preview" element={<PreviewSurvey />} />
+                    </Route>
+                  </Route>
                 </Route>
 
-                <Route element={<SurveyLayout />}>
-                  <Route path="/survey/questionnaires" element={<Questionnaires />} />
-                  <Route path="/survey/questionnaires/:surveyId" element={<Questionnaires />} />
-                  <Route path="/survey/demographics" element={<Demographics />} />
-                  <Route path="/survey/analytics" element={<SurveyAnalytics />} />
-                  <Route path="/survey/preview" element={<PreviewSurvey />} />
-                </Route>
-
-                <Route element={<ParticipantsLayout />}>
-                  <Route path="/surveys/allsurveys" element={<Surveys />} />
-                  <Route path="/surveys/profile" element={<Profile />} />
-                  <Route path="/surveys/rewards" element={<Rewards />} />
-                  <Route path="/surveys/notifications" element={<Notifications />} />
-                  <Route path="/surveys/takesurvey" element={<TakeSurvey />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route
+                    element={
+                      <RoleRoute
+                        allowedRoles={PARTICIPANT_PORTAL_ROLES}
+                        fallbackPath="/projects/dashboard"
+                      />
+                    }>
+                    <Route element={<ParticipantsLayout />}>
+                      <Route path="/surveys/allsurveys" element={<Surveys />} />
+                      <Route path="/surveys/profile" element={<Profile />} />
+                      <Route path="/surveys/rewards" element={<Rewards />} />
+                      <Route path="/surveys/notifications" element={<Notifications />} />
+                    </Route>
+                  </Route>
                 </Route>
 
                 <Route path="*" element={<NotFound />} />

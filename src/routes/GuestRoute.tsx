@@ -1,10 +1,10 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useAuth } from "../contexts/AuthContext";
+import { getDefaultRouteForRole } from "../constants/userRoles";
 
-export default function ProtectedRoute() {
+export default function GuestRoute() {
   const { user, isLoading } = useAuth();
-  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -14,8 +14,8 @@ export default function ProtectedRoute() {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (user) {
+    return <Navigate to={getDefaultRouteForRole(user.role)} replace />;
   }
 
   return <Outlet />;

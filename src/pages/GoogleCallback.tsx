@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import type { AuthResultDto } from "../types/api";
+import { getPostLoginRedirect } from "../utils/routeUtils";
 
 const decodeBase64Url = (value: string): string => {
   const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -43,7 +44,7 @@ const GoogleCallback = () => {
       }
 
       signin(result.user, result.token, result.refreshToken || undefined);
-      navigate("/projects/dashboard", { replace: true });
+      navigate(getPostLoginRedirect(undefined, result.user.role), { replace: true });
     } catch {
       setError("Google sign-in failed. Please try again.");
     }
