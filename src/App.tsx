@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import Verify from "./pages/Verification";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import GoogleCallback from "./pages/GoogleCallback";
 import ForgotPassword from "./pages/ForgotPassword";
 import Participants from "./pages/Participants";
 import ResetPassword from "./pages/ResetPassword";
@@ -89,6 +90,7 @@ function App(): JSX.Element {
 
                 <Route path="/" element={<AuthLayout />}>
                   <Route path="login" element={<Login />} />
+                  <Route path="auth/google/callback" element={<GoogleCallback />} />
                   <Route path="register" element={<Signup />} />
                   <Route path="participant" element={<Participants />} />
                   <Route path="verification" element={<Verify />} />

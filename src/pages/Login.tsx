@@ -1,11 +1,29 @@
 // src/pages/Login.tsx
 import { useState, type FormEvent, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useAuthApi } from "../services/apiClient";
 import { useAuth } from "../contexts/AuthContext";
+
+type ApiErrorResponse = {
+  response?: {
+    data?: {
+      detail?: string;
+    };
+  };
+};
+
+const getLoginErrorMessage = (error: unknown): string => {
+  if (typeof error === "object" && error !== null && "response" in error) {
+    const apiError = error as ApiErrorResponse;
+    if (apiError.response?.data?.detail) {
+      return apiError.response.data.detail;
+    }
+  }
+
+  return "Login failed. Please check your credentials.";
+};
 
 const Login = () => {
   // 1. Consolidated state into a single object.
@@ -44,19 +62,20 @@ const Login = () => {
       } else {
         setError(result.errors?.[0] || "Login failed. Please try again.");
       }
-    } catch (error: any) {
-      setError(error.response?.data?.detail || "Login failed. Please check your credentials.");
+    } catch (error: unknown) {
+      setError(getLoginErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSocialLogin = (provider: "google" | "facebook") => {
-    if (provider === "google") {
-      window.location.href = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:7141"}/api/auth/google-login?returnUrl=${encodeURIComponent(window.location.origin + "/projects/dashboard")}`;
-    } else {
-      console.log(`Facebook login not implemented yet`);
-    }
+  const handleGoogleLogin = () => {
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5136";
+    const callbackUrl = `${window.location.origin}/auth/google/callback`;
+    const googleLoginUrl = new URL("/api/auth/google-login", apiBaseUrl);
+    googleLoginUrl.searchParams.set("returnUrl", callbackUrl);
+
+    window.location.href = googleLoginUrl.toString();
   };
 
   const isFormDisabled = !formData.email || !formData.password;
@@ -79,7 +98,7 @@ const Login = () => {
             {error && <p className="text-sm text-center text-red-500">{error}</p>}
 
             {/* 4. Form now uses our clean CSS classes and single handler. */}
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            <form className="space-y-4" onSubmit={handleSubmit} autoComplete="off">
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
                   Email
@@ -89,6 +108,7 @@ const Login = () => {
                   name="email"
                   type="email"
                   placeholder="abc@email.com"
+                  autoComplete="username"
                   required
                   value={formData.email}
                   onChange={handleValueChange}
@@ -105,6 +125,7 @@ const Login = () => {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="8+ characters"
+                  autoComplete="current-password"
                   required
                   value={formData.password}
                   onChange={handleValueChange}
@@ -147,11 +168,7 @@ const Login = () => {
             </div>
 
             <div className="space-y-4">
-              <button onClick={() => handleSocialLogin("facebook")} className="btn-social">
-                <FaFacebook className="w-5 h-5 mr-2 text-blue-600" />
-                Login with Facebook
-              </button>
-              <button onClick={() => handleSocialLogin("google")} className="btn-social">
+              <button onClick={handleGoogleLogin} className="btn-social">
                 <FcGoogle className="w-5 h-5 mr-2" />
                 Login with Google
               </button>

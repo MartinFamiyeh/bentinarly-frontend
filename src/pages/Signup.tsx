@@ -98,7 +98,7 @@ const Signup = () => {
             {error && <p className="text-sm text-center text-red-500">{error}</p>}
 
             {/* 5. Form now uses our clean CSS classes and separate handlers. */}
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            <form className="space-y-4" onSubmit={handleSubmit} autoComplete="off">
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="firstName" className="form-label">
@@ -109,6 +109,7 @@ const Signup = () => {
                     name="firstName"
                     type="text"
                     placeholder="Eric"
+                    autoComplete="given-name"
                     required
                     value={formData.firstName}
                     onChange={handleValueChange}
@@ -124,6 +125,7 @@ const Signup = () => {
                     name="lastName"
                     type="text"
                     placeholder="Joel"
+                    autoComplete="family-name"
                     required
                     value={formData.lastName}
                     onChange={handleValueChange}
@@ -141,6 +143,7 @@ const Signup = () => {
                   name="email"
                   type="email"
                   placeholder="abc@email.com"
+                  autoComplete="email"
                   required
                   value={formData.email}
                   onChange={handleValueChange}
@@ -157,6 +160,7 @@ const Signup = () => {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="8+ characters"
+                  autoComplete="new-password"
                   required
                   value={formData.password}
                   onChange={handleValueChange}
@@ -179,6 +183,7 @@ const Signup = () => {
                   name="confirmPassword"
                   type={showPassword ? "text" : "password"}
                   placeholder="8+ characters"
+                  autoComplete="new-password"
                   required
                   value={formData.confirmPassword}
                   onChange={handleValueChange}
