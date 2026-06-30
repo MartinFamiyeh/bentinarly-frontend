@@ -23,8 +23,8 @@ const TakeSurvey: React.FC = () => {
   const fetchSurvey = async () => {
     try {
       setLoading(true);
-      const data = await surveysApi.getSurvey(surveyId, {});
-      setQuestions(data.questions || []);
+      const questionsData = await surveysApi.getPublicQuestions(surveyId!);
+      setQuestions(questionsData || []);
     } catch (err) {
       console.error("Failed to fetch survey", err);
     } finally {

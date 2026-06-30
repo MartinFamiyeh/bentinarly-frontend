@@ -61,7 +61,6 @@ export interface RegisterCommand {
   email?: string;
   password?: string;
   mobileNumber?: string;
-  role: UserRole;
 }
 
 export interface RegisterParticipantCommand {
@@ -154,6 +153,16 @@ export interface SurveyDto {
   questionCount: number;
   responseCount: number;
   questions?: QuestionDto[];
+}
+
+export interface PublicSurveyDto {
+  id: string;
+  title?: string;
+  description?: string;
+  settings: SurveySettings;
+  passwordProtected: boolean;
+  publishedAt?: string;
+  questionCount: number;
 }
 
 export interface SurveyDtoPagedResult extends PagedResult<SurveyDto> {}

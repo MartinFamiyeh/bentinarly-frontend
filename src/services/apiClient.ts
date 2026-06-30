@@ -96,6 +96,12 @@ export const useSurveysApi = () => {
 
     removeSurveyCollaborator: (id: string, userId: string) =>
       api.del<void>(`/api/surveys/${id}/collaborators/${userId}`),
+
+    getPublicSurvey: (id: string) =>
+      api.get<ApiTypes.PublicSurveyDto>(`/api/public/surveys/${id}`),
+
+    getPublicQuestions: (surveyId: string) =>
+      api.get<ApiTypes.QuestionDto[]>(`/api/public/surveys/${surveyId}/questions`),
   };
 };
 

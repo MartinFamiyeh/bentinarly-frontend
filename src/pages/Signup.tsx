@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useAuthApi } from "../services/apiClient";
 import { useAuth } from "../contexts/AuthContext";
-import type { UserRole } from "../types/api";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -62,7 +61,6 @@ const Signup = () => {
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        role: 2 as UserRole, // Assuming 2 is the default user role
       });
 
       if (result.success && result.user && result.token) {
