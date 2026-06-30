@@ -1,32 +1,43 @@
 import React, { createContext, useContext, useState } from "react";
 
-type AutoSaveStatus = "idle" | "saving" | "saved" | "error";
+export type SaveStatus = "idle" | "draft-local" | "saving" | "saved" | "error";
 
 type SurveyEditingContextType = {
-  autoSaveStatus: AutoSaveStatus;
+  saveStatus: SaveStatus;
   lastSavedAt: number | null;
-  setStatus: (status: AutoSaveStatus) => void;
+  lastLocalDraftAt: number | null;
+  setStatus: (status: SaveStatus) => void;
   setLastSavedAt: (timestamp: number) => void;
+  setLastLocalDraftAt: (timestamp: number) => void;
+  /** @deprecated Use saveStatus */
+  autoSaveStatus: SaveStatus;
 };
 
 const SurveyEditingContext = createContext<SurveyEditingContextType>({
-  autoSaveStatus: "idle",
+  saveStatus: "idle",
   lastSavedAt: null,
+  lastLocalDraftAt: null,
   setStatus: () => {},
   setLastSavedAt: () => {},
+  setLastLocalDraftAt: () => {},
+  autoSaveStatus: "idle",
 });
 
 export const SurveyEditingProvider = ({ children }: { children: React.ReactNode }) => {
-  const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>("idle");
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [lastLocalDraftAt, setLastLocalDraftAt] = useState<number | null>(null);
 
   return (
     <SurveyEditingContext.Provider
       value={{
-        autoSaveStatus,
+        saveStatus,
         lastSavedAt,
-        setStatus: setAutoSaveStatus,
+        lastLocalDraftAt,
+        setStatus: setSaveStatus,
         setLastSavedAt,
+        setLastLocalDraftAt,
+        autoSaveStatus: saveStatus,
       }}>
       {children}
     </SurveyEditingContext.Provider>
@@ -34,5 +45,3 @@ export const SurveyEditingProvider = ({ children }: { children: React.ReactNode 
 };
 
 export const useSurveyEditing = () => useContext(SurveyEditingContext);
-
-

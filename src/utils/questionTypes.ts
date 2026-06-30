@@ -185,6 +185,22 @@ export function getQuestionTypeConfig(type: QuestionType) {
   return QUESTION_TYPES.find((qt) => qt.type === type);
 }
 
+export function isPersistedQuestionId(id: string): boolean {
+  return !id.startsWith("question_") && id.length > 20;
+}
+
+export function isPersistedOptionId(id: string): boolean {
+  return !id.startsWith("option_") && id !== "yes" && id !== "no" && id.length > 20;
+}
+
+export function hasUnsyncedQuestionsWithContent(
+  questions: Array<{ id: string; title?: string }>
+): boolean {
+  return questions.some(
+    (question) => Boolean(question.title?.trim()) && !isPersistedQuestionId(question.id)
+  );
+}
+
 export function createDefaultQuestion(type: QuestionType, order: number) {
   const baseQuestion = {
     id: `question_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,

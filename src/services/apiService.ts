@@ -125,7 +125,8 @@ const refreshAuthLogic = async (failedRequest: AxiosError): Promise<string> => {
       currentPath.includes("/participant");
 
     if (!isAuthPage) {
-      window.location.href = "/login";
+      const loginPath = currentPath.startsWith("/surveys/") ? "/participant/login" : "/login";
+      window.location.href = loginPath;
     }
 
     throw error;

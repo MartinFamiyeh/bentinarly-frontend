@@ -1,13 +1,19 @@
 import type { UserRole } from "../types/api";
 import {
   getDefaultRouteForRole,
+  PARTICIPANT_LOGIN,
   PARTICIPANT_PORTAL_ROLES,
+  PARTICIPANT_SIGNUP,
+  RESEARCHER_LOGIN,
+  RESEARCHER_SIGNUP,
   RESEARCHER_WORKSPACE_ROLES,
 } from "../constants/userRoles";
 
 const AUTH_PATHS = [
-  "/login",
-  "/register",
+  RESEARCHER_LOGIN,
+  RESEARCHER_SIGNUP,
+  PARTICIPANT_LOGIN,
+  PARTICIPANT_SIGNUP,
   "/participant",
   "/verification",
   "/forgotpassword",

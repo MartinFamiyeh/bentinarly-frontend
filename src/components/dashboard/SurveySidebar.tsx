@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { NavLink } from "react-router-dom";
 import Expand from "../../assets/icons/expand_nav.svg";
 import Minimize from "../../assets/icons/collapse_nav.svg";
@@ -11,7 +11,6 @@ import DemographicActive from "../../assets/icons/demographics-active.png";
 import Analytics from "../../assets/icons/analytics.png";
 import AnalyticsActive from "../../assets/icons/analytics-active.png";
 
-import Survey from "../../assets/icons/survey_file.svg";
 import { useSurveyEditing } from "../../contexts/SurveyEditingContext";
 
 interface NavLinkItem {
@@ -28,7 +27,7 @@ interface SidebarProps {
 }
 
 const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
-  const { autoSaveStatus, lastSavedAt } = useSurveyEditing();
+  const { saveStatus, lastSavedAt, lastLocalDraftAt } = useSurveyEditing();
   const navLinks: NavLinkItem[] = [
     {
       to: "/survey/questionnaires",
@@ -129,14 +128,14 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
           </ul>
         </nav>
 
-        {/* Auto-save status at bottom of sidebar */}
+        {/* Save / draft status at bottom of sidebar */}
         <div className="py-3 text-xs text-gray-500 border-t border-gray-100 mt-2">
           {!isMinimized && (
             <>
-              {autoSaveStatus === "saving" && <p>Auto saving...</p>}
-              {autoSaveStatus === "saved" && (
+              {saveStatus === "saving" && <p>Saving...</p>}
+              {saveStatus === "saved" && (
                 <p>
-                  All changes saved
+                  Saved to server
                   {lastSavedAt
                     ? ` · ${new Date(lastSavedAt).toLocaleTimeString([], {
                         hour: "2-digit",
@@ -145,8 +144,30 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
                     : ""}
                 </p>
               )}
-              {autoSaveStatus === "error" && <p className="text-red-500">Auto-save failed</p>}
-              {autoSaveStatus === "idle" && !lastSavedAt && <p>Draft not saved yet</p>}
+              {saveStatus === "draft-local" && (
+                <p>
+                  Draft saved locally
+                  {lastLocalDraftAt
+                    ? ` · ${new Date(lastLocalDraftAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}`
+                    : ""}
+                </p>
+              )}
+              {saveStatus === "error" && <p className="text-red-500">Save failed</p>}
+              {saveStatus === "idle" && !lastSavedAt && !lastLocalDraftAt && (
+                <p>Unsaved draft</p>
+              )}
+              {saveStatus === "idle" && !lastSavedAt && lastLocalDraftAt && (
+                <p>
+                  Draft saved locally
+                  {` · ${new Date(lastLocalDraftAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}`}
+                </p>
+              )}
             </>
           )}
         </div>

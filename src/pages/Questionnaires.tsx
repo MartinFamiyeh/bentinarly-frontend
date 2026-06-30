@@ -14,9 +14,16 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import type { Question, Survey, QuestionType } from "../types/question";
-import { createDefaultQuestion } from "../utils/questionTypes";
+import {
+  createDefaultQuestion,
+  isPersistedOptionId,
+  isPersistedQuestionId,
+} from "../utils/questionTypes";
+import { createSurveySnapshot } from "../utils/surveySnapshot";
+import { useSurveyDraft } from "../hooks/useSurveyDraft";
+import { useSnackbar } from "../contexts/SnackbarContext";
 import QuestionBox from "../components/survey/QuestionBox";
 import Preview from "../assets/icons/eye.svg";
 import Undo from "../assets/icons/undo.svg";
@@ -28,123 +35,12 @@ import QuestionMark from "../assets/icons/question.svg";
 import AddQuestion from "../assets/icons/add-question.svg";
 import { useSurveysApi, useQuestionsApi } from "../services/apiClient";
 import ShareModal from "../components/survey/ShareModal";
+import DraftRestoreModal from "../components/survey/DraftRestoreModal";
 import PreviewSurvey from "../components/survey/PreviewSurvey";
 import { useProjects } from "../contexts/ProjectsContext";
 import { useSurveyEditing } from "../contexts/SurveyEditingContext";
 import { useAuth } from "../contexts/AuthContext";
 import * as ApiTypes from "../types/api";
-
-// Helper function to create a normalized snapshot of survey for comparison
-const createSurveySnapshot = (survey: Survey): string => {
-  // Create a clean copy without transient fields that don't affect backend state
-  const snapshot = {
-    id: survey.id,
-    title: survey.title?.trim() || "",
-    description: survey.description?.trim() || "",
-    settings: survey.settings,
-    questions: survey.questions
-      .filter(q => q.title?.trim()) // Only include questions with titles
-      .map(q => ({
-        id: q.id,
-        type: q.type,
-        title: q.title?.trim() || "",
-        description: q.description?.trim() || "",
-        required: q.required,
-        order: q.order,
-        options: (q.options || [])
-          .filter(opt => opt.text?.trim())
-          .map(opt => ({
-            id: opt.id,
-            text: opt.text?.trim() || "",
-          })),
-      }))
-      .sort((a, b) => a.order - b.order), // Sort by order for consistent comparison
-  };
-  return JSON.stringify(snapshot);
-};
-
-
-// Auto-save on route change and browser close
-const useRouteBasedAutoSave = (
-  survey: Survey,
-  handleSave: () => Promise<void>,
-  lastSavedSurvey: string | null,
-  currentSurveyId: string | undefined
-) => {
-  const location = useLocation();
-  const prevLocationRef = useRef<string>(location.pathname);
-  const isSavingRef = useRef<boolean>(false);
-
-  useEffect(() => {
-    // Only set up auto-save if survey has been created and has a title
-    if (survey.id === "new" || !survey.title?.trim()) {
-      return;
-    }
-
-    // Check if we're on the survey editing page
-    const isOnSurveyPage = location.pathname.startsWith('/survey/questionnaires/');
-    const wasOnSurveyPage = prevLocationRef.current.startsWith('/survey/questionnaires/');
-
-    // If we were on the survey page and now we're not, save the survey
-    if (wasOnSurveyPage && !isOnSurveyPage && !isSavingRef.current) {
-      const currentSnapshot = createSurveySnapshot(survey);
-      if (lastSavedSurvey !== currentSnapshot) {
-        console.log("🔄 Route changed away from survey page, auto-saving...");
-        isSavingRef.current = true;
-        handleSave()
-          .then(() => {
-            console.log("✅ Auto-saved on route change");
-          })
-          .catch((error) => {
-            console.error("❌ Error auto-saving on route change:", error);
-          })
-          .finally(() => {
-            isSavingRef.current = false;
-          });
-      }
-    }
-
-    // Update previous location
-    prevLocationRef.current = location.pathname;
-  }, [location.pathname, survey, handleSave, lastSavedSurvey, currentSurveyId]);
-
-  // Handle browser/tab close
-  useEffect(() => {
-    if (survey.id === "new" || !survey.title?.trim()) {
-      return;
-    }
-
-    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
-      // Check if there are unsaved changes
-      const currentSnapshot = createSurveySnapshot(survey);
-      if (lastSavedSurvey === currentSnapshot) {
-        return; // No changes, allow navigation
-      }
-
-      // Attempt to save before leaving
-      // Note: Modern browsers limit async operations in beforeunload
-      // We'll use sendBeacon or a synchronous approach
-      e.preventDefault();
-      e.returnValue = ""; // Chrome requires returnValue to be set
-
-      // Try to save using sendBeacon for better reliability
-      try {
-        // For beforeunload, we can't reliably await async operations
-        // So we'll just show the warning and let the user decide
-        // The route-based save should handle most cases
-        console.log("⚠️ Browser closing with unsaved changes");
-      } catch (error) {
-        console.error("Error in beforeunload handler:", error);
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [survey, lastSavedSurvey]);
-};
 
 const Questionnaires: React.FC = () => {
   const { surveyId } = useParams<{ surveyId?: string }>();
@@ -154,11 +50,16 @@ const Questionnaires: React.FC = () => {
   const { selectedProject } = useProjects();
   const { setStatus, setLastSavedAt } = useSurveyEditing();
   const { user } = useAuth();
+  const { showSnackbar } = useSnackbar();
+  const isExistingSurveyRoute = Boolean(surveyId && surveyId !== "new");
+  const [isSurveyLoaded, setIsSurveyLoaded] = useState(!isExistingSurveyRoute);
   const [survey, setSurvey] = useState<Survey>({
     id: surveyId || "new",
     title: "New Survey",
     description: "",
-    questions: [createDefaultQuestion("single-choice", 1)],
+    questions: isExistingSurveyRoute
+      ? []
+      : [createDefaultQuestion("single-choice", 1)],
     settings: {
       allowAnonymous: true,
       collectEmails: false,
@@ -176,30 +77,52 @@ const Questionnaires: React.FC = () => {
   const [isPreviewSurvey, setIsPreviewSurvey] = useState(false);
   const [undoStack, setUndoStack] = useState<Survey[]>([]);
   const [redoStack, setRedoStack] = useState<Survey[]>([]);
-  // Get last saved snapshot from localStorage if it exists, otherwise null
-  const getLastSavedSnapshotFromStorage = (surveyId: string): string | null => {
-    try {
-      const key = `lastSavedSurvey_${surveyId}`;
-      return localStorage.getItem(key);
-    } catch {
-      return null;
-    }
-  };
 
-  const setLastSavedSnapshotToStorage = (surveyId: string, snapshot: string) => {
-    try {
-      const key = `lastSavedSurvey_${surveyId}`;
-      localStorage.setItem(key, snapshot);
-    } catch {
-      // Ignore localStorage errors
-    }
-  };
-
-  const [lastSavedSurvey, setLastSavedSurvey] = useState<string | null>(null); // JSON string of last saved state
+  const [lastSavedSurvey, setLastSavedSurvey] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [surveyOwnerId, setSurveyOwnerId] = useState<string>("");
   const [surveyOwnerName, setSurveyOwnerName] = useState<string>("");
   const [surveyProjectId, setSurveyProjectId] = useState<string | undefined>(undefined);
+
+  const draftKey = surveyId || survey.id || "new";
+
+  const {
+    pendingRestore,
+    hasUnsavedServerChanges,
+    offerDraftRestore,
+    offerDraftRestoreForNew,
+    restoreDraft,
+    discardDraft,
+    clearDraftForSurvey,
+  } = useSurveyDraft({
+    survey,
+    draftKey,
+    lastSavedSurvey,
+    isSurveyLoaded,
+    enabled: true,
+  });
+
+  const handleNavigateAway = () => {
+    if (
+      hasUnsavedServerChanges &&
+      !window.confirm("You have unsaved changes. Leave without saving to the server?")
+    ) {
+      return;
+    }
+    navigate("/projects/dashboard");
+  };
+
+  const handleRestoreDraft = () => {
+    const restored = restoreDraft();
+    if (restored) {
+      setSurvey(restored);
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    discardDraft();
+  };
 
   const mapQuestionTypeToApi = (type: Question["type"]): ApiTypes.QuestionType => {
     // Mapping from UI question type string to backend numeric QuestionType enum
@@ -249,6 +172,42 @@ const Questionnaires: React.FC = () => {
     return reverseMapping[apiType];
   };
 
+  const mapApiQuestionsToLocal = (questions: ApiTypes.QuestionDto[]): Question[] =>
+    questions.map((q, index) => ({
+      id: q.id,
+      type: mapApiTypeToQuestionType(q.type),
+      title: q.title || "",
+      description: q.description || "",
+      required: q.isRequired,
+      order: q.order || index + 1,
+      options:
+        q.options
+          ?.sort((a, b) => (a.order || 0) - (b.order || 0))
+          .map((opt) => ({
+            id: opt.id,
+            text: opt.text || "",
+          })) || [],
+    }));
+
+  const mapLoadedSurvey = (
+    surveyData: ApiTypes.SurveyDto,
+    questions: ApiTypes.QuestionDto[]
+  ): Survey => ({
+    id: surveyData.id,
+    title: surveyData.title || "Untitled Survey",
+    description: surveyData.description || "",
+    questions: mapApiQuestionsToLocal(questions),
+    settings: {
+      allowAnonymous: surveyData.settings?.allowAnonymous ?? true,
+      collectEmails: surveyData.settings?.collectEmails ?? false,
+      shuffleQuestions: surveyData.settings?.shuffleQuestions ?? false,
+      oneResponsePerPerson: surveyData.settings?.oneResponsePerPerson ?? true,
+    },
+    createdAt: surveyData.createdAt,
+    updatedAt: surveyData.updatedAt,
+    status: surveyData.status === 1 ? "draft" : surveyData.status === 2 ? "published" : "closed",
+  });
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -260,39 +219,13 @@ const Questionnaires: React.FC = () => {
   useEffect(() => {
     const loadSurvey = async () => {
       if (surveyId && surveyId !== "new") {
+        setIsSurveyLoaded(false);
         try {
           const surveyData = await surveysApi.getSurvey(surveyId, { includeQuestions: true });
           const questions = await questionsApi.getQuestions(surveyId);
+          const loadedSurvey = mapLoadedSurvey(surveyData, questions);
 
-          // Convert API types to local Survey type
-          setSurvey({
-            id: surveyData.id,
-            title: surveyData.title || "Untitled Survey",
-            description: surveyData.description || "",
-            questions: questions.map((q, index) => ({
-              id: q.id,
-              type: mapApiTypeToQuestionType(q.type),
-              title: q.title || "",
-              description: q.description || "",
-              required: q.isRequired,
-              order: q.order || index + 1,
-              options: q.options
-                ?.sort((a, b) => (a.order || 0) - (b.order || 0)) // Sort by order to ensure correct sequence
-                .map((opt) => ({
-                  id: opt.id,
-                  text: opt.text || "",
-                })) || [],
-            })),
-            settings: {
-              allowAnonymous: surveyData.settings?.allowAnonymous ?? true,
-              collectEmails: surveyData.settings?.collectEmails ?? false,
-              shuffleQuestions: surveyData.settings?.shuffleQuestions ?? false,
-              oneResponsePerPerson: surveyData.settings?.oneResponsePerPerson ?? true,
-            },
-            createdAt: surveyData.createdAt,
-            updatedAt: surveyData.updatedAt,
-            status: surveyData.status === 1 ? "draft" : surveyData.status === 2 ? "published" : "closed",
-          });
+          setSurvey(loadedSurvey);
           
           // Store owner info for ShareModal
           setSurveyOwnerId(surveyData.creatorId);
@@ -300,86 +233,36 @@ const Questionnaires: React.FC = () => {
           // Store projectId to preserve it when updating
           setSurveyProjectId((surveyData as ApiTypes.SurveyDto & { projectId?: string }).projectId);
           
-          // Set the saved snapshot to match loaded state (so auto-save doesn't trigger immediately)
-          const loadedSurvey: Survey = {
-            id: surveyData.id,
-            title: surveyData.title || "Untitled Survey",
-            description: surveyData.description || "",
-            questions: questions.map((q, index) => ({
-              id: q.id,
-              type: mapApiTypeToQuestionType(q.type),
-              title: q.title || "",
-              description: q.description || "",
-              required: q.isRequired,
-              order: q.order || index + 1,
-              options: q.options
-                ?.sort((a, b) => (a.order || 0) - (b.order || 0))
-                .map((opt) => ({
-                  id: opt.id,
-                  text: opt.text || "",
-                })) || [],
-            })),
-            settings: {
-              allowAnonymous: surveyData.settings?.allowAnonymous ?? true,
-              collectEmails: surveyData.settings?.collectEmails ?? false,
-              shuffleQuestions: surveyData.settings?.shuffleQuestions ?? false,
-              oneResponsePerPerson: surveyData.settings?.oneResponsePerPerson ?? true,
-            },
-            createdAt: surveyData.createdAt,
-            updatedAt: surveyData.updatedAt,
-            status: surveyData.status === 1 ? "draft" : surveyData.status === 2 ? "published" : "closed",
-          };
-          
           const loadedSnapshot = createSurveySnapshot(loadedSurvey);
           setLastSavedSurvey(loadedSnapshot);
-          
-          // Store snapshot in localStorage for comparison on next mount
-          setLastSavedSnapshotToStorage(surveyData.id, loadedSnapshot);
+          offerDraftRestore(loadedSurvey, loadedSnapshot);
         } catch (error) {
           console.error("Error loading survey:", error);
+        } finally {
+          setIsSurveyLoaded(true);
         }
+      } else {
+        setIsSurveyLoaded(true);
       }
     };
     loadSurvey();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [surveyId]);
 
-  // Auto-save on mount if loaded survey differs from last saved snapshot
+  const newDraftPromptCheckedRef = useRef(false);
+
   useEffect(() => {
-    if (survey.id === "new" || !survey.title?.trim() || !surveyId || surveyId === "new") {
+    if (surveyId !== "new") {
+      newDraftPromptCheckedRef.current = false;
       return;
     }
-
-    const loadedSnapshot = createSurveySnapshot(survey);
-    const previousSavedSnapshot = getLastSavedSnapshotFromStorage(survey.id);
-
-    // Compare and save if different
-    if (previousSavedSnapshot && previousSavedSnapshot !== loadedSnapshot) {
-      console.log("📋 Auto-saving on mount - survey differs from last saved snapshot");
-      handleSave()
-        .then(() => {
-          console.log("✅ Auto-saved on mount due to differences");
-        })
-        .catch((error) => {
-          console.error("❌ Error auto-saving on mount:", error);
-        });
-    } else if (!previousSavedSnapshot) {
-      // First time loading this survey, store the snapshot
-      setLastSavedSnapshotToStorage(survey.id, loadedSnapshot);
+    if (!isSurveyLoaded || newDraftPromptCheckedRef.current) {
+      return;
     }
+    newDraftPromptCheckedRef.current = true;
+    offerDraftRestoreForNew(survey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [survey.id, surveyId]); // Only run when survey.id or surveyId changes (i.e., when survey is loaded)
-
-  // Auto-save functionality (disabled for now to avoid too many API calls)
-  // useEffect(() => {
-  //   const autoSave = setTimeout(() => {
-  //     if (survey.questions.length > 0 && survey.id !== "new") {
-  //       handleSave();
-  //     }
-  //   }, 2000);
-
-  //   return () => clearTimeout(autoSave);
-  // }, [survey]);
+  }, [surveyId, isSurveyLoaded]);
 
   const saveSnapshot = () => {
     // Deep clone current survey to avoid mutating history references
@@ -516,13 +399,18 @@ const Questionnaires: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (): Promise<string> => {
+    if (survey.id !== "new" && !isSurveyLoaded) {
+      throw new Error("Survey is still loading. Please try again.");
+    }
+
     setIsSaving(true);
     setStatus("saving");
+    let savedSurveyId = survey.id;
+
     try {
       const trimmedTitle = survey.title?.trim() || "";
 
-      // Prevent saving if another survey in the same project already has this title
       if (trimmedTitle) {
         const existing = await surveysApi.getSurveys({
           projectId: selectedProject?.id,
@@ -534,26 +422,20 @@ const Questionnaires: React.FC = () => {
         const hasDuplicate = existing.items?.some((s) => {
           const existingTitle = (s.title || "").trim().toLowerCase();
           const currentTitle = trimmedTitle.toLowerCase();
-          // Ignore the current survey (when updating)
           return existingTitle === currentTitle && s.id !== survey.id;
         });
 
         if (hasDuplicate) {
-          console.warn(
-            "⚠️ Duplicate survey title detected in this project, skipping save:",
-            trimmedTitle
-          );
           setStatus("error");
-          return;
+          throw new Error("A survey with this title already exists in this project.");
         }
       }
 
       if (survey.id === "new") {
-        // Create new survey
         const newSurvey = await surveysApi.createSurvey({
           title: trimmedTitle,
           description: survey.description,
-          projectId: selectedProject?.id, // Include projectId if a project is selected
+          projectId: selectedProject?.id,
           settings: {
             allowAnonymous: survey.settings.allowAnonymous,
             collectEmails: survey.settings.collectEmails,
@@ -567,68 +449,48 @@ const Questionnaires: React.FC = () => {
           isTemplate: false,
         });
 
-        // Update survey ID (stay on page; navigation handled by initial route)
-        setSurvey((prev) => ({ ...prev, id: newSurvey.id }));
-        // Store projectId for future updates
+        savedSurveyId = newSurvey.id;
         setSurveyProjectId(newSurvey.projectId || selectedProject?.id);
 
-        // Create questions (skip questions with empty titles - they're not ready yet)
         for (const question of survey.questions) {
-          const trimmedTitle = question.title?.trim() || "";
-          if (!trimmedTitle) {
-            console.log("⏭️ Skipping question with empty title:", question.id);
+          const questionTitle = question.title?.trim() || "";
+          if (!questionTitle) {
             continue;
           }
 
-          // Filter and map options, preserving array order as the order value
-          const validOptions = question.options?.filter(opt => opt.text?.trim()) || [];
-          await questionsApi.createQuestion(newSurvey.id, {
+          const validOptions = question.options?.filter((opt) => opt.text?.trim()) || [];
+          await questionsApi.createQuestion(savedSurveyId, {
             type: mapQuestionTypeToApi(question.type),
-            title: trimmedTitle,
+            title: questionTitle,
             description: question.description,
             isRequired: question.required,
             order: question.order,
             options: validOptions.map((opt, optIndex) => ({
               text: opt.text.trim(),
-              order: optIndex, // Use array index as order (0, 1, 2, ...)
+              order: optIndex,
             })),
           });
         }
       } else {
-        // Update existing survey
-        // Fetch current survey data to get projectId if we don't have it stored
+        savedSurveyId = survey.id;
+
         let currentProjectId = surveyProjectId;
         if (currentProjectId === undefined) {
           try {
             const currentSurveyData = await surveysApi.getSurvey(survey.id);
             currentProjectId = currentSurveyData.projectId;
-            console.log("📋 Fetched projectId from backend:", currentProjectId);
             setSurveyProjectId(currentProjectId);
-            
-            // If the survey doesn't have a projectId but we have a selectedProject, use it
+
             if (!currentProjectId && selectedProject?.id) {
-              console.log("📋 Survey has no projectId, using selectedProject:", selectedProject.id);
               currentProjectId = selectedProject.id;
             }
-          } catch (error) {
-            console.warn("Could not fetch current survey projectId, using selectedProject:", error);
-            // Fallback to selectedProject if we can't fetch it
+          } catch {
             currentProjectId = selectedProject?.id;
-            console.log("📋 Using selectedProject?.id as fallback:", currentProjectId);
           }
-        } else {
-          console.log("📋 Using stored projectId:", currentProjectId);
-          // If stored projectId is null/undefined but we have a selectedProject, use it
-          if (!currentProjectId && selectedProject?.id) {
-            console.log("📋 Stored projectId is empty, using selectedProject:", selectedProject.id);
-            currentProjectId = selectedProject.id;
-          }
+        } else if (!currentProjectId && selectedProject?.id) {
+          currentProjectId = selectedProject.id;
         }
-        
-        console.log("💾 Updating survey with projectId:", currentProjectId, "surveyId:", survey.id);
-        
-        // Build update payload - only include projectId if it has a value
-        // If projectId is undefined or null, omit it to prevent backend from clearing it
+
         const updatePayload: ApiTypes.UpdateSurveyDto = {
           title: survey.title,
           description: survey.description,
@@ -639,147 +501,119 @@ const Questionnaires: React.FC = () => {
             oneResponsePerPerson: survey.settings.oneResponsePerPerson,
           },
         };
-        
-        // Only include projectId if it's a valid string (not undefined or null)
-        // This prevents the backend from clearing the projectId if it's already set
+
         if (currentProjectId !== undefined && currentProjectId !== null) {
           updatePayload.projectId = currentProjectId;
-          console.log("✅ Including projectId in update:", currentProjectId);
-        } else {
-          console.log("⚠️ Omitting projectId from update to preserve existing value");
         }
-        
+
         const updatedSurvey = await surveysApi.updateSurvey(survey.id, updatePayload);
-        
-        // Update stored projectId from the response
-        const responseProjectId = updatedSurvey.projectId;
-        console.log("✅ Survey updated. Response projectId:", responseProjectId);
-        if (responseProjectId !== undefined) {
-          setSurveyProjectId(responseProjectId);
+        if (updatedSurvey.projectId !== undefined) {
+          setSurveyProjectId(updatedSurvey.projectId);
         }
 
-        // Update questions
         const existingQuestions = await questionsApi.getQuestions(survey.id);
+        const existingQuestionIds = new Set(existingQuestions.map((q) => q.id.toLowerCase()));
 
-        // Create a map of existing question IDs for faster lookup
-        const existingQuestionIds = new Set(existingQuestions.map(q => q.id.toLowerCase()));
+        const persistedLocalQuestions = survey.questions.filter((q) => isPersistedQuestionId(q.id));
+        const localQuestionIds = new Set(persistedLocalQuestions.map((q) => q.id.toLowerCase()));
+        const titledLocalQuestions = survey.questions.filter((q) => q.title?.trim());
+        const shouldSyncDeletes =
+          isSurveyLoaded &&
+          (persistedLocalQuestions.length > 0 ||
+            (titledLocalQuestions.length === 0 && existingQuestions.length > 0));
 
-        // Find questions that were deleted (exist in backend but not in local state)
-        const localQuestionIds = new Set(survey.questions.map(q => q.id.toLowerCase()));
-        const questionsToDelete = existingQuestions.filter(
-          q => !localQuestionIds.has(q.id.toLowerCase())
-        );
+        const questionsToDelete = shouldSyncDeletes
+          ? existingQuestions.filter((q) => !localQuestionIds.has(q.id.toLowerCase()))
+          : [];
 
-        // Delete removed questions from backend
         for (const questionToDelete of questionsToDelete) {
-          console.log("🗑️ Deleting question from backend:", questionToDelete.id, questionToDelete.title);
           try {
             await questionsApi.deleteQuestion(survey.id, questionToDelete.id);
           } catch (error) {
             console.error("Error deleting question:", error);
-            // Continue with other operations even if one delete fails
           }
         }
 
-        // Update or create questions
         for (const question of survey.questions) {
-          const trimmedTitle = question.title?.trim() || "";
-
-          // Skip questions with empty titles (they're not ready to be saved)
-          if (!trimmedTitle) {
-            console.log("⏭️ Skipping question with empty title:", question.id);
+          const questionTitle = question.title?.trim() || "";
+          if (!questionTitle) {
             continue;
           }
 
-          // Normalize IDs for comparison (handle GUID format differences)
-          const questionIdNormalized = question.id.toLowerCase();
-          const isExisting = existingQuestionIds.has(questionIdNormalized);
+          let effectiveQuestionId = question.id;
+          let isExisting = existingQuestionIds.has(question.id.toLowerCase());
+
+          if (!isExisting && !isPersistedQuestionId(question.id)) {
+            const orderMatch = existingQuestions.find((eq) => eq.order === question.order);
+            if (orderMatch) {
+              effectiveQuestionId = orderMatch.id;
+              isExisting = true;
+            }
+          }
+
+          const validOptions = question.options?.filter((opt) => opt.text?.trim()) || [];
 
           if (isExisting) {
-            // Update existing question
-            console.log("🔄 Updating existing question:", question.id, question.title);
-            await questionsApi.updateQuestion(survey.id, question.id, {
+            await questionsApi.updateQuestion(survey.id, effectiveQuestionId, {
               type: mapQuestionTypeToApi(question.type),
-              title: trimmedTitle,
+              title: questionTitle,
               description: question.description,
               isRequired: question.required,
               order: question.order,
-              options: (() => {
-                // Filter out empty options and preserve array order
-                const validOptions = question.options?.filter(opt => opt.text?.trim()) || [];
-                return validOptions.map((opt, optIndex) => {
-                  // For update, include id if it exists (from backend), otherwise omit it (new option)
-                  const optionPayload: { text: string; order: number; id?: string } = {
-                    text: opt.text.trim(),
-                    order: optIndex, // Use array index as order (0, 1, 2, ...)
-                  };
-                  // Only include id if it looks like a backend GUID (not a local temp ID like "option_1")
-                  if (opt.id && !opt.id.startsWith("option_") && opt.id.length > 20) {
-                    optionPayload.id = opt.id;
-                  }
-                  return optionPayload;
-                });
-              })(),
+              options: validOptions.map((opt, optIndex) => {
+                const optionPayload: { text: string; order: number; id?: string } = {
+                  text: opt.text.trim(),
+                  order: optIndex,
+                };
+                if (isPersistedOptionId(opt.id)) {
+                  optionPayload.id = opt.id;
+                }
+                return optionPayload;
+              }),
             });
           } else {
-            // Create new question
-            console.log("➕ Creating new question:", question.id, question.title);
             const newQuestion = await questionsApi.createQuestion(survey.id, {
               type: mapQuestionTypeToApi(question.type),
-              title: trimmedTitle,
+              title: questionTitle,
               description: question.description,
               isRequired: question.required,
               order: question.order,
-              options: (() => {
-                // Filter out empty options and preserve array order
-                const validOptions = question.options?.filter(opt => opt.text?.trim()) || [];
-                return validOptions.map((opt, optIndex) => ({
-                  text: opt.text.trim(),
-                  order: optIndex, // Use array index as order (0, 1, 2, ...)
-                }));
-              })(),
+              options: validOptions.map((opt, optIndex) => ({
+                text: opt.text.trim(),
+                order: optIndex,
+              })),
             });
-
-            // Update local question ID and option IDs with the ones returned from backend
-            setSurvey((prev) => ({
-              ...prev,
-              questions: prev.questions.map((q) => {
-                if (q.id === question.id) {
-                  // Map local options to backend options by order/text to preserve IDs
-                  const updatedOptions = q.options?.map((localOpt, index) => {
-                    const backendOpt = newQuestion.options?.[index];
-                    return backendOpt
-                      ? { ...localOpt, id: backendOpt.id } // Use backend ID
-                      : localOpt; // Fallback if no match
-                  }) || [];
-
-                  return {
-                    ...q,
-                    id: newQuestion.id,
-                    options: updatedOptions,
-                  };
-                }
-                return q;
-              }),
-            }));
-
-            // Add to existing set so subsequent iterations know it exists
             existingQuestionIds.add(newQuestion.id.toLowerCase());
           }
         }
       }
 
+      const apiQuestions = await questionsApi.getQuestions(savedSurveyId);
+      const mappedQuestions = mapApiQuestionsToLocal(apiQuestions);
+      const unsavedDrafts = survey.questions.filter((q) => !q.title?.trim());
+      const syncedSurvey: Survey = {
+        ...survey,
+        id: savedSurveyId,
+        questions: [...mappedQuestions, ...unsavedDrafts],
+        updatedAt: new Date().toISOString(),
+      };
+
+      setSurvey(syncedSurvey);
+
       const now = Date.now();
       setLastSavedAt(now);
       setStatus("saved");
-      
-      // Update last saved snapshot after successful save
-      const currentSnapshot = createSurveySnapshot(survey);
+
+      const currentSnapshot = createSurveySnapshot(syncedSurvey);
       setLastSavedSurvey(currentSnapshot);
-      // Also store in localStorage for persistence across sessions
-      if (survey.id !== "new") {
-        setLastSavedSnapshotToStorage(survey.id, currentSnapshot);
+      clearDraftForSurvey(savedSurveyId, survey.id !== savedSurveyId ? survey.id : undefined);
+      setIsSurveyLoaded(true);
+
+      if (survey.id === "new" && savedSurveyId !== "new") {
+        navigate(`/survey/questionnaires/${savedSurveyId}`, { replace: true });
       }
+
+      return savedSurveyId;
     } catch (error) {
       console.error("Error saving survey:", error);
       setStatus("error");
@@ -789,18 +623,32 @@ const Questionnaires: React.FC = () => {
     }
   };
 
-  // Set up route-based auto-save
-  useRouteBasedAutoSave(survey, handleSave, lastSavedSurvey, surveyId);
-
   const handlePublish = async () => {
+    if (!survey.title?.trim()) {
+      showSnackbar("Survey title is required before publishing.", "error");
+      return;
+    }
+
+    const hasTitledQuestion = survey.questions.some((q) => q.title?.trim());
+    if (!hasTitledQuestion) {
+      showSnackbar("Add at least one question with a title before publishing.", "error");
+      return;
+    }
+
+    setIsPublishing(true);
     try {
-      if (survey.id === "new") {
-        await handleSave();
-      }
-      await surveysApi.publishSurvey(survey.id);
-      setSurvey((prev) => ({ ...prev, status: "published" }));
+      const savedSurveyId = await handleSave();
+      await surveysApi.publishSurvey(savedSurveyId);
+      setSurvey((prev) => ({ ...prev, status: "published", id: savedSurveyId }));
+      showSnackbar("Survey published successfully.", "success");
     } catch (error) {
       console.error("Error publishing survey:", error);
+      showSnackbar(
+        error instanceof Error ? error.message : "Failed to publish survey. Please try again.",
+        "error"
+      );
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -830,7 +678,7 @@ const Questionnaires: React.FC = () => {
       <div className="py-3 flex justify-between items-center flex-shrink-0">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate("/projects/dashboard")}
+            onClick={handleNavigateAway}
             className="cursor-pointer hover:opacity-70 transition-opacity">
             <Back />
           </button>
@@ -870,15 +718,16 @@ const Questionnaires: React.FC = () => {
             <button
               type="button"
               onClick={handleSave}
-              disabled={isSaving || !survey.title?.trim()}
+              disabled={isSaving || isPublishing || !survey.title?.trim()}
               className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed px-3 py-1 rounded-lg text-white font-semibold text-sm transition-colors">
               {isSaving ? "Saving..." : "Save"}
             </button>
             <button
               type="button"
-              className="bg-[#FE5102] hover:bg-orange-600 px-3 py-1 rounded-lg text-white font-semibold text-sm transition-colors"
+              className="bg-[#FE5102] hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed px-3 py-1 rounded-lg text-white font-semibold text-sm transition-colors"
+              disabled={isSaving || isPublishing || !survey.title?.trim()}
               onClick={handlePublish}>
-              Publish
+              {isPublishing ? "Publishing..." : "Publish"}
             </button>
           </div>
           <div>
@@ -1006,6 +855,14 @@ const Questionnaires: React.FC = () => {
         <PreviewSurvey
           questions={survey.questions}
           onClose={() => setIsPreviewSurvey(false)}
+        />
+      )}
+
+      {pendingRestore && (
+        <DraftRestoreModal
+          savedAt={pendingRestore.savedAt}
+          onRestore={handleRestoreDraft}
+          onDiscard={handleDiscardDraft}
         />
       )}
 

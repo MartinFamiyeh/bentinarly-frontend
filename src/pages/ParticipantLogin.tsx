@@ -1,4 +1,3 @@
-// src/pages/Login.tsx
 import { useState, type FormEvent, type ChangeEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
@@ -29,7 +28,7 @@ const getLoginErrorMessage = (error: unknown): string => {
   return "Login failed. Please check your credentials.";
 };
 
-const Login = () => {
+const ParticipantLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const authApi = useAuthApi();
@@ -43,12 +42,10 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // 2. A single, reusable handler for all standard inputs.
   const handleValueChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // 3. Form submission logic.
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
@@ -61,9 +58,9 @@ const Login = () => {
       });
 
       if (result.success && result.user && result.token) {
-        if (isParticipantRole(result.user.role)) {
+        if (!isParticipantRole(result.user.role)) {
           setError(
-            "Participant accounts should sign in at the participant login page."
+            "This login is for participant accounts only. Researchers should use the researcher login."
           );
           return;
         }
@@ -81,11 +78,11 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    startGoogleLogin("researcher");
-  };
-
   const isFormDisabled = !formData.email || !formData.password;
+
+  const handleGoogleLogin = () => {
+    startGoogleLogin("participant");
+  };
 
   return (
     <div className="bg-gradient-to-b from-[#FE5102] to-[#B148F3]">
@@ -93,14 +90,13 @@ const Login = () => {
         <div className="min-h-screen flex justify-center items-center p-4">
           <div className="w-full md:max-w-[540px] p-8 space-y-4 bg-white rounded-lg shadow-md">
             <AuthBrandHeader
-              accountType="Researcher"
+              accountType="Participant"
               title="Login"
-              description="Welcome back! Please enter your details."
+              description="Sign in to browse surveys, complete responses, and manage your profile."
             />
 
             {error && <p className="text-sm text-center text-red-500">{error}</p>}
 
-            {/* 4. Form now uses our clean CSS classes and single handler. */}
             <form className="space-y-4" onSubmit={handleSubmit} autoComplete="off">
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
@@ -159,15 +155,8 @@ const Login = () => {
 
             <p className="text-sm text-center text-gray-600">
               Don&apos;t have an account?{" "}
-              <Link to="/register" className="font-medium text-[#FE5102] hover:underline">
+              <Link to="/participant/signup" className="font-medium text-[#FE5102] hover:underline">
                 Sign up
-              </Link>
-            </p>
-
-            <p className="text-sm text-center text-gray-500">
-              Are you a participant?{" "}
-              <Link to="/participant/login" className="font-medium text-[#FE5102] hover:underline">
-                Participant login
               </Link>
             </p>
 
@@ -178,11 +167,18 @@ const Login = () => {
             </div>
 
             <div className="space-y-4">
-              <button onClick={handleGoogleLogin} className="btn-social">
+              <button type="button" onClick={handleGoogleLogin} className="btn-social">
                 <FcGoogle className="w-5 h-5 mr-2" />
                 Login with Google
               </button>
             </div>
+
+            <p className="text-sm text-center text-gray-500">
+              Are you a researcher?{" "}
+              <Link to="/login" className="font-medium text-[#FE5102] hover:underline">
+                Researcher login
+              </Link>
+            </p>
           </div>
         </div>
       </div>
@@ -190,4 +186,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ParticipantLogin;

@@ -7,14 +7,12 @@ import SurveyCard from "../components/dashboard/SurveyCard";
 import ProjectsTopBar from "../components/dashboard/ProjectsTopBar";
 import { sampleQuestions } from "../data/questions";
 import { useLoading } from "../contexts/LoadingContext";
-import { useDarkMode } from "../contexts/DarkModeContext";
 import { useSurveysApi } from "../services/apiClient";
 import { useAuth } from "../contexts/AuthContext";
 import { useProjects } from "../contexts/ProjectsContext";
 import type { SurveyDto, SurveyStatus } from "../types/api";
 
 const Projects = () => {
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { showLoading, hideLoading } = useLoading();
   const { user } = useAuth();
   const { selectedProject } = useProjects();
@@ -38,12 +36,6 @@ const Projects = () => {
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      toggleDarkMode();
-    }
-  });
 
   useEffect(() => {
     setIsQuestionnaireModalOpen(true);

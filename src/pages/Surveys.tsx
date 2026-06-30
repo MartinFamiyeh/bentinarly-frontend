@@ -3,7 +3,6 @@ import GreetingBackground from "../assets/images/greeting.jpg";
 import EmptySurvey from "../assets/images/empty-survey.png";
 import SurveyCard from "../components/participants/SurveyCard";
 import Topbar from "../components/participants/Topbar";
-import { useDarkMode } from "../contexts/DarkModeContext";
 import { useSurveysApi } from "../services/apiClient";
 import { useLoading } from "../contexts/LoadingContext";
 import { useSnackbar } from "../contexts/SnackbarContext";
@@ -12,7 +11,6 @@ import * as ApiTypes from "../types/api";
 // import CircularProgress from "@mui/material/CircularProgress";
 
 const Surveys = () => {
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { user } = useAuth();
   const surveysApi = useSurveysApi();
   const { showLoading, hideLoading } = useLoading();
@@ -24,12 +22,6 @@ const Surveys = () => {
   const [sortOrder, setSortOrder] = useState<
     "Newest to Oldest" | "Oldest to Newest" | "A - Z" | "Z - A"
   >("Newest to Oldest");
-
-  useEffect(() => {
-    if (isDarkMode) {
-      toggleDarkMode();
-    }
-  });
 
   useEffect(() => {
     const fetchSurveys = async () => {

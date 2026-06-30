@@ -4,6 +4,7 @@ import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useAuthApi } from "../services/apiClient";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import * as ApiTypes from "../types/api";
+import AuthBrandHeader from "../components/auth/AuthBrandHeader";
 
 const Participants = () => {
   const navigate = useNavigate();
@@ -86,17 +87,11 @@ const Participants = () => {
       <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-[url('assets/images/signinpattern.png')]">
         <div className="min-h-screen flex justify-center items-center p-4">
           <div className="w-full md:max-w-[540px] p-8 space-y-4 bg-white rounded-lg shadow-md">
-            {/* Header */}
-            <div className="flex items-center space-x-2">
-              <img src="/logo.svg" alt="Logo" className="w-6 h-6" />
-              <h1 className="text-[25px] font-semibold text-[#292929]">Bentinarly Poll</h1>
-            </div>
-            <div>
-              <h1 className="text-[24px] font-bold text-[#313131] mb-2">Sign Up</h1>
-              <p className="text-sm text-[#696969]">
-                Set up your account to manage your child's academy profile
-              </p>
-            </div>
+            <AuthBrandHeader
+              accountType="Participant"
+              title="Sign Up"
+              description="Create an account to take surveys and track your responses."
+            />
 
             {error && <p className="text-sm text-center text-red-500">{error}</p>}
 
@@ -263,8 +258,15 @@ const Participants = () => {
 
             <p className="text-sm text-center text-gray-600">
               Already have an account?{" "}
-              <Link to="/login" className="font-medium text-[#FE5102] hover:underline">
+              <Link to="/participant/login" className="font-medium text-[#FE5102] hover:underline">
                 Sign In
+              </Link>
+            </p>
+
+            <p className="text-sm text-center text-gray-500">
+              Are you a researcher?{" "}
+              <Link to="/register" className="font-medium text-[#FE5102] hover:underline">
+                Researcher sign up
               </Link>
             </p>
           </div>

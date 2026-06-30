@@ -1,5 +1,5 @@
 import { type JSX } from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Navigate, Routes, Route, Outlet } from "react-router-dom";
 
 import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { SnackbarProvider } from "./contexts/SnackbarContext";
@@ -23,6 +23,7 @@ import Signup from "./pages/Signup";
 import GoogleCallback from "./pages/GoogleCallback";
 import ForgotPassword from "./pages/ForgotPassword";
 import Participants from "./pages/Participants";
+import ParticipantLogin from "./pages/ParticipantLogin";
 import ResetPassword from "./pages/ResetPassword";
 import ResetSuccess from "./pages/ResetSuccess";
 
@@ -46,7 +47,7 @@ import Notifications from "./pages/Notifications";
 import PreviewSurvey from "./components/survey/TakeSurvey";
 import TakeSurvey from "./components/participants/TakeSurvey";
 
-import ProtectedRoute from "./routes/ProtectedRoutes";
+import ProtectedRoute, { ParticipantProtectedRoute } from "./routes/ProtectedRoutes";
 import RoleRoute from "./routes/RoleRoute";
 import GuestRoute from "./routes/GuestRoute";
 import {
@@ -100,7 +101,9 @@ function App(): JSX.Element {
                   <Route path="/" element={<AuthLayout />}>
                     <Route path="login" element={<Login />} />
                     <Route path="register" element={<Signup />} />
-                    <Route path="participant" element={<Participants />} />
+                    <Route path="participant/login" element={<ParticipantLogin />} />
+                    <Route path="participant/signup" element={<Participants />} />
+                    <Route path="participant" element={<Navigate to="/participant/signup" replace />} />
                   </Route>
                 </Route>
 
@@ -138,7 +141,7 @@ function App(): JSX.Element {
                   </Route>
                 </Route>
 
-                <Route element={<ProtectedRoute />}>
+                <Route element={<ParticipantProtectedRoute />}>
                   <Route
                     element={
                       <RoleRoute

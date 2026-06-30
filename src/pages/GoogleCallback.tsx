@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import type { AuthResultDto } from "../types/api";
 import { getPostLoginRedirect } from "../utils/routeUtils";
+import { clearGoogleAuthIntent, readGoogleAuthIntent } from "../utils/googleAuth";
+import { isParticipantRole } from "../utils/userRoleUtils";
 
 const decodeBase64Url = (value: string): string => {
   const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -28,6 +30,8 @@ const GoogleCallback = () => {
   const navigate = useNavigate();
   const { signin } = useAuth();
   const [error, setError] = useState("");
+  const intent = readGoogleAuthIntent(window.location.search);
+  const loginPath = intent === "participant" ? "/participant/login" : "/login";
 
   useEffect(() => {
     try {
@@ -43,12 +47,27 @@ const GoogleCallback = () => {
         return;
       }
 
+      const userIsParticipant = isParticipantRole(result.user.role);
+
+      if (intent === "participant" && !userIsParticipant) {
+        setError(
+          "This Google account is registered as a researcher. Use researcher login instead, or sign up with a different Google account for participant access."
+        );
+        return;
+      }
+
+      if (intent === "researcher" && userIsParticipant) {
+        setError("Participant accounts should sign in from the participant login page.");
+        return;
+      }
+
+      clearGoogleAuthIntent();
       signin(result.user, result.token, result.refreshToken || undefined);
       navigate(getPostLoginRedirect(undefined, result.user.role), { replace: true });
     } catch {
       setError("Google sign-in failed. Please try again.");
     }
-  }, [navigate, signin]);
+  }, [navigate, signin, intent]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
@@ -59,7 +78,7 @@ const GoogleCallback = () => {
             <p className="mt-3 text-sm text-red-600">{error}</p>
             <button
               type="button"
-              onClick={() => navigate("/login", { replace: true })}
+              onClick={() => navigate(loginPath, { replace: true })}
               className="mt-5 rounded-md bg-[#FE5102] px-4 py-2 text-sm font-medium text-white">
               Back to login
             </button>

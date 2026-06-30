@@ -1,44 +1,54 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { QuestionDto } from "../../types/api";
-import { useSurveysApi } from "../../services/apiClient";
+import { useResponsesApi, useSurveysApi } from "../../services/apiClient";
+import { useSnackbar } from "../../contexts/SnackbarContext";
 import CircularProgress from "@mui/material/CircularProgress";
-
-type AnswerValue = string | string[] | number | boolean | Record<string, any>;
+import {
+  type AnswerValue,
+  mapAnswersToSubmission,
+  validateRequiredAnswers,
+} from "../../utils/mapSurveyAnswersToSubmission";
 
 const TakeSurvey: React.FC = () => {
-   const [searchParams] = useSearchParams();
-   const surveyId = searchParams.get("surveyId");
+  const [searchParams] = useSearchParams();
+  const surveyId = searchParams.get("surveyId");
   const surveysApi = useSurveysApi();
+  const responsesApi = useResponsesApi();
+  const { showSnackbar } = useSnackbar();
 
   const [questions, setQuestions] = useState<QuestionDto[]>([]);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  /* ---------------------------------- */
-  /* Fetch Survey */
-  /* ---------------------------------- */
+  const fetchSurvey = useCallback(async () => {
+    if (!surveyId) {
+      setLoading(false);
+      setLoadError("Survey ID is missing from the URL.");
+      return;
+    }
 
-  const fetchSurvey = async () => {
     try {
       setLoading(true);
-      const questionsData = await surveysApi.getPublicQuestions(surveyId!);
+      setLoadError(null);
+      const questionsData = await surveysApi.getPublicQuestions(surveyId);
       setQuestions(questionsData || []);
     } catch (err) {
       console.error("Failed to fetch survey", err);
+      setLoadError("Unable to load this survey. It may be unpublished or no longer available.");
+      setQuestions([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [surveyId, surveysApi]);
 
   useEffect(() => {
-    if (surveyId) fetchSurvey();
-  }, []);
+    fetchSurvey();
+  }, [fetchSurvey]);
 
-  /* ---------------------------------- */
-  /* Answer Helpers */
-  /* ---------------------------------- */
   const updateAnswer = (questionId: string, value: AnswerValue) => {
     setAnswers((prev) => ({
       ...prev,
@@ -56,24 +66,35 @@ const TakeSurvey: React.FC = () => {
     });
   };
 
-  /* ---------------------------------- */
-  /* Submit */
-  /* ---------------------------------- */
   const submitSurvey = async () => {
+    if (!surveyId) {
+      showSnackbar("Survey ID is missing.", "error");
+      return;
+    }
+
+    const validationError = validateRequiredAnswers(questions, answers);
+    if (validationError) {
+      showSnackbar(validationError, "error");
+      return;
+    }
+
+    const questionResponses = mapAnswersToSubmission(questions, answers);
+    if (questionResponses.length === 0) {
+      showSnackbar("Please answer at least one question before submitting.", "error");
+      return;
+    }
+
     try {
       setSubmitting(true);
-
-      // 🔁 Replace with real API call
-      await fetch(`/api/surveys/${surveyId}/responses`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers }),
+      await responsesApi.submitResponse(surveyId, {
+        questionResponses,
+        userAgent: navigator.userAgent,
       });
-
-      alert("Survey submitted successfully 🎉");
+      setSubmitted(true);
+      showSnackbar("Survey submitted successfully.", "success");
     } catch (err) {
       console.error("Submit failed", err);
-      alert("Failed to submit survey");
+      showSnackbar("Failed to submit survey. Please try again.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -94,9 +115,6 @@ const TakeSurvey: React.FC = () => {
     }
   };
 
-  /* ---------------------------------- */
-  /* Render Question */
-  /* ---------------------------------- */
   const renderQuestionContent = (question: QuestionDto) => {
     switch (question.type) {
       case 1:
@@ -158,6 +176,7 @@ const TakeSurvey: React.FC = () => {
             <label className="flex gap-2">
               <input
                 type="radio"
+                name={question.id}
                 checked={answers[question.id] === true}
                 onChange={() => updateAnswer(question.id, true)}
               />
@@ -166,6 +185,7 @@ const TakeSurvey: React.FC = () => {
             <label className="flex gap-2">
               <input
                 type="radio"
+                name={question.id}
                 checked={answers[question.id] === false}
                 onChange={() => updateAnswer(question.id, false)}
               />
@@ -226,27 +246,11 @@ const TakeSurvey: React.FC = () => {
           />
         );
 
-      //   case "slider-scale":
-      //     return (
-      //       <input
-      //         type="range"
-      //         min={question.slider!.min}
-      //         max={question.slider!.max}
-      //         step={question.slider!.step || 1}
-      //         value={(answers[question.id] as number) ?? question.slider!.min}
-      //         onChange={(e) => updateAnswer(question.id, Number(e.target.value))}
-      //         className="w-full"
-      //       />
-      //     );
-
       default:
         return <p className="text-gray-400">Unsupported question type</p>;
     }
   };
 
-  /* ---------------------------------- */
-  /* Render */
-  /* ---------------------------------- */
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[70vh]">
@@ -255,8 +259,33 @@ const TakeSurvey: React.FC = () => {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="max-w-2xl mx-auto py-10 px-4 text-center">
+        <p className="text-red-600">{loadError}</p>
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div className="max-w-2xl mx-auto py-10 px-4 text-center space-y-4">
+        <h1 className="text-2xl font-semibold text-[#292929]">Thank you!</h1>
+        <p className="text-gray-600">Your responses have been submitted successfully.</p>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="max-w-2xl mx-auto py-10 px-4 text-center">
+        <p className="text-gray-600">This survey has no questions yet.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-2xl mx-auto py-10 space-y-8">
+    <div className="max-w-2xl mx-auto py-10 px-4 space-y-8">
       {questions.map((question, index) => (
         <div key={question.id} className="space-y-3">
           <label className="font-medium">
@@ -271,6 +300,7 @@ const TakeSurvey: React.FC = () => {
       ))}
 
       <button
+        type="button"
         onClick={submitSurvey}
         disabled={submitting}
         className="w-full bg-[#FE5102] text-white py-2 rounded-md font-medium disabled:opacity-50">

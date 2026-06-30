@@ -70,13 +70,13 @@ const navLinks: NavLinkItem[] = [
 
 const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   isMinimized,
-  setIsCreateSurveyModalOpen,
   setIsCreateProjectModalOpen,
 }) => {
   const [isProjectsOpen, setProjectsOpen] = useState(true);
   const { projects, selectedProject } = useProjects();
   const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
   const [editedName, setEditedName] = useState("");
+  const isProjectsActive = useMatch("/projects/*");
 
   const [hoveredItem, setHoveredItem] = useState<NavLinkItem | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -109,7 +109,6 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
       </NavLink>
       <ul>
         {navLinks.map((item) => {
-          const isProjectsActive = useMatch("/projects/*");
           if (item.text === "Projects") {
             return (
               <li key={item.to} className="relative group">
