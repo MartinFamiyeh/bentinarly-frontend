@@ -1,6 +1,26 @@
 import type { QuestionDto, QuestionResponseSubmissionDto } from "../types/api";
 
-export type AnswerValue = string | string[] | number | boolean;
+export type FileAnswerValue = {
+  fileUrl: string;
+  fileName: string;
+  fileSizeBytes: number;
+};
+
+export type MatrixAnswerValue = Record<string, string | string[]>;
+
+export type OtherOptionAnswerValue = {
+  optionId: string;
+  otherText?: string;
+};
+
+export type AnswerValue =
+  | string
+  | string[]
+  | number
+  | boolean
+  | FileAnswerValue
+  | MatrixAnswerValue
+  | OtherOptionAnswerValue;
 
 function isAnswerProvided(question: QuestionDto, answers: Record<string, AnswerValue>): boolean {
   if (!(question.id in answers)) {
@@ -11,6 +31,7 @@ function isAnswerProvided(question: QuestionDto, answers: Record<string, AnswerV
 
   switch (question.type) {
     case 2:
+    case 14:
       return Array.isArray(answer) && answer.length > 0;
     case 5:
     case 16:
@@ -18,6 +39,29 @@ function isAnswerProvided(question: QuestionDto, answers: Record<string, AnswerV
       return typeof answer === "number" && !Number.isNaN(answer);
     case 6:
       return typeof answer === "boolean";
+    case 12:
+      return (
+        typeof answer === "object" &&
+        answer !== null &&
+        !Array.isArray(answer) &&
+        "fileUrl" in answer &&
+        Boolean((answer as FileAnswerValue).fileUrl)
+      );
+    case 13:
+    case 15:
+      return (
+        typeof answer === "object" &&
+        answer !== null &&
+        !Array.isArray(answer) &&
+        Object.keys(answer as MatrixAnswerValue).length > 0
+      );
+    case 1:
+    case 11:
+      if (typeof answer === "object" && answer !== null && "optionId" in answer) {
+        const otherAnswer = answer as OtherOptionAnswerValue;
+        return Boolean(otherAnswer.optionId);
+      }
+      return typeof answer === "string" && answer.trim().length > 0;
     default:
       if (typeof answer === "string") {
         return answer.trim().length > 0;
@@ -52,6 +96,17 @@ function mapSingleAnswer(
   switch (question.type) {
     case 1:
     case 11: {
+      if (typeof answer === "object" && answer !== null && "optionId" in answer) {
+        const otherAnswer = answer as OtherOptionAnswerValue;
+        if (!otherAnswer.optionId) {
+          return null;
+        }
+        return {
+          questionId: question.id,
+          selectedOptionIds: [otherAnswer.optionId],
+          textResponse: otherAnswer.otherText?.trim() || undefined,
+        };
+      }
       if (typeof answer !== "string" || !answer.trim()) {
         return null;
       }
@@ -72,15 +127,22 @@ function mapSingleAnswer(
     case 3:
     case 4:
     case 9:
-    case 10:
-    case 14:
-    case 15: {
+    case 10: {
       if (typeof answer !== "string" || !answer.trim()) {
         return null;
       }
       return {
         questionId: question.id,
         textResponse: answer.trim(),
+      };
+    }
+    case 14: {
+      if (!Array.isArray(answer) || answer.length === 0) {
+        return null;
+      }
+      return {
+        questionId: question.id,
+        selectedOptionIds: answer,
       };
     }
     case 5:
@@ -129,6 +191,41 @@ function mapSingleAnswer(
       return {
         questionId: question.id,
         timeResponse: timeValue.length === 5 ? `${timeValue}:00` : timeValue,
+      };
+    }
+    case 12: {
+      if (
+        typeof answer !== "object" ||
+        answer === null ||
+        Array.isArray(answer) ||
+        !("fileUrl" in answer)
+      ) {
+        return null;
+      }
+      const fileAnswer = answer as FileAnswerValue;
+      if (!fileAnswer.fileUrl) {
+        return null;
+      }
+      return {
+        questionId: question.id,
+        fileUrl: fileAnswer.fileUrl,
+        fileName: fileAnswer.fileName,
+        fileSizeBytes: fileAnswer.fileSizeBytes,
+      };
+    }
+    case 13:
+    case 15: {
+      if (
+        typeof answer !== "object" ||
+        answer === null ||
+        Array.isArray(answer) ||
+        Object.keys(answer).length === 0
+      ) {
+        return null;
+      }
+      return {
+        questionId: question.id,
+        matrixResponse: JSON.stringify(answer),
       };
     }
     default:

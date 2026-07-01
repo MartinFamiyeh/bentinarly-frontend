@@ -163,6 +163,8 @@ export interface PublicSurveyDto {
   passwordProtected: boolean;
   publishedAt?: string;
   questionCount: number;
+  /** Not on public API yet; optional for forward compatibility. */
+  rewardPerResponse?: number;
 }
 
 export interface SurveyDtoPagedResult extends PagedResult<SurveyDto> {}
@@ -217,6 +219,15 @@ export interface SurveySettings {
   password?: string;
   showProgress?: boolean;
   allowSaveAndContinue?: boolean;
+  /** Not on API yet; optional for forward compatibility. */
+  sections?: SurveySection[];
+}
+
+export interface SurveySection {
+  id: string;
+  title: string;
+  description?: string;
+  questionIds: string[];
 }
 
 // Question Types
@@ -244,6 +255,8 @@ export interface QuestionOptionDto {
   text?: string;
   order: number;
   isCorrect: boolean;
+  /** Not on API yet; infer from option text when absent. */
+  isOther?: boolean;
   imageUrl?: string;
   createdAt: string;
   updatedAt: string;

@@ -115,7 +115,23 @@ function App(): JSX.Element {
                   <Route path="/reset-success" element={<ResetSuccess />} />
                 </Route>
 
-                <Route path="/surveys/takesurvey" element={<TakeSurvey />} />
+                <Route element={<ParticipantProtectedRoute />}>
+                  <Route
+                    element={
+                      <RoleRoute
+                        allowedRoles={PARTICIPANT_PORTAL_ROLES}
+                        fallbackPath="/projects/dashboard"
+                      />
+                    }>
+                    <Route path="/surveys/takesurvey" element={<TakeSurvey />} />
+                    <Route element={<ParticipantsLayout />}>
+                      <Route path="/surveys/allsurveys" element={<Surveys />} />
+                      <Route path="/surveys/profile" element={<Profile />} />
+                      <Route path="/surveys/rewards" element={<Rewards />} />
+                      <Route path="/surveys/notifications" element={<Notifications />} />
+                    </Route>
+                  </Route>
+                </Route>
 
                 <Route element={<ProtectedRoute />}>
                   <Route
@@ -137,23 +153,6 @@ function App(): JSX.Element {
                       <Route path="/survey/demographics" element={<Demographics />} />
                       <Route path="/survey/analytics" element={<SurveyAnalytics />} />
                       <Route path="/survey/preview" element={<PreviewSurvey />} />
-                    </Route>
-                  </Route>
-                </Route>
-
-                <Route element={<ParticipantProtectedRoute />}>
-                  <Route
-                    element={
-                      <RoleRoute
-                        allowedRoles={PARTICIPANT_PORTAL_ROLES}
-                        fallbackPath="/projects/dashboard"
-                      />
-                    }>
-                    <Route element={<ParticipantsLayout />}>
-                      <Route path="/surveys/allsurveys" element={<Surveys />} />
-                      <Route path="/surveys/profile" element={<Profile />} />
-                      <Route path="/surveys/rewards" element={<Rewards />} />
-                      <Route path="/surveys/notifications" element={<Notifications />} />
                     </Route>
                   </Route>
                 </Route>

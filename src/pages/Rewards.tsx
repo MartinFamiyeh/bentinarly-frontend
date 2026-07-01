@@ -1,7 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useWalletApi } from "../services/apiClient";
 import { useLoading } from "../contexts/LoadingContext";
 import { useSnackbar } from "../contexts/SnackbarContext";
+import RewardsHeader from "../components/participants/RewardsHeader";
+import RewardsStats from "../components/participants/RewardsStats";
+import RewardHistory from "../components/participants/RewardHistory";
+import {
+  countCompletedSurveys,
+  matchesRewardFilter,
+  type RewardStatusFilter,
+} from "../utils/rewardTransactions";
 import * as ApiTypes from "../types/api";
 
 const Rewards = () => {
@@ -10,93 +18,85 @@ const Rewards = () => {
   const { showSnackbar } = useSnackbar();
   const [wallet, setWallet] = useState<ApiTypes.UserWalletDto | null>(null);
   const [transactions, setTransactions] = useState<ApiTypes.WalletTransactionDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState<RewardStatusFilter>("All");
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+
+  const loadWalletData = async () => {
+    showLoading();
+    try {
+      const [walletData, transactionsData] = await Promise.all([
+        walletApi.getWallet(),
+        walletApi.getTransactions({ page: 1, pageSize: 100 }),
+      ]);
+      setWallet(walletData);
+      setTransactions(transactionsData.items || []);
+    } catch (error: unknown) {
+      console.error("Failed to fetch wallet data:", error);
+      showSnackbar("Failed to load rewards data.", "error");
+      setWallet(null);
+      setTransactions([]);
+    } finally {
+      hideLoading();
+    }
+  };
 
   useEffect(() => {
-    const fetchWalletData = async () => {
-      showLoading();
-      try {
-        const [walletData, transactionsData] = await Promise.all([
-          walletApi.getWallet(),
-          walletApi.getTransactions({ page: 1, pageSize: 50 }),
-        ]);
-        setWallet(walletData);
-        setTransactions(transactionsData.items || []);
-      } catch (error: any) {
-        console.error("Failed to fetch wallet data:", error);
-        showSnackbar("Failed to load wallet data.", "error");
-      } finally {
-        setLoading(false);
-        hideLoading();
-      }
-    };
-
-    fetchWalletData();
+    loadWalletData();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p>Loading wallet...</p>
-      </div>
-    );
-  }
+  const surveysCompleted = useMemo(() => countCompletedSurveys(transactions), [transactions]);
+
+  const filteredTransactions = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+
+    return transactions.filter((transaction) => {
+      const matchesSearch =
+        !query || (transaction.description || "").toLowerCase().includes(query);
+
+      return matchesSearch && matchesRewardFilter(transaction, activeFilter);
+    });
+  }, [transactions, searchTerm, activeFilter]);
+
+  const handleWithdraw = async () => {
+    if (!wallet || wallet.balance <= 0) {
+      showSnackbar("No available balance to withdraw.", "error");
+      return;
+    }
+
+    setIsWithdrawing(true);
+    try {
+      await walletApi.requestWithdrawal({ amount: wallet.balance });
+      showSnackbar("Withdrawal request submitted.", "success");
+      await loadWalletData();
+    } catch (error: unknown) {
+      console.error("Failed to request withdrawal:", error);
+      showSnackbar("Failed to submit withdrawal request.", "error");
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
 
   return (
-    <div className="bg-white h-screen rounded-l-xl flex flex-col overflow-y-auto">
-      <div className="py-6 px-8 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">Rewards & Wallet</h1>
-      </div>
+    <div className="flex h-screen flex-col overflow-y-auto rounded-l-xl bg-white shadow-sm">
+      <RewardsHeader searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
-      <div className="p-8">
+      <div className="space-y-6 p-6">
         {wallet && (
-          <div className="bg-gradient-to-r from-[#FE5102] to-[#B148F3] rounded-lg p-8 mb-8 text-white">
-            <h2 className="text-lg font-medium mb-2">Wallet Balance</h2>
-            <p className="text-4xl font-bold">{wallet.balance?.toFixed(2) || "0.00"}</p>
-            <p className="text-sm mt-2 opacity-90">
-              Available: {wallet.availableBalance?.toFixed(2) || "0.00"} | 
-              Pending: {wallet.pendingBalance?.toFixed(2) || "0.00"}
-            </p>
-          </div>
+          <RewardsStats
+            wallet={wallet}
+            surveysCompleted={surveysCompleted}
+            transactions={transactions}
+            onWithdraw={handleWithdraw}
+            isWithdrawing={isWithdrawing}
+          />
         )}
 
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Recent Transactions</h2>
-          {transactions.length > 0 ? (
-            <div className="space-y-4">
-              {transactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-900">{transaction.description || transaction.type}</p>
-                    <p className="text-sm text-gray-500">
-                      {transaction.createdAt ? new Date(transaction.createdAt).toLocaleDateString() : ""}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p
-                      className={`font-semibold ${
-                        transaction.type === ApiTypes.TransactionType.Credit
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}>
-                      {transaction.type === ApiTypes.TransactionType.Credit ? "+" : "-"}
-                      {transaction.amount?.toFixed(2) || "0.00"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {ApiTypes.TransactionStatus[transaction.status || 0]}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No transactions yet</p>
-            </div>
-          )}
-        </div>
+        <RewardHistory
+          transactions={filteredTransactions}
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+        />
       </div>
     </div>
   );

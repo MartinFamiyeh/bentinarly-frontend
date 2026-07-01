@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import Project from "../../assets/icons/folder.png";
-import ProjectActive from "../../assets/icons/folder-active.png";
-import Analytics from "../../assets/icons/analytics.png";
-import AnalyticsActive from "../../assets/icons/analytics-active.png";
-import Templates from "../../assets/icons/templates.png";
-import TemplatesActive from "../../assets/icons/templates-active.png";
+import AllSurveys from "../../assets/icons/all-surveys.svg";
+import AllSurveysActive from "../../assets/icons/all-surveys-active.svg";
+import Wallet from "../../assets/icons/wallet.svg";
+import WalletActive from "../../assets/icons/wallet-active.svg";
+import Profile from "../../assets/icons/profile-icon.svg";
+import ProfileActive from "../../assets/icons/profile-icon-active.svg";
 import { createPortal } from "react-dom";
+
+type SvgIcon = React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
 
 interface NavLinkItem {
   to: string;
-  activeIcon: string;
-  inactiveIcon: string;
+  activeIcon: SvgIcon;
+  inactiveIcon: SvgIcon;
   text: string;
 }
 
@@ -49,27 +51,21 @@ const Tooltip: React.FC<TooltipProps> = ({ text, position }) => (
 const navLinks: NavLinkItem[] = [
   {
     to: "/surveys/allsurveys",
-    activeIcon: ProjectActive,
-    inactiveIcon: Project,
+    activeIcon: AllSurveysActive as unknown as SvgIcon,
+    inactiveIcon: AllSurveys as unknown as SvgIcon,
     text: "All Surveys",
   },
   {
-    to: "/surveys/profile",
-    activeIcon: AnalyticsActive,
-    inactiveIcon: Analytics,
-    text: "Profile",
-  },
-  {
     to: "/surveys/rewards",
-    activeIcon: TemplatesActive,
-    inactiveIcon: Templates,
+    activeIcon: WalletActive as unknown as SvgIcon,
+    inactiveIcon: Wallet as unknown as SvgIcon,
     text: "Rewards & Earnings",
   },
   {
-    to: "/surveys/notifications",
-    activeIcon: TemplatesActive,
-    inactiveIcon: Templates,
-    text: "Notifications",
+    to: "/surveys/profile",
+    activeIcon: ProfileActive as unknown as SvgIcon,
+    inactiveIcon: Profile as unknown as SvgIcon,
+    text: "Profile",
   },
 ];
 
@@ -102,21 +98,25 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isMinimized }) =>
           <li key={item.to} className="relative group mb-4">
             <NavLink
               to={item.to}
+              end={item.to === "/surveys/allsurveys"}
               className={({ isActive }) =>
-                `flex items-center gap-3 p-2 text-sm rounded-md ${
+                `flex items-center gap-3 p-2 text-sm rounded-md transition-colors ${
                   isActive
                     ? "bg-[#FFF5F0] text-[#FE5102] font-semibold"
-                    : "text-gray-600 hover:bg-gray-100"
+                    : "text-[#696969] hover:bg-gray-100 font-medium"
                 } ${isMinimized ? "justify-center" : ""}`
               }
               onMouseEnter={(e) => handleMouseEnter(item, e)}
               onMouseLeave={handleMouseLeave}>
-              {({ isActive }) => (
-                <>
-                  <img src={isActive ? item.activeIcon : item.inactiveIcon} className="w-5 h-5" />
-                  {!isMinimized && item.text}
-                </>
-              )}
+              {({ isActive }) => {
+                const Icon = isActive ? item.activeIcon : item.inactiveIcon;
+                return (
+                  <>
+                    <Icon className="w-5 h-5 shrink-0" aria-hidden />
+                    {!isMinimized && item.text}
+                  </>
+                );
+              }}
             </NavLink>
 
             {isMinimized && hoveredItem?.to === item.to && (

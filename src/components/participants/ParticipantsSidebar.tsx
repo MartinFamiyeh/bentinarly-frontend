@@ -1,8 +1,5 @@
-import { useState } from "react";
-import CreateSurvey from "../dashboard/CreateSurvey";
-import CreateProject from "../dashboard/CreateProject";
 import SidebarHeader from "../dashboard/SidebarHeader";
-import SidebarNavigation from "../participants/SidebarNavigation";
+import SidebarNavigation from "./SidebarNavigation";
 import HelpAndRefreshSection from "../dashboard/HelpAndRefreshSection";
 import UserProfileSection from "../dashboard/UserProfileSection";
 
@@ -11,10 +8,7 @@ interface SidebarProps {
   toggle: () => void;
 }
 
-const Sidebar = ({ isMinimized, toggle }: SidebarProps) => {
-  const [isCreateSurveyModalOpen, setIsCreateSurveyModalOpen] = useState(false);
-  const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
-
+const ParticipantsSidebar = ({ isMinimized, toggle }: SidebarProps) => {
   return (
     <aside
       className={`h-screen rounded-r-xl bg-white shadow-sm flex flex-col transition-all duration-300 ease-in-out z-40 overflow-visible ${
@@ -28,18 +22,8 @@ const Sidebar = ({ isMinimized, toggle }: SidebarProps) => {
       </div>
 
       <UserProfileSection isMinimized={isMinimized} />
-
-      <CreateSurvey
-        isOpen={isCreateSurveyModalOpen}
-        onClose={() => setIsCreateSurveyModalOpen(false)}
-      />
-
-      <CreateProject
-        isOpen={isCreateProjectModalOpen}
-        onClose={() => setIsCreateProjectModalOpen(false)}
-      />
     </aside>
   );
 };
 
-export default Sidebar;
+export default ParticipantsSidebar;

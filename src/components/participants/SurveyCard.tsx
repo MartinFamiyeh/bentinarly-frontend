@@ -1,43 +1,66 @@
 import { useNavigate } from "react-router-dom";
-import SurveyImage from "../../assets/icons/survey_file.svg";
-import { formatDate } from "../../functions";
+import Thumbnail1 from "../../assets/images/survey-dummy-1.png";
+import Thumbnail2 from "../../assets/images/survey-dummy-2.png";
+import Thumbnail3 from "../../assets/images/survey-dummy-3.png";
 import * as ApiTypes from "../../types/api";
+import {
+  estimateSurveyDuration,
+  getParticipantStatus,
+  getSurveyActionLabel,
+} from "../../utils/participantSurvey";
+
+const THUMBNAILS = [Thumbnail1, Thumbnail2, Thumbnail3];
 
 type SurveyCardProps = {
   survey: ApiTypes.SurveyDto;
+  thumbnailIndex?: number;
 };
 
-const SurveyCard = ({ survey }: SurveyCardProps) => {
+const SurveyCard = ({ survey, thumbnailIndex = 0 }: SurveyCardProps) => {
   const navigate = useNavigate();
+  const participantStatus = getParticipantStatus(survey);
+  const actionLabel = getSurveyActionLabel(participantStatus);
+  const thumbnail = THUMBNAILS[thumbnailIndex % THUMBNAILS.length];
 
   const handleTakeSurvey = () => {
-    // Navigate to survey preview/take survey page
-    if (survey.shareableLink) {
-      window.open(survey.shareableLink, "_blank");
-    } else {
-      navigate(`/surveys/takesurvey?surveyId=${survey.id}`);
-    }
+    navigate(`/surveys/takesurvey?surveyId=${survey.id}`, {
+      state: { rewardPerResponse: survey.rewardPerResponse },
+    });
   };
 
   return (
-    <div className="p-4 border border-[#EEEEEE] rounded-xl bg-[#FFFFFF] space-y-4">
-      <div className="bg-[#EFEFEF] rounded-md w-full h-[140px]"></div>
-      <p className="text-sm font-medium text-[#292929]">{survey.title || "Untitled Survey"}</p>
-      <p className="text-xs text-[#696969] line-clamp-2">{survey.description || "No description"}</p>
-      {survey.rewardPerResponse && (
-        <p className="text-sm font-bold text-[#292929]">
-          GHS {survey.rewardPerResponse.toFixed(2)}
-        </p>
-      )}
-      <div className="flex justify-between items-center">
-        <p className="italic text-[#696969] text-xs">
-          {survey.questionCount || 0} questions
-        </p>
-        <button
-          onClick={handleTakeSurvey}
-          className="w-[60%] btn bg-gradient-to-r from-[#FE5102] to-[#B148F3] border-none">
-          Take Survey
-        </button>
+    <div className="flex flex-col rounded-xl border border-[#EEEEEE] bg-white shadow-sm overflow-hidden">
+      <img
+        src={thumbnail}
+        alt=""
+        className="h-[140px] w-full object-cover"
+      />
+
+      <div className="flex flex-col flex-1 p-4 gap-3">
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-[#292929] line-clamp-2">
+            {survey.title || "Untitled Survey"}
+          </p>
+          <p className="text-xs text-[#696969]">
+            {estimateSurveyDuration(survey.questionCount)} • {participantStatus}
+          </p>
+        </div>
+
+        <div className="mt-auto flex items-center justify-between gap-3">
+          {survey.rewardPerResponse != null && (
+            <p className="text-sm font-bold text-[#292929]">
+              GHS {survey.rewardPerResponse.toFixed(2)}
+            </p>
+          )}
+
+          {actionLabel && (
+            <button
+              onClick={handleTakeSurvey}
+              className="ml-auto shrink-0 rounded-full bg-gradient-to-r from-[#FE5102] to-[#B148F3] px-4 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity">
+              {actionLabel}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -60,6 +60,7 @@ export interface Question {
   dateSettings?: DateQuestion;
   timeSettings?: DateQuestion;
   slider?: RatingScale;
+  fileSettings?: FileQuestion;
   validation?: {
     minLength?: number;
     maxLength?: number;
