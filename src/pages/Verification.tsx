@@ -1,5 +1,5 @@
 // src/pages/Verification.tsx
-import React, {
+import {
   useState,
   useRef,
   useEffect,

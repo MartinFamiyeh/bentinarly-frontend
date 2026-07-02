@@ -1,5 +1,4 @@
 // src/pages/ResetSuccess.tsx
-import React from "react";
 import { Link } from "react-router-dom";
 
 // Make sure you have an illustration at this path or update it accordingly

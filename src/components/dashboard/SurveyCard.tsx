@@ -50,15 +50,9 @@ const SurveyCard = ({ survey, onSurveyDeleted, onSurveyUpdated }: SurveyCardProp
   const handleDuplicate = async () => {
     setOpen(false);
     try {
-      const surveyData = await surveysApi.getSurvey(survey.id);
-      const newSurvey = await surveysApi.createSurvey({
-        title: `${surveyData.title} (Copy)`,
-        description: surveyData.description || "",
-        projectId: selectedProject?.id, // Use selected project for the duplicate
-        settings: surveyData.settings,
-        expectedResponses: surveyData.expectedResponses,
-        rewardPerResponse: surveyData.rewardPerResponse,
-        isTemplate: surveyData.isTemplate,
+      const newSurvey = await surveysApi.duplicateSurvey(survey.id, {
+        title: `${survey.title} (Copy)`,
+        projectId: selectedProject?.id,
       });
       showSnackbar("Survey duplicated successfully.", "success");
       if (onSurveyUpdated) {
@@ -145,21 +139,21 @@ const SurveyCard = ({ survey, onSurveyDeleted, onSurveyUpdated }: SurveyCardProp
   return (
     <>
       <div 
-        className="grid grid-cols-12 items-center py-4 px-6 border border-[#2929291A]/10 rounded-md bg-[#FFFFFF] text-sm cursor-pointer hover:bg-gray-50"
+        className="grid grid-cols-12 items-center py-4 px-6 border border-[#2929291A]/10 dark:border-gray-700 rounded-md bg-[#FFFFFF] dark:bg-gray-900 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
         onClick={handleClick}
       >
         <div className="col-span-4 flex items-center gap-4">
           <SurveyImage />
           <div>
-            <p className="font-medium text-sm text-[#292929] leading-[18px] text-nowrap w-[18rem] overflow-hidden text-ellipsis">
+            <p className="font-medium text-sm text-[#292929] dark:text-gray-100 leading-[18px] text-nowrap w-[18rem] overflow-hidden text-ellipsis">
               {survey.title || "Untitled Survey"}
             </p>
-            <p className="text-[#696969] text-xs">{survey.questionCount || 0} Question(s)</p>
+            <p className="text-[#696969] dark:text-gray-400 text-xs">{survey.questionCount || 0} Question(s)</p>
           </div>
         </div>
         <div className="col-span-2">
-          <p className="text-xs text-[#696969]">Completion</p>
-          <p className="font-medium text-sm text-[#292929]">{completion}</p>
+          <p className="text-xs text-[#696969] dark:text-gray-400">Completion</p>
+          <p className="font-medium text-sm text-[#292929] dark:text-gray-100">{completion}</p>
         </div>
         <div className="col-span-1 flex ">
           <span className={`px-3 py-1 rounded-lg text-xs ${bg} ${text}`}>
@@ -167,14 +161,14 @@ const SurveyCard = ({ survey, onSurveyDeleted, onSurveyUpdated }: SurveyCardProp
           </span>
         </div>
         <div className="col-span-3 ml-2">
-          <p className="text-xs text-[#696969]"> Created By</p>
-          <p className="text-sm text-[#292929]">
+          <p className="text-xs text-[#696969] dark:text-gray-400"> Created By</p>
+          <p className="text-sm text-[#292929] dark:text-gray-100">
             <span>{createdBy}</span> | {formatDate(new Date(survey.createdAt).getTime())}
           </p>
         </div>
         <div className="col-span-1 text-gray-700">
-          <p className="text-xs text-[#696969]">Access</p>
-          <p className="font-medium text-[#292929] text-sm">{access}</p>
+          <p className="text-xs text-[#696969] dark:text-gray-400">Access</p>
+          <p className="font-medium text-[#292929] dark:text-gray-100 text-sm">{access}</p>
         </div>
         <div className="col-span-1 text-right">
           <button
@@ -183,7 +177,7 @@ const SurveyCard = ({ survey, onSurveyDeleted, onSurveyUpdated }: SurveyCardProp
               e.stopPropagation(); // Prevent click from bubbling to parent div
               toggleMenu();
             }}
-            className="text-gray-400 hover:text-gray-600 p-2 rounded-md hover:bg-gray-100 transition-colors">
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <Menu />
           </button>
         </div>
@@ -224,6 +218,7 @@ const SurveyCard = ({ survey, onSurveyDeleted, onSurveyUpdated }: SurveyCardProp
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
         surveyId={survey.id}
+        surveyStatus={survey.status}
         currentSettings={survey.settings}
         onSettingsUpdated={(updatedSurvey) => {
           if (onSurveyUpdated) {
@@ -239,32 +234,32 @@ const SurveyCard = ({ survey, onSurveyDeleted, onSurveyUpdated }: SurveyCardProp
               top: coords.top,
               left: coords.left - 200 + (buttonRef.current?.offsetWidth || 0), // align to right
             }}
-            className="absolute bg-white shadow-lg border rounded-md w-52 z-50">
-            <ul className="py-1 text-sm text-gray-700">
+            className="absolute bg-white dark:bg-gray-900 shadow-lg border dark:border-gray-700 rounded-md w-52 z-50">
+            <ul className="py-1 text-sm text-gray-700 dark:text-gray-300">
               <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
                 onClick={() => setIsRenameSurveyModalOpen(true)}>
                 Rename
               </li>
-              <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleDuplicate(); }}>
+              <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleDuplicate(); }}>
                 Duplicate
               </li>
               <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
                 onClick={(e) => { e.stopPropagation(); setIsMoveSurveyModalOpen(true); }}>
                 Move to
               </li>
               <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
                 onClick={(e) => { e.stopPropagation(); setIsSettingsModalOpen(true); setOpen(false); }}>
                 Settings
               </li>
               <li 
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
                 onClick={(e) => { e.stopPropagation(); setIsDeleteSurveyModalOpen(true); }}>
                 Delete
               </li>
-              <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Download Questionnaire</li>
+              <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">Download Questionnaire</li>
             </ul>
           </div>
         </Portal>

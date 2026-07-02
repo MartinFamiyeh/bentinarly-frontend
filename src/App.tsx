@@ -28,7 +28,9 @@ import ResetPassword from "./pages/ResetPassword";
 import ResetSuccess from "./pages/ResetSuccess";
 
 import DashboardLayout from "./layouts/DashboardLayout";
+import ResearcherWorkspaceRoot from "./layouts/ResearcherWorkspaceRoot";
 import Projects from "./pages/Projects";
+import ResearcherProfile from "./pages/ResearcherProfile";
 import Analytics from "./pages/Analytics";
 import Templates from "./pages/Templates";
 
@@ -115,6 +117,8 @@ function App(): JSX.Element {
                   <Route path="/reset-success" element={<ResetSuccess />} />
                 </Route>
 
+                <Route path="/surveys/takesurvey" element={<TakeSurvey />} />
+
                 <Route element={<ParticipantProtectedRoute />}>
                   <Route
                     element={
@@ -123,7 +127,6 @@ function App(): JSX.Element {
                         fallbackPath="/projects/dashboard"
                       />
                     }>
-                    <Route path="/surveys/takesurvey" element={<TakeSurvey />} />
                     <Route element={<ParticipantsLayout />}>
                       <Route path="/surveys/allsurveys" element={<Surveys />} />
                       <Route path="/surveys/profile" element={<Profile />} />
@@ -141,18 +144,27 @@ function App(): JSX.Element {
                         fallbackPath="/surveys/allsurveys"
                       />
                     }>
-                    <Route element={<DashboardLayout />}>
-                      <Route path="/projects/dashboard" element={<Projects />} />
-                      <Route path="/analytics" element={<Analytics />} />
-                      <Route path="/templates" element={<Templates />} />
-                    </Route>
+                    <Route element={<ResearcherWorkspaceRoot />}>
+                      <Route element={<DashboardLayout />}>
+                        <Route path="/projects/dashboard" element={<Projects />} />
+                        <Route path="/projects/profile" element={<ResearcherProfile />} />
+                        <Route path="/analytics" element={<Analytics />} />
+                        <Route path="/templates" element={<Templates />} />
+                      </Route>
 
-                    <Route element={<SurveyLayout />}>
-                      <Route path="/survey/questionnaires" element={<Questionnaires />} />
-                      <Route path="/survey/questionnaires/:surveyId" element={<Questionnaires />} />
-                      <Route path="/survey/demographics" element={<Demographics />} />
-                      <Route path="/survey/analytics" element={<SurveyAnalytics />} />
-                      <Route path="/survey/preview" element={<PreviewSurvey />} />
+                      <Route element={<SurveyLayout />}>
+                        <Route path="/survey/questionnaires" element={<Questionnaires />} />
+                        <Route path="/survey/questionnaires/:surveyId" element={<Questionnaires />} />
+                        <Route
+                          path="/survey/questionnaires/:surveyId/demographics"
+                          element={<Demographics />}
+                        />
+                        <Route
+                          path="/survey/questionnaires/:surveyId/analytics"
+                          element={<SurveyAnalytics />}
+                        />
+                        <Route path="/survey/preview" element={<PreviewSurvey />} />
+                      </Route>
                     </Route>
                   </Route>
                 </Route>

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { X, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 const SurveyPreviewPage = () => {
   const [surveyData] = useState({

@@ -29,7 +29,7 @@ const QuestionTypeSelector: React.FC<QuestionTypeSelectorProps> = ({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className="flex items-center gap-2 px-3 py-1.5 border border-[#696969] rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center gap-2 px-3 py-1.5 border border-[#696969] dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {currentTypeConfig?.icon && (
           typeof currentTypeConfig.icon === 'string' ? (
@@ -38,8 +38,8 @@ const QuestionTypeSelector: React.FC<QuestionTypeSelectorProps> = ({
             <currentTypeConfig.icon className="w-4 h-4" />
           )
         )}
-        <span className=" text-[#696969] text-sm font-normal">{currentTypeConfig?.label}</span>
-        <ChevronDown className="w-4 h-4 text-black" />
+        <span className=" text-[#696969] dark:text-gray-400 text-sm font-normal">{currentTypeConfig?.label}</span>
+        <ChevronDown className="w-4 h-4 text-black dark:text-gray-200" />
       </button>
 
       {isOpen && !disabled && (
@@ -51,13 +51,13 @@ const QuestionTypeSelector: React.FC<QuestionTypeSelectorProps> = ({
           />
           
           {/* Dropdown */}
-          <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-20">
+          <div className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-20">
             <div className="py-1">
               {QUESTION_TYPES.map((typeConfig) => (
                 <button
                   key={typeConfig.type}
                   onClick={() => handleTypeSelect(typeConfig.type)}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   {typeof typeConfig.icon === 'string' ? (
                     <img src={typeConfig.icon} alt={typeConfig.label} className="w-4 h-4" />
@@ -65,10 +65,10 @@ const QuestionTypeSelector: React.FC<QuestionTypeSelectorProps> = ({
                     <typeConfig.icon className="w-4 h-4" />
                   )}
                   <div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-300">
                       {typeConfig.label}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
                       {typeConfig.description}
                     </div>
                   </div>

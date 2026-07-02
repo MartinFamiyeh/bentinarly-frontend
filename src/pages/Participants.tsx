@@ -61,9 +61,7 @@ const Participants = () => {
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        gender: formData.gender || undefined,
-        dateOfBirth: formData.dob || undefined,
-        mobileNumber: formData.email, // Using email as mobile for now
+        mobileNumber: formData.email,
       };
 
       const result = await authApi.registerParticipant(registerData);

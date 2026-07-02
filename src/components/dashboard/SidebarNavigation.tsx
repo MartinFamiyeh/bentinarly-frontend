@@ -47,10 +47,10 @@ const Tooltip: React.FC<TooltipProps> = ({ text, position }) => (
         transform: "translateY(-50%)",
       }}>
       {/* Arrow */}
-      <div className="w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-white shadow-sm" />
+      <div className="w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-white dark:border-r-gray-900 shadow-sm" />
 
       {/* Tooltip box */}
-      <div className="bg-white text-[#FE5102] text-xs font-medium px-2 py-1 rounded shadow whitespace-nowrap">
+      <div className="bg-white dark:bg-gray-900 text-[#FE5102] text-xs font-medium px-2 py-1 rounded shadow whitespace-nowrap">
         {text}
       </div>
     </div>
@@ -74,7 +74,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
 }) => {
   const [isProjectsOpen, setProjectsOpen] = useState(true);
   const { projects, selectedProject } = useProjects();
-  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState("");
   const isProjectsActive = useMatch("/projects/*");
 
@@ -125,13 +125,13 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
                   }}
                   onMouseLeave={handleMouseLeave}
                   className={`flex items-center mb-4 p-2 rounded-md transition-colors w-full ${
-                    isProjectsActive ? "bg-[#FFF5F0]" : "hover:bg-gray-100"
+                    isProjectsActive ? "bg-[#FFF5F0] dark:bg-gray-800" : "hover:bg-gray-100 dark:hover:bg-gray-800"
                   } ${isMinimized ? "justify-center" : "justify-between"}`}>
                   <NavLink
                     to={item.to}
                     end
                     className={`flex items-center gap-3 text-sm ${
-                      isProjectsActive ? "text-[#FE5102] font-semibold" : "text-gray-600"
+                      isProjectsActive ? "text-[#FE5102] font-semibold" : "text-gray-600 dark:text-gray-400"
                     }`}>
                     <img
                       src={isProjectsActive ? item.activeIcon : item.inactiveIcon}
@@ -142,7 +142,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
                   {!isMinimized && (
                     <button
                       onClick={() => setProjectsOpen(!isProjectsOpen)}
-                      className="p-1 rounded-md hover:bg-gray-200">
+                      className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
                       <img src={Arrow} className={isProjectsOpen ? "-rotate-180" : ""} />
                     </button>
                   )}
@@ -169,7 +169,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
                       ))}
                     <li className="mt-1">
                       <button
-                        className="flex items-center gap-1 text-xs text-gray-800 p-2 w-full hover:bg-gray-100 rounded-md"
+                        className="flex items-center gap-1 text-xs text-gray-800 dark:text-gray-300 p-2 w-full hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
                         onClick={() => setIsCreateProjectModalOpen(true)}>
                         <FiPlus /> Add project
                       </button>
@@ -190,8 +190,8 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
                 className={({ isActive }) =>
                   `flex items-center gap-3 p-2 text-sm rounded-md ${
                     isActive
-                      ? "bg-[#FFF5F0] text-[#FE5102] font-semibold"
-                      : "text-gray-600 hover:bg-gray-100"
+                      ? "bg-[#FFF5F0] dark:bg-gray-800 text-[#FE5102] font-semibold"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                   } ${isMinimized ? "justify-center" : ""}`
                 }
                 onMouseEnter={(e) => handleMouseEnter(item, e)}

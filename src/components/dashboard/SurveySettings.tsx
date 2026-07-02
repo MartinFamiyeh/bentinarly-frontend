@@ -8,6 +8,7 @@ type SurveySettingsModalProps = {
   isOpen: boolean; 
   onClose: () => void;
   surveyId: string;
+  surveyStatus: ApiTypes.SurveyStatus;
   currentSettings: ApiTypes.SurveySettings;
   onSettingsUpdated?: (updatedSurvey: ApiTypes.SurveyDto) => void;
 };
@@ -16,21 +17,62 @@ const SurveySettings = ({
   isOpen, 
   onClose, 
   surveyId, 
+  surveyStatus,
   currentSettings,
   onSettingsUpdated 
 }: SurveySettingsModalProps) => {
   const [settings, setSettings] = useState<ApiTypes.SurveySettings>(currentSettings);
+  const [status, setStatus] = useState<ApiTypes.SurveyStatus>(surveyStatus);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTogglingResponse, setIsTogglingResponse] = useState(false);
   const { showSnackbar } = useSnackbar();
   const surveysApi = useSurveysApi();
 
   useEffect(() => {
     if (isOpen) {
       setSettings(currentSettings);
+      setStatus(surveyStatus);
     }
-  }, [isOpen, currentSettings]);
+  }, [isOpen, currentSettings, surveyStatus]);
 
   if (!isOpen) return null;
+
+  const isCollectingResponses = status === 2;
+  const canToggleResponses = status === 2 || status === 5;
+
+  const getCollectionDescription = (): string => {
+    if (status === 1) return "Publish the survey to start collecting responses.";
+    if (status === 3) return "This survey is closed and no longer accepts responses.";
+    if (status === 4) return "Archived surveys do not accept responses.";
+    if (status === 5) return "Response collection is paused. Turn on to resume.";
+    return "When enabled, respondents can submit answers via the share link.";
+  };
+
+  const handleToggleResponses = async () => {
+    if (!canToggleResponses || isTogglingResponse) return;
+
+    setIsTogglingResponse(true);
+    try {
+      if (status === 2) {
+        const updated = await surveysApi.pauseSurvey(surveyId);
+        setStatus(updated.status);
+        onSettingsUpdated?.(updated);
+        showSnackbar("Response collection paused.", "success");
+      } else if (status === 5) {
+        const updated = await surveysApi.resumeSurvey(surveyId);
+        setStatus(updated.status);
+        onSettingsUpdated?.(updated);
+        showSnackbar("Response collection resumed.", "success");
+      }
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === "object" && "response" in error
+        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+        : undefined;
+      showSnackbar(errorMessage || "Failed to update response collection.", "error");
+    } finally {
+      setIsTogglingResponse(false);
+    }
+  };
 
   const handleToggle = (key: keyof ApiTypes.SurveySettings) => {
     setSettings((prev) => ({
@@ -71,12 +113,14 @@ const SurveySettings = ({
     label, 
     description, 
     checked, 
-    onChange 
+    onChange,
+    disabled = false,
   }: { 
     label: string; 
     description?: string; 
     checked: boolean; 
     onChange: () => void;
+    disabled?: boolean;
   }) => (
     <div className="flex items-start justify-between py-3 border-b border-gray-200 last:border-b-0">
       <div className="flex-1">
@@ -88,7 +132,8 @@ const SurveySettings = ({
       <button
         type="button"
         onClick={onChange}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+        disabled={disabled}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
           checked ? "bg-[#FE5102]" : "bg-gray-300"
         }`}
       >
@@ -109,6 +154,16 @@ const SurveySettings = ({
           <p className="text-[16px] leading-none text-gray-600 mt-2">
             Configure how your survey behaves and what information is collected.
           </p>
+        </div>
+
+        <div className="rounded-lg border border-gray-200 px-4">
+          <ToggleSwitch
+            label="Collecting responses"
+            description={getCollectionDescription()}
+            checked={isCollectingResponses}
+            onChange={() => void handleToggleResponses()}
+            disabled={!canToggleResponses || isTogglingResponse}
+          />
         </div>
 
         <div className="space-y-0">

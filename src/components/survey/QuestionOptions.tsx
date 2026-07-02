@@ -82,13 +82,13 @@ const OptionItem: React.FC<OptionItemProps> = ({
             value={option.text}
             onChange={(e) => onUpdate(option.id, { text: e.target.value })}
             placeholder={`Option ${index + 1}`}
-            className="text-black w-full px-3 py-2 pr-12 placeholder-[#696969] bg-gray-50 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-black dark:text-gray-100 w-full px-3 py-2 pr-12 placeholder-[#696969] dark:placeholder-gray-400 bg-gray-50 dark:bg-gray-800 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={disabled}
             maxLength={100}
           />
 
           {option.image ? (
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white w-8 h-8 rounded-md flex items-center justify-center">
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white dark:bg-gray-800 w-8 h-8 rounded-md flex items-center justify-center">
               <img
                 src={option.image}
                 alt="Option"
@@ -112,7 +112,7 @@ const OptionItem: React.FC<OptionItemProps> = ({
                 input?.click();
               }}
               disabled={disabled}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white w-8 h-8 rounded-md flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white dark:bg-gray-800 w-8 h-8 rounded-md flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
               <ImgSelector />
             </button>
           )}
@@ -192,18 +192,6 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
     }
   };
 
-  const handleImageUpload = (optionId: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      updateOption(optionId, { image: imageUrl });
-    }
-  };
-
-  const handleRemoveImage = (optionId: string) => {
-    updateOption(optionId, { image: undefined });
-  };
-
   return (
     <div className="space-y-3">
       <SortableContext items={options.map((o) => o.id)} strategy={verticalListSortingStrategy}>
@@ -226,12 +214,12 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
 
       {/* Add Options */}
       {isActive && (
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
           <button
             type="button"
             onClick={addOption}
             disabled={disabled || options.length >= 20}
-            className="flex items-center gap-1 px-2 py-1 text-[#292929] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#FE5102]">
+            className="flex items-center gap-1 px-2 py-1 text-[#292929] dark:text-gray-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#FE5102]">
             Add Option
           </button>
 
@@ -241,7 +229,7 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
             type="button"
             onClick={addOtherOption}
             disabled={disabled || options.some((opt) => opt.isOther)}
-            className="px-2 py-1 text-[#292929] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#FE5102]">
+            className="px-2 py-1 text-[#292929] dark:text-gray-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#FE5102]">
             Add Other
           </button>
         </div>

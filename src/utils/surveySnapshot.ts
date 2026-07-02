@@ -1,5 +1,18 @@
 import type { Survey } from "../types/question";
 
+function snapshotQuestionConfig(q: Survey["questions"][number]) {
+  return {
+    ratingScale: q.ratingScale,
+    likertScale: q.likertScale,
+    slider: q.slider,
+    matrix: q.matrix,
+    validation: q.validation,
+    fileSettings: q.fileSettings,
+    dateSettings: q.dateSettings,
+    timeSettings: q.timeSettings,
+  };
+}
+
 /** Normalized JSON snapshot for comparing survey state (draft vs server). */
 export function createSurveySnapshot(survey: Survey): string {
   const snapshot = {
@@ -22,6 +35,7 @@ export function createSurveySnapshot(survey: Survey): string {
             id: opt.id,
             text: opt.text?.trim() || "",
           })),
+        ...snapshotQuestionConfig(q),
       }))
       .sort((a, b) => a.order - b.order),
   };

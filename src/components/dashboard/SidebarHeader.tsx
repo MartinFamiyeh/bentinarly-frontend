@@ -16,7 +16,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ isMinimized, toggle }) =>
       <div className="flex items-center gap-2">
         <img src="/logo.svg" alt="Logo" className="w-[29px] h-[22.6px] shrink-0" />
         {!isMinimized && (
-          <span className="font-medium text-xl text-[#292929]">Bentinarly Poll</span>
+          <span className="font-medium text-xl text-[#292929] dark:text-gray-100">Bentinarly Poll</span>
         )}
       </div>
       <button onClick={toggle}>{isMinimized ? <Expand /> : <Minimize />}</button>

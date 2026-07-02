@@ -1,5 +1,4 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import Expand from "../../assets/icons/expand_nav.svg";
 import Minimize from "../../assets/icons/collapse_nav.svg";
 import Questionnaire from "../../assets/icons/questionnaire.png";
@@ -27,22 +26,24 @@ interface SidebarProps {
 }
 
 const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
+  const { surveyId } = useParams<{ surveyId?: string }>();
   const { saveStatus, lastSavedAt, lastLocalDraftAt } = useSurveyEditing();
+  const surveyBase = surveyId ? `/survey/questionnaires/${surveyId}` : "/survey/questionnaires";
   const navLinks: NavLinkItem[] = [
     {
-      to: "/survey/questionnaires",
+      to: surveyBase,
       activeIcon: QuestionnaireActive,
       inactiveIcon: Questionnaire,
       text: "Questionnaires",
     },
     {
-      to: "/survey/demographics",
+      to: `${surveyBase}/demographics`,
       activeIcon: DemographicActive,
       inactiveIcon: Demographic,
       text: "Target Audience",
     },
     {
-      to: "/survey/analytics",
+      to: `${surveyBase}/analytics`,
       activeIcon: AnalyticsActive,
       inactiveIcon: Analytics,
       text: "Analytics",
@@ -51,7 +52,7 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
 
   return (
     <aside
-      className={`h-screen rounded-r-xl bg-white shadow-sm flex flex-col transition-all duration-300 ease-in-out z-40 ${
+      className={`h-screen rounded-r-xl bg-white dark:bg-gray-900 shadow-sm flex flex-col transition-all duration-300 ease-in-out z-40 ${
         isMinimized ? "w-20" : "w-64"
       }`}>
       <div
@@ -61,7 +62,7 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
         <div className={`flex items-center gap-2 overflow-hidden ${isMinimized ? "" : ""}`}>
           <img src="/logo.svg" alt="Logo" className="w-[29px] h-[22.6px] shrink-0" />
           <span
-            className={`font-medium text-xl whitespace-nowrap text-[#292929] ${
+            className={`font-medium text-xl whitespace-nowrap text-[#292929] dark:text-gray-100 ${
               isMinimized ? "hidden" : "inline"
             }`}>
             Bentinarly Poll
@@ -94,11 +95,12 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
                 <li key={item.to} className="relative group mb-4">
                   <NavLink
                     to={item.to}
+                    end={item.text === "Questionnaires"}
                     className={({ isActive }) =>
                       `flex items-center gap-3 p-2 text-sm rounded-md transition-colors w-full ${
                         isActive
-                          ? "bg-[#FFF5F0] text-[#FE5102] font-semibold"
-                          : "text-gray-600 hover:bg-gray-100 font-medium"
+                          ? "bg-[#FFF5F0] dark:bg-gray-800 text-[#FE5102] font-semibold"
+                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium"
                       } ${isMinimized ? "justify-center" : ""}`
                     }>
                     {({ isActive }) => (
@@ -118,7 +120,7 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
                     )}
                   </NavLink>
                   {isMinimized && (
-                    <span className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-[#FFF5F0] text-[#FE5102] text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    <span className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-[#FFF5F0] dark:bg-gray-800 text-[#FE5102] text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                       {item.text}
                     </span>
                   )}
@@ -129,7 +131,7 @@ const SurveySidebar = ({ isMinimized, toggle }: SidebarProps) => {
         </nav>
 
         {/* Save / draft status at bottom of sidebar */}
-        <div className="py-3 text-xs text-gray-500 border-t border-gray-100 mt-2">
+        <div className="py-3 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700 mt-2">
           {!isMinimized && (
             <>
               {saveStatus === "saving" && <p>Saving...</p>}

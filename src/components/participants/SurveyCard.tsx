@@ -29,7 +29,7 @@ const SurveyCard = ({ survey, thumbnailIndex = 0 }: SurveyCardProps) => {
   };
 
   return (
-    <div className="flex flex-col rounded-xl border border-[#EEEEEE] bg-white shadow-sm overflow-hidden">
+    <div className="flex flex-col rounded-xl border border-[#EEEEEE] dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
       <img
         src={thumbnail}
         alt=""
@@ -38,17 +38,17 @@ const SurveyCard = ({ survey, thumbnailIndex = 0 }: SurveyCardProps) => {
 
       <div className="flex flex-col flex-1 p-4 gap-3">
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-[#292929] line-clamp-2">
+          <p className="text-sm font-semibold text-[#292929] dark:text-gray-100 line-clamp-2">
             {survey.title || "Untitled Survey"}
           </p>
-          <p className="text-xs text-[#696969]">
+          <p className="text-xs text-[#696969] dark:text-gray-400">
             {estimateSurveyDuration(survey.questionCount)} • {participantStatus}
           </p>
         </div>
 
         <div className="mt-auto flex items-center justify-between gap-3">
           {survey.rewardPerResponse != null && (
-            <p className="text-sm font-bold text-[#292929]">
+            <p className="text-sm font-bold text-[#292929] dark:text-gray-100">
               GHS {survey.rewardPerResponse.toFixed(2)}
             </p>
           )}

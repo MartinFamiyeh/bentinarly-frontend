@@ -28,7 +28,7 @@ const Demographics = () => {
       try {
         const data = await analyticsApi.getDemographics(surveyId);
         setDemographics(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Failed to fetch demographics:", error);
         showSnackbar("Failed to load demographics data.", "error");
       } finally {
@@ -38,24 +38,30 @@ const Demographics = () => {
     };
 
     fetchDemographics();
-  }, [surveyId]);
+  }, [surveyId, navigate, showSnackbar, showLoading, hideLoading, analyticsApi]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen dark:text-gray-300">
         <p>Loading demographics...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white h-screen rounded-l-xl flex flex-col">
-      <div className="py-3 px-6 flex justify-between items-center flex-shrink-0 border-b border-[#E5E7EB]">
+    <div className="bg-white dark:bg-gray-900 h-screen rounded-l-xl flex flex-col">
+      <div className="py-3 px-6 flex justify-between items-center flex-shrink-0 border-b border-[#E5E7EB] dark:border-gray-700">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)}>
+          <button
+            type="button"
+            onClick={() =>
+              surveyId
+                ? navigate(`/survey/questionnaires/${surveyId}`)
+                : navigate("/projects/dashboard")
+            }>
             <Back />
           </button>
-          <p className="font-semibold text-lg">Demographics</p>
+          <p className="font-semibold text-lg dark:text-gray-100">Demographics</p>
         </div>
         <div>
           <Profile />
@@ -64,19 +70,27 @@ const Demographics = () => {
 
       <div className="p-6 overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <p className="font-medium text-xl">Target Audience Demographics</p>
+          <p className="font-medium text-xl dark:text-gray-100">Target Audience Demographics</p>
+          {demographics && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {demographics.totalParticipants} participant
+              {demographics.totalParticipants === 1 ? "" : "s"}
+            </p>
+          )}
         </div>
 
         {demographics ? (
           <div className="space-y-6">
-            {demographics.ageDistribution && demographics.ageDistribution.length > 0 && (
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">Age Distribution</h3>
+            {demographics.ageGroups && demographics.ageGroups.length > 0 && (
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Age Distribution</h3>
                 <div className="space-y-2">
-                  {demographics.ageDistribution.map((item, index) => (
+                  {demographics.ageGroups.map((item, index) => (
                     <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">{item.range || item.label}</span>
-                      <span className="text-sm font-medium">{item.count || 0} ({item.percentage || 0}%)</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{item.ageGroup || "Unknown"}</span>
+                      <span className="text-sm font-medium dark:text-gray-200">
+                        {item.count || 0} ({item.percentage || 0}%)
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -84,36 +98,50 @@ const Demographics = () => {
             )}
 
             {demographics.genderDistribution && demographics.genderDistribution.length > 0 && (
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">Gender Distribution</h3>
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Gender Distribution</h3>
                 <div className="space-y-2">
                   {demographics.genderDistribution.map((item, index) => (
                     <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">{item.gender || item.label}</span>
-                      <span className="text-sm font-medium">{item.count || 0} ({item.percentage || 0}%)</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{item.gender || "Unknown"}</span>
+                      <span className="text-sm font-medium dark:text-gray-200">
+                        {item.count || 0} ({item.percentage || 0}%)
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {demographics.locationDistribution && demographics.locationDistribution.length > 0 && (
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">Location Distribution</h3>
+            {demographics.locations && demographics.locations.length > 0 && (
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Location Distribution</h3>
                 <div className="space-y-2">
-                  {demographics.locationDistribution.map((item, index) => (
+                  {demographics.locations.map((item, index) => (
                     <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">{item.location || item.label}</span>
-                      <span className="text-sm font-medium">{item.count || 0} ({item.percentage || 0}%)</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {[item.region, item.country].filter(Boolean).join(", ") || "Unknown"}
+                      </span>
+                      <span className="text-sm font-medium dark:text-gray-200">
+                        {item.count || 0} ({item.percentage || 0}%)
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
+
+            {!demographics.ageGroups?.length &&
+              !demographics.genderDistribution?.length &&
+              !demographics.locations?.length && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 dark:text-gray-400">No demographic breakdown available yet.</p>
+                </div>
+              )}
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500">No demographics data available</p>
+            <p className="text-gray-500 dark:text-gray-400">No demographics data available</p>
           </div>
         )}
       </div>

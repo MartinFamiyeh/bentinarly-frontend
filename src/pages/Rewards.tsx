@@ -78,7 +78,7 @@ const Rewards = () => {
   };
 
   return (
-    <div className="flex h-screen flex-col overflow-y-auto rounded-l-xl bg-white shadow-sm">
+    <div className="flex h-screen flex-col overflow-y-auto rounded-l-xl bg-white dark:bg-gray-900 shadow-sm">
       <RewardsHeader searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
       <div className="space-y-6 p-6">

@@ -1,5 +1,5 @@
 import type { UserRole } from "../types/api";
-import { PARTICIPANT_PORTAL_ROLES, UserRoles } from "../constants/userRoles";
+import { PARTICIPANT_PORTAL_ROLES, RESEARCHER_WORKSPACE_ROLES, UserRoles } from "../constants/userRoles";
 
 const ROLE_NAME_TO_VALUE: Record<string, UserRole> = {
   Admin: UserRoles.Admin,
@@ -32,4 +32,9 @@ export function normalizeUserRole(role: unknown): UserRole | null {
 export function isParticipantRole(role: unknown): boolean {
   const normalized = normalizeUserRole(role);
   return normalized !== null && PARTICIPANT_PORTAL_ROLES.includes(normalized);
+}
+
+export function isResearcherWorkspaceRole(role: unknown): boolean {
+  const normalized = normalizeUserRole(role);
+  return normalized !== null && RESEARCHER_WORKSPACE_ROLES.includes(normalized);
 }

@@ -84,6 +84,27 @@ export const useSurveysApi = () => {
     publishSurvey: (id: string) =>
       api.post<ApiTypes.SurveyDto>(`/api/surveys/${id}/publish`),
 
+    pauseSurvey: (id: string) =>
+      api.post<ApiTypes.SurveyDto>(`/api/surveys/${id}/pause`),
+
+    resumeSurvey: (id: string) =>
+      api.post<ApiTypes.SurveyDto>(`/api/surveys/${id}/resume`),
+
+    closeSurvey: (id: string) =>
+      api.post<ApiTypes.SurveyDto>(`/api/surveys/${id}/close`),
+
+    getShareableLink: (id: string) =>
+      api.get<ApiTypes.ShareableLinkDto>(`/api/surveys/${id}/share-link`),
+
+    regenerateShareableLink: (id: string) =>
+      api.post<ApiTypes.ShareableLinkDto>(`/api/surveys/${id}/share-link/regenerate`),
+
+    updateShareableLink: (id: string, data: ApiTypes.UpdateShareableLinkDto) =>
+      api.put<ApiTypes.ShareableLinkDto>(`/api/surveys/${id}/share-link`, data),
+
+    duplicateSurvey: (id: string, data?: ApiTypes.DuplicateSurveyDto) =>
+      api.post<ApiTypes.SurveyDto>(`/api/surveys/${id}/duplicate`, data ?? {}),
+
     // Survey Collaborators
     getSurveyCollaborators: (id: string) =>
       api.get<ApiTypes.SurveyCollaboratorDto[]>(`/api/surveys/${id}/collaborators`),
@@ -211,6 +232,9 @@ export const useUsersApi = () => {
       formData.append("file", file);
       return api.post<string>("/api/users/me/profile-image", formData);
     },
+
+    saveResearcherOnboarding: (data: ApiTypes.SaveResearcherOnboardingRequest) =>
+      api.put<ApiTypes.UserDto>("/api/users/me/researcher-onboarding", data),
 
     getUser: (id: string) =>
       api.get<ApiTypes.UserDto>(`/api/users/${id}`),

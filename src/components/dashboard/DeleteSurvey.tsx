@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { useSnackbar } from "../../contexts/SnackbarContext";
 
 type DeleteSurveyModalProps = { 
   isOpen: boolean; 
@@ -10,9 +9,8 @@ type DeleteSurveyModalProps = {
   onDelete: () => void;
 };
 
-const DeleteSurvey = ({ isOpen, onClose, surveyId, surveyName, onDelete }: DeleteSurveyModalProps) => {
+const DeleteSurvey = ({ isOpen, onClose, surveyName, onDelete }: DeleteSurveyModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { showSnackbar } = useSnackbar();
 
   if (!isOpen) return null;
 

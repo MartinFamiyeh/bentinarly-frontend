@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -146,7 +146,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
       ref={setNodeRef}
       style={style}
       data-question-card
-      className={`bg-white rounded-lg border border-gray-200 p-6 mb-4 relative transition-all duration-200 cursor-pointer ${
+      className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-4 relative transition-all duration-200 cursor-pointer ${
         isActive ? "shadow-lg" : "shadow-sm"
       } ${isDragging ? "opacity-50 scale-105 shadow-2xl border-blue-500 z-50" : ""}`}
       onClick={handleCardClick}>
@@ -186,7 +186,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
       </div>
 
       {/* Horizontal Line */}
-      <div className="border-t border-[#E5E7EB] mb-3 -mx-6"></div>
+      <div className="border-t border-[#E5E7EB] dark:border-gray-700 mb-3 -mx-6"></div>
 
       {/* Question Content */}
       <div className="space-y-4">
@@ -229,7 +229,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                   max: parseInt(e.target.value),
                 })
               }
-              className="text-black px-3 py-3 pr-12 border bg-[#F9F9F9] border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-black dark:text-gray-100 px-3 py-3 pr-12 border bg-[#F9F9F9] dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isPreview}>
               <option value={3}>3 Stars</option>
               <option value={4}>4 Stars</option>
@@ -256,7 +256,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                     min: parseInt(e.target.value),
                   })
                 }
-                className="text-black px-3 py-3 pr-12 border bg-[#F9F9F9] border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-black dark:text-gray-100 px-3 py-3 pr-12 border bg-[#F9F9F9] dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isPreview}>
                 <option value={0}>0</option>
                 <option value={1}>1</option>
@@ -270,7 +270,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                     max: parseInt(e.target.value),
                   })
                 }
-                className="text-black px-3 py-3 pr-12 border bg-[#F9F9F9] border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-black dark:text-gray-100 px-3 py-3 pr-12 border bg-[#F9F9F9] dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isPreview}>
                 <option value={2}>2</option>
                 <option value={3}>3</option>
@@ -294,7 +294,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                   })
                 }
                 placeholder="Label for min (optional)"
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md text-sm"
               />
               <p>to</p>
               <input
@@ -307,7 +307,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                   })
                 }
                 placeholder="Label for max (optional)"
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md text-sm"
               />
             </div>
           </div>
@@ -326,7 +326,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                   })
                 }
                 placeholder="Minimun value"
-                className="w-[10rem] px-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="w-[10rem] px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md text-sm"
               />
               <p>,</p>
               <input
@@ -339,7 +339,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                   })
                 }
                 placeholder="Maximum Value"
-                className="w-[10rem] px-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="w-[10rem] px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md text-sm"
               />
               <p>, increase step by</p>
               <input
@@ -352,7 +352,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                   })
                 }
                 placeholder="Maximum Value"
-                className="w-[5rem] px-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="w-[5rem] px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md text-sm"
               />
             </div>
           </div>
@@ -367,7 +367,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                   format: e.target.value,
                 })
               }
-              className="text-black px-3 py-3 pr-12 border bg-[#F9F9F9] border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-black dark:text-gray-100 px-3 py-3 pr-12 border bg-[#F9F9F9] dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isPreview}>
               <option value="dmy" selected>
                 Day, Month, Year
@@ -389,7 +389,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                   format: e.target.value,
                 })
               }
-              className="text-black px-3 py-3 pr-12 border bg-[#F9F9F9] border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-black dark:text-gray-100 px-3 py-3 pr-12 border bg-[#F9F9F9] dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isPreview}>
               <option value="12" selected>
                 12 hours
@@ -404,7 +404,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
             <div className="flex gap-4">
               {/* Rows Section */}
               <div className="flex-1">
-                <label className="block text-xs text-gray-500 mb-2">Rows</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Rows</label>
                 <div className="space-y-2">
                   {question.matrix.rows.map((row, index) => (
                     <div key={index} className="flex gap-2">
@@ -420,7 +420,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                           });
                         }}
                         placeholder={`Row ${index + 1}`}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md text-sm"
                         disabled={isPreview}
                       />
                       {!isPreview && question.matrix!.rows.length > 1 && (
@@ -449,7 +449,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                           rows: [...question.matrix!.rows, ""],
                         });
                       }}
-                      className="text-sm font-semibold hover:text-gray-600">
+                      className="text-sm font-semibold hover:text-gray-600 dark:hover:text-gray-300 dark:text-gray-200">
                       Add Row
                     </button>
                   )}
@@ -458,7 +458,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
 
               {/* Columns Section */}
               <div className="flex-1">
-                <label className="block text-xs text-gray-500 mb-2">Columns</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">Columns</label>
                 <div className="space-y-2">
                   {question.matrix.columns.map((column, index) => (
                     <div key={index} className="flex gap-2">
@@ -474,7 +474,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                           });
                         }}
                         placeholder={`Column ${index + 1}`}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md text-sm"
                         disabled={isPreview}
                       />
                       {!isPreview && question.matrix!.columns.length > 1 && (
@@ -505,7 +505,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                           columns: [...question.matrix!.columns, ""],
                         });
                       }}
-                      className="text-sm font-semibold hover:text-gray-600">
+                      className="text-sm font-semibold hover:text-gray-600 dark:hover:text-gray-300 dark:text-gray-200">
                       Add column
                     </button>
                   )}
@@ -518,10 +518,10 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
         {/* Validation Settings */}
         {isExpanded && (question.type === "short-answer" || question.type === "long-answer") && (
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700">Validation</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Validation</label>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Min Length</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Min Length</label>
                 <input
                   type="number"
                   value={question.validation?.minLength || ""}
@@ -531,12 +531,12 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                       minLength: e.target.value ? parseInt(e.target.value) : undefined,
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md text-sm"
                   disabled={isPreview}
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Max Length</label>
+                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Max Length</label>
                 <input
                   type="number"
                   value={question.validation?.maxLength || ""}
@@ -546,7 +546,7 @@ const QuestionBox: React.FC<QuestionBoxProps> = ({
                       maxLength: e.target.value ? parseInt(e.target.value) : undefined,
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md text-sm"
                   disabled={isPreview}
                 />
               </div>

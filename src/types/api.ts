@@ -37,6 +37,19 @@ export interface PagedResult<T> {
 }
 
 // User Types
+export interface ResearcherOnboardingDto {
+  dismissed: boolean;
+  completed: boolean;
+  answers?: Record<string, unknown>;
+  updatedAt?: string;
+}
+
+export interface SaveResearcherOnboardingRequest {
+  dismissed: boolean;
+  completed: boolean;
+  answers?: Record<string, unknown>;
+}
+
 export interface UserDto {
   id: string;
   userName?: string;
@@ -51,6 +64,7 @@ export interface UserDto {
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
+  researcherOnboarding?: ResearcherOnboardingDto;
 }
 
 export interface UserDtoPagedResult extends PagedResult<UserDto> {}
@@ -155,6 +169,22 @@ export interface SurveyDto {
   questions?: QuestionDto[];
 }
 
+export interface ShareableLinkDto {
+  shareableLink: string;
+  password?: string;
+  expiresAt?: string;
+  isActive: boolean;
+  useCount: number;
+  maxUses?: number;
+}
+
+export interface UpdateShareableLinkDto {
+  password?: string;
+  expiresAt?: string;
+  allowAnonymous?: boolean;
+  maxUses?: number;
+}
+
 export interface PublicSurveyDto {
   id: string;
   title?: string;
@@ -206,6 +236,13 @@ export interface UpdateSurveyDto {
   settings?: SurveySettings;
   expectedResponses?: number;
   rewardPerResponse?: number;
+}
+
+export interface DuplicateSurveyDto {
+  title?: string;
+  projectId?: string;
+  includeResponses?: boolean;
+  includeAnalytics?: boolean;
 }
 
 export interface SurveySettings {

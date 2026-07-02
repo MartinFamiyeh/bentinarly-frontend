@@ -450,7 +450,7 @@ const SurveyQuestionInput: React.FC<SurveyQuestionInputProps> = ({
           : {};
       return (
         <div className="overflow-hidden rounded-lg border border-[#EEEEEE]">
-          {question.matrix?.rows.map((row) => (
+          {question.matrix?.rows.map((row, rowIndex) => (
             <div key={row} className="border-b border-[#EEEEEE] last:border-b-0">
               <div className="flex items-center justify-between bg-[#FAFAFA] px-4 py-3">
                 <span className="text-sm font-medium text-[#292929]">{row}</span>

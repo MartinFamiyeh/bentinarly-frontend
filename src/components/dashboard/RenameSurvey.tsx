@@ -34,8 +34,14 @@ const RenameSurvey = ({ isOpen, onClose, surveyId, currentName, onRenameComplete
     
     setIsLoading(true);
     try {
+      const currentSurvey = await surveysApi.getSurvey(surveyId);
       const updatedSurvey = await surveysApi.updateSurvey(surveyId, {
         title: name.trim(),
+        description: currentSurvey.description,
+        projectId: currentSurvey.projectId,
+        settings: currentSurvey.settings,
+        expectedResponses: currentSurvey.expectedResponses,
+        rewardPerResponse: currentSurvey.rewardPerResponse,
       });
       showSnackbar("Survey renamed successfully.", "success");
       if (onRenameComplete) {

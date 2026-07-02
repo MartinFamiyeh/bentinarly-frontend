@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useProjectsApi } from "../services/apiClient";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import { useLoading } from "../contexts/LoadingContext";
@@ -41,9 +42,16 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   const { showSnackbar } = useSnackbar();
   const { showLoading, hideLoading } = useLoading();
   const { user, isLoading: authLoading } = useAuth();
+  const location = useLocation();
+  const isPublicTakeSurveyRoute = location.pathname === "/surveys/takesurvey";
 
   // Load projects from API only when user is authenticated
   useEffect(() => {
+    if (isPublicTakeSurveyRoute) {
+      setIsLoading(false);
+      return;
+    }
+
     // Wait for auth to finish loading
     if (authLoading) {
       return;
@@ -58,7 +66,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       setSelectedProject(null);
       setIsLoading(false);
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, isPublicTakeSurveyRoute]);
 
   const loadProjects = async () => {
     // Don't load if user is not authenticated

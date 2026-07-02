@@ -42,7 +42,7 @@ const ToolbarBtn: React.FC<ToolbarBtnProps> = ({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`p-2 rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       title={label}
     >
       {typeof IconToRender === 'string' ? (
@@ -75,8 +75,6 @@ const QuestionToolbar: React.FC<QuestionToolbarProps> = ({
   onDuplicate,
   onDelete,
   onOpenComment,
-  onMoveUp,
-  onMoveDown,
   isExpanded,
   onToggleExpanded,
   disabled = false,

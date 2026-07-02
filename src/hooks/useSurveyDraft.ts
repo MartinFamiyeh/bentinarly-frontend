@@ -89,7 +89,7 @@ export function useSurveyDraft({
   }, [draftKey, pendingRestore, setLastLocalDraftAt, setStatus]);
 
   const offerDraftRestore = useCallback(
-    (serverSurvey: Survey, serverSnapshot: string) => {
+    (_serverSurvey: Survey, serverSnapshot: string) => {
       const entry = loadDraft(draftKey);
       if (!entry) {
         return;

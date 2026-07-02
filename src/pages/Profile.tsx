@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useUsersApi } from "../services/apiClient";
 import { useSnackbar } from "../contexts/SnackbarContext";
@@ -8,21 +7,15 @@ import * as ApiTypes from "../types/api";
 
 const Profile = () => {
   const { user, refreshUser } = useAuth();
-  console.log("user profile", user);
   const usersApi = useUsersApi();
   const { showSnackbar } = useSnackbar();
   const { showLoading, hideLoading } = useLoading();
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    phoneNumber: "",
-    bio: "",
-    dateOfBirth: "",
-    gender: "",
-    location: "",
+    mobileNumber: "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -33,16 +26,14 @@ const Profile = () => {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
-        phoneNumber: user.phoneNumber || "",
-        bio: user.bio || "",
-        dateOfBirth: user.dateOfBirth || "",
-        gender: user.gender || "",
-        location: user.location || "",
+        mobileNumber: user.mobileNumber || "",
       });
     }
   }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -56,21 +47,22 @@ const Profile = () => {
     showLoading();
     try {
       const updateData: ApiTypes.UpdateUserProfileCommand = {
+        userId: user.id,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        phoneNumber: formData.phoneNumber,
-        bio: formData.bio,
-        dateOfBirth: formData.dateOfBirth || undefined,
-        gender: formData.gender || undefined,
-        location: formData.location,
+        mobileNumber: formData.mobileNumber,
       };
 
       await usersApi.updateProfile(updateData);
       await refreshUser();
       showSnackbar("Profile updated successfully!", "success");
       setIsEditing(false);
-    } catch (error: any) {
-      showSnackbar(error.response?.data?.detail || "Failed to update profile.", "error");
+    } catch (error: unknown) {
+      const message =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+          : undefined;
+      showSnackbar(message || "Failed to update profile.", "error");
     } finally {
       hideLoading();
     }
@@ -78,19 +70,20 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen dark:text-gray-300">
         <p>Loading profile...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white h-screen rounded-l-xl flex flex-col overflow-y-auto">
-      <div className="py-6 px-8 border-b border-gray-200">
+    <div className="bg-white dark:bg-gray-900 h-screen rounded-l-xl flex flex-col overflow-y-auto">
+      <div className="py-6 px-8 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Profile</h1>
           {!isEditing && (
             <button
+              type="button"
               onClick={() => setIsEditing(true)}
               className="px-4 py-2 bg-[#FE5102] text-white rounded-lg hover:bg-orange-600 transition-colors">
               Edit Profile
@@ -101,42 +94,36 @@ const Profile = () => {
 
       <div className="p-8 max-w-4xl">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
-            
+          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-lg font-semibold mb-4 dark:text-gray-100">Personal Information</h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
                 <input
                   type="text"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102] disabled:bg-gray-100"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102] disabled:bg-gray-100 dark:disabled:bg-gray-700"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
                 <input
                   type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102] disabled:bg-gray-100"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102] disabled:bg-gray-100 dark:disabled:bg-gray-700"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
                 <input
                   type="email"
                   name="email"
@@ -148,75 +135,16 @@ const Profile = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Mobile Number
                 </label>
                 <input
                   type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
+                  name="mobileNumber"
+                  value={formData.mobileNumber}
                   onChange={handleChange}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102] disabled:bg-gray-100"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  value={formData.dateOfBirth}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102] disabled:bg-gray-100"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Gender
-                </label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102] disabled:bg-gray-100">
-                  <option value="">Select gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102] disabled:bg-gray-100"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bio
-                </label>
-                <textarea
-                  name="bio"
-                  value={formData.bio}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102] disabled:bg-gray-100"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102] disabled:bg-gray-100 dark:disabled:bg-gray-700"
                 />
               </div>
             </div>
@@ -233,11 +161,7 @@ const Profile = () => {
                       firstName: user.firstName || "",
                       lastName: user.lastName || "",
                       email: user.email || "",
-                      phoneNumber: user.phoneNumber || "",
-                      bio: user.bio || "",
-                      dateOfBirth: user.dateOfBirth || "",
-                      gender: user.gender || "",
-                      location: user.location || "",
+                      mobileNumber: user.mobileNumber || "",
                     });
                   }
                 }}

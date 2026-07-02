@@ -11,11 +11,7 @@ import DateIcon from "../assets/icons/date.svg";
 import TimeIcon from "../assets/icons/time.svg";
 import DropdownIcon from "../assets/icons/dropdown.svg";
 import FileUploadIcon from "../assets/icons/upload.svg";
-import MatrixIcon from "../assets/icons/matrix.svg";
-import SliderIcon from "../assets/icons/slider.svg";
 import SingleGridIcon from "../assets/icons/single-matrix.svg";
-import LikertIcon from "../assets/icons/likert.svg";
-import RankingIcon from "../assets/icons/ranking.svg";
 
 export const QUESTION_TYPES: Array<{
   type: QuestionType;
@@ -81,24 +77,6 @@ export const QUESTION_TYPES: Array<{
     hasMatrix: false,
   },
   {
-    type: "ranking",
-    label: "Ranking",
-    icon: RankingIcon,
-    description: "",
-    hasOptions: true,
-    hasRating: false,
-    hasMatrix: false,
-  },
-  {
-    type: "likert-scale",
-    label: "Likert Scale",
-    icon: LikertIcon,
-    description: "",
-    hasOptions: false,
-    hasRating: true,
-    hasMatrix: false,
-  },
-  {
     type: "dropdown",
     label: "Dropdown",
     icon: DropdownIcon,
@@ -124,24 +102,6 @@ export const QUESTION_TYPES: Array<{
     hasOptions: false,
     hasRating: false,
     hasMatrix: true,
-  },
-  {
-    type: "multiple-grid",
-    label: "Multiple Choice Grid",
-    icon: MatrixIcon,
-    description: "",
-    hasOptions: false,
-    hasRating: false,
-    hasMatrix: true,
-  },
-  {
-    type: "slider-scale",
-    label: "Slider Scale",
-    icon: SliderIcon,
-    description: "",
-    hasOptions: false,
-    hasRating: true,
-    hasMatrix: false,
   },
   {
     type: "date",

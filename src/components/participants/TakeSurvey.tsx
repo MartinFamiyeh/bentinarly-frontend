@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import type { PublicSurveyDto, QuestionDto } from "../../types/api";
@@ -63,75 +63,68 @@ const TakeSurvey: React.FC = () => {
   const currentPage = pages[currentPageIndex];
   const totalPages = pages.length;
 
-  const fetchSurvey = useCallback(async () => {
+  useEffect(() => {
     if (!surveyId) {
       setLoading(false);
       setLoadError("Survey ID is missing from the URL.");
       return;
     }
 
-    try {
-      setLoading(true);
-      setLoadError(null);
-      const [surveyData, questionsData] = await Promise.all([
-        surveysApi.getPublicSurvey(surveyId),
-        surveysApi.getPublicQuestions(surveyId),
-      ]);
-      setSurvey(surveyData);
+    let cancelled = false;
 
-      if (surveyData.rewardPerResponse != null) {
-        setRewardAmount(surveyData.rewardPerResponse);
-      }
-
-      const sortedApiQuestions = (questionsData || []).sort((a, b) => a.order - b.order);
-      setApiQuestions(sortedApiQuestions);
-      const localQuestions = mapApiQuestionsToLocal(sortedApiQuestions);
-      setQuestions(localQuestions);
-
-      const persisted = loadPersistedAnswers(surveyId);
-      const initialAnswers: Record<string, AnswerValue> = { ...(persisted ?? {}) };
-
-      for (const question of localQuestions) {
-        if (question.type === "ranking" && !initialAnswers[question.id]) {
-          initialAnswers[question.id] = question.options?.map((o) => o.id) || [];
-        }
-      }
-
-      setAnswers(initialAnswers);
-    } catch (err) {
-      console.error("Failed to fetch survey", err);
-      setLoadError("Unable to load this survey. It may be unpublished or no longer available.");
-      setSurvey(null);
-      setApiQuestions([]);
-      setQuestions([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [surveyId, surveysApi]);
-
-  useEffect(() => {
-    if (rewardAmount != null || !surveyId) {
-      return;
-    }
-
-    const loadReward = async () => {
+    const load = async () => {
       try {
-        const list = await surveysApi.getSurveys({});
-        const match = list.items?.find((item) => item.id === surveyId);
-        if (match?.rewardPerResponse != null) {
-          setRewardAmount(match.rewardPerResponse);
+        setLoading(true);
+        setLoadError(null);
+        const [surveyData, questionsData] = await Promise.all([
+          surveysApi.getPublicSurvey(surveyId),
+          surveysApi.getPublicQuestions(surveyId),
+        ]);
+        if (cancelled) return;
+
+        setSurvey(surveyData);
+
+        if (surveyData.rewardPerResponse != null) {
+          setRewardAmount(surveyData.rewardPerResponse);
         }
-      } catch {
-        // Reward display is optional; ignore lookup failures.
+
+        const sortedApiQuestions = (questionsData || []).sort((a, b) => a.order - b.order);
+        setApiQuestions(sortedApiQuestions);
+        const localQuestions = mapApiQuestionsToLocal(sortedApiQuestions);
+        setQuestions(localQuestions);
+
+        const persisted = loadPersistedAnswers(surveyId);
+        const initialAnswers: Record<string, AnswerValue> = { ...(persisted ?? {}) };
+
+        for (const question of localQuestions) {
+          if (question.type === "ranking" && !initialAnswers[question.id]) {
+            initialAnswers[question.id] = question.options?.map((o) => o.id) || [];
+          }
+        }
+
+        setAnswers(initialAnswers);
+      } catch (err) {
+        if (cancelled) return;
+        console.error("Failed to fetch survey", err);
+        setLoadError("Unable to load this survey. It may be unpublished or no longer available.");
+        setSurvey(null);
+        setApiQuestions([]);
+        setQuestions([]);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    void loadReward();
-  }, [surveyId, rewardAmount, surveysApi]);
+    void load();
 
-  useEffect(() => {
-    fetchSurvey();
-  }, [fetchSurvey]);
+    return () => {
+      cancelled = true;
+    };
+    // surveysApi is recreated each render; surveyId is the only stable trigger we need.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [surveyId]);
 
   useEffect(() => {
     if (surveyId && Object.keys(answers).length > 0) {

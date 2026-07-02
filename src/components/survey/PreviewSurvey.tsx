@@ -4,7 +4,6 @@ import { ChevronDown, X } from "lucide-react";
 import DragIcon from "../../assets/icons/drag-vertical.svg";
 import Folder from "../../assets/icons/folder.svg";
 import Divider from "../../assets/icons/divider.svg";
-import { div } from "framer-motion/client";
 
 interface QuestionPreviewProps {
   questions: Question[];

@@ -40,8 +40,8 @@ const Tooltip: React.FC<TooltipProps> = ({ text, position }) => (
         left: position.left,
         transform: "translateY(-50%)",
       }}>
-      <div className="w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-white shadow-sm" />
-      <div className="bg-white text-[#FE5102] text-xs font-medium px-2 py-1 rounded shadow whitespace-nowrap">
+      <div className="w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-white dark:border-r-gray-900 shadow-sm" />
+      <div className="bg-white dark:bg-gray-900 text-[#FE5102] text-xs font-medium px-2 py-1 rounded shadow whitespace-nowrap">
         {text}
       </div>
     </div>
@@ -102,8 +102,8 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ isMinimized }) =>
               className={({ isActive }) =>
                 `flex items-center gap-3 p-2 text-sm rounded-md transition-colors ${
                   isActive
-                    ? "bg-[#FFF5F0] text-[#FE5102] font-semibold"
-                    : "text-[#696969] hover:bg-gray-100 font-medium"
+                    ? "bg-[#FFF5F0] dark:bg-gray-800 text-[#FE5102] font-semibold"
+                    : "text-[#696969] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium"
                 } ${isMinimized ? "justify-center" : ""}`
               }
               onMouseEnter={(e) => handleMouseEnter(item, e)}

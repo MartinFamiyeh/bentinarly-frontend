@@ -4,7 +4,7 @@ import { useSnackbar } from "../../contexts/SnackbarContext";
 type DeleteProjectModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  projectId: number;
+  projectId: string;
   projectName: string;
 };
 

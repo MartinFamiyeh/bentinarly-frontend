@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ImgSelector from '../../assets/icons/img_selector.svg';
 
 interface QuestionInputProps {
@@ -16,10 +16,8 @@ interface QuestionInputProps {
 const QuestionInput: React.FC<QuestionInputProps> = ({
   questionNumber,
   title,
-  description,
   image,
   onTitleChange,
-  onDescriptionChange,
   onImageChange,
   disabled = false,
   questionId,
@@ -43,7 +41,7 @@ const QuestionInput: React.FC<QuestionInputProps> = ({
     <div className="space-y-4">
       {/* Question Title */}
       <div className="flex items-start gap-3">
-        <span className="text-md font-medium text-black mt-2">
+        <span className="text-md font-medium text-black dark:text-gray-100 mt-2">
           Q{questionNumber}.
         </span>
         <div className="flex-1 relative">
@@ -52,7 +50,7 @@ const QuestionInput: React.FC<QuestionInputProps> = ({
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder="Type question here"
-            className={`text-black w-full px-3 py-3 ${!title.trim() ? 'pr-20' : 'pr-12'} border ${!title.trim() ? 'border-amber-400 bg-amber-50' : 'bg-gray-50 border-gray-300'} rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`text-black dark:text-gray-100 w-full px-3 py-3 ${!title.trim() ? 'pr-20' : 'pr-12'} border ${!title.trim() ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' : 'bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600'} rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
             disabled={disabled}
             maxLength={200}
           />
@@ -77,7 +75,7 @@ const QuestionInput: React.FC<QuestionInputProps> = ({
             </div>
           )}
           {image ? (
-            <div className={`absolute ${!title.trim() ? 'right-10' : 'right-2'} top-1/2 transform -translate-y-1/2 bg-white w-8 h-8 rounded-md flex items-center justify-center`}>
+            <div className={`absolute ${!title.trim() ? 'right-10' : 'right-2'} top-1/2 transform -translate-y-1/2 bg-white dark:bg-gray-800 w-8 h-8 rounded-md flex items-center justify-center`}>
               <img
                 src={image}
                 alt="Question"
@@ -101,7 +99,7 @@ const QuestionInput: React.FC<QuestionInputProps> = ({
                   input?.click();
                 }}
                 disabled={disabled}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white w-8 h-8 rounded-md flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white dark:bg-gray-800 w-8 h-8 rounded-md flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ImgSelector />
               </button>

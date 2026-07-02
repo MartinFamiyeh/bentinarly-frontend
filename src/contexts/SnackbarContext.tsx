@@ -31,7 +31,11 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         autoHideDuration={4000}
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        sx={{ top: "75px !important" }}>
+        sx={{
+          top: { xs: 16, sm: 24 },
+          bottom: "auto !important",
+          zIndex: (theme) => theme.zIndex.snackbar,
+        }}>
         <Alert onClose={handleClose} severity={severity} variant="filled">
           {message}
         </Alert>

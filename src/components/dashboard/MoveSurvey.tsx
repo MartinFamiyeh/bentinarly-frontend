@@ -61,7 +61,7 @@ const MoveSurvey = ({ isOpen, onClose, surveyId, onMoveComplete }: MoveSurveyMod
         updatedSurvey = await surveysApi.updateSurvey(surveyId, {
           title: surveyData.title || "",
           description: surveyData.description || "",
-          projectId: selectedProjectId,
+          projectId: selectedProjectId ?? undefined,
           settings: surveyData.settings,
           expectedResponses: surveyData.expectedResponses,
           rewardPerResponse: surveyData.rewardPerResponse,

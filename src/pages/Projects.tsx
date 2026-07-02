@@ -2,15 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GreetingBackground from "../assets/images/greeting.jpg";
 import EmptySurvey from "../assets/images/empty-survey.png";
-import QuestionnaireModal from "../components/dashboard/QuestionnaireModal";
 import SurveyCard from "../components/dashboard/SurveyCard";
 import ProjectsTopBar from "../components/dashboard/ProjectsTopBar";
-import { sampleQuestions } from "../data/questions";
 import { useLoading } from "../contexts/LoadingContext";
 import { useSurveysApi } from "../services/apiClient";
 import { useAuth } from "../contexts/AuthContext";
 import { useProjects } from "../contexts/ProjectsContext";
 import type { SurveyDto, SurveyStatus } from "../types/api";
+import { getTimeOfDayGreeting } from "../utils/timeOfDayGreeting";
 
 const Projects = () => {
   const { showLoading, hideLoading } = useLoading();
@@ -26,7 +25,6 @@ const Projects = () => {
   const [sortOrder, setSortOrder] = useState<
     "Newest to Oldest" | "Oldest to Newest" | "A - Z" | "Z - A"
   >("Newest to Oldest");
-  const [isQuestionnaireModalOpen, setIsQuestionnaireModalOpen] = useState(false);
 
   // Debounce search term to avoid too many API calls
   useEffect(() => {
@@ -36,10 +34,6 @@ const Projects = () => {
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
-
-  useEffect(() => {
-    setIsQuestionnaireModalOpen(true);
-  }, []);
 
   // Fetch surveys from backend
   const loadSurveysRef = useRef<(() => Promise<void>) | null>(null);
@@ -95,11 +89,6 @@ const Projects = () => {
     loadSurveys();
   }, [activeFilter, sortOrder, selectedProject?.id, debouncedSearchTerm]);
 
-  const handleQuestionnaireSubmit = (answers: Record<string, string | string[]>) => {
-    console.log("Questionnaire Answers:", answers);
-    setIsQuestionnaireModalOpen(false);
-  };
-
   // Note: Filtering by status is handled by the API, so we only need to sort here
   const filteredSurveys = surveys.sort((a, b) => {
       switch (sortOrder) {
@@ -121,7 +110,7 @@ const Projects = () => {
     });
 
   return (
-    <div className="h-screen rounded-l-xl bg-white shadow-sm overflow-y-auto">
+    <div className="h-screen rounded-l-xl bg-white dark:bg-gray-900 shadow-sm overflow-y-auto">
       <ProjectsTopBar
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}
@@ -138,7 +127,7 @@ const Projects = () => {
             backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${GreetingBackground})`,
           }}>
           <h2 className="text-lg font-semibold text-[#FFFEFE] tracking-normal leading-normal">
-            Good Morning {user?.firstName || user?.userName || "User"},
+            {getTimeOfDayGreeting()} {user?.firstName || user?.userName || "User"},
           </h2>
           <p className="text-[#FFFEFE] text-sm">
             Let’s get your research moving. Craft better surveys, find the right participants, and
@@ -178,7 +167,7 @@ const Projects = () => {
           ) : (
             <div className="h-full flex flex-col gap-4 justify-center items-center py-10">
               <img src={EmptySurvey} alt="" className="max-w-xs" />
-              <p className="text-sm text-[#696969]">
+              <p className="text-sm text-[#696969] dark:text-gray-400">
                 {selectedProject
                   ? `You currently have no surveys in ${selectedProject.name} with the selected filter.`
                   : "You currently have no surveys with the selected filter."}{" "}
@@ -196,14 +185,6 @@ const Projects = () => {
           )}
         </div>
       </div>
-
-      <QuestionnaireModal
-        isOpen={isQuestionnaireModalOpen}
-        onClose={() => setIsQuestionnaireModalOpen(false)}
-        onSubmit={handleQuestionnaireSubmit}
-        questions={sampleQuestions}
-        title="Help us set you up for impactful research."
-      />
     </div>
   );
 };

@@ -1,17 +1,24 @@
 // src/layouts/DashboardLayout.tsx
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/dashboard/Sidebar";
+import { useResearcherOnboarding } from "../contexts/ResearcherOnboardingContext";
+import { useSidebarCollapsed } from "../hooks/useSidebarCollapsed";
 
 const DashboardLayout = () => {
-  const [isSidebarMinimized, setSidebarMinimized] = useState(false);
+  const { isMinimized: isSidebarMinimized, toggleSidebar } = useSidebarCollapsed();
+  const { shouldAutoOpen, openModal } = useResearcherOnboarding();
+  const hasAutoOpenedRef = useRef(false);
 
-  const toggleSidebar = () => {
-    setSidebarMinimized(!isSidebarMinimized);
-  };
+  useEffect(() => {
+    if (shouldAutoOpen && !hasAutoOpenedRef.current) {
+      hasAutoOpenedRef.current = true;
+      openModal();
+    }
+  }, [shouldAutoOpen, openModal]);
 
   return (
-    <div className="flex h-screen bg-[#F1F1F1] gap-x-4">
+    <div className="flex h-screen bg-[#F1F1F1] dark:bg-[#0B0B0B] gap-x-4">
       <Sidebar isMinimized={isSidebarMinimized} toggle={toggleSidebar} />
 
       <main className={`flex-1`}>

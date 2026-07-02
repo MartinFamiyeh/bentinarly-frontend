@@ -1,7 +1,5 @@
 import { useEffect, useRef, type RefObject } from "react";
 
-type EventType = "mousedown" | "touchstart";
-
 export const useClickAway = <T extends HTMLElement>(
   handler: (event: MouseEvent | TouchEvent) => void
 ): RefObject<T> => {

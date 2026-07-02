@@ -93,7 +93,7 @@ export interface Survey {
   };
   createdAt: string;
   updatedAt: string;
-  status: "draft" | "published" | "closed";
+  status: "draft" | "published" | "paused" | "closed";
 }
 
 // export interface SurveyQuestion {

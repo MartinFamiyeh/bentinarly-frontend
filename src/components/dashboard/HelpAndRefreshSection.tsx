@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import Refresh from "../../assets/icons/refresh.png";
-import HelpActive from "../../assets/icons/help-active.png";
 import Help from "../../assets/icons/help.png";
 import Arrow from "../../assets/icons/chevron-down.png";
 
@@ -30,10 +29,10 @@ const Tooltip: React.FC<TooltipProps> = ({ text, position }) => (
         transform: "translateY(-50%)",
       }}>
       {/* Arrow */}
-      <div className="w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-white shadow-sm" />
+      <div className="w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-white dark:border-r-gray-900 shadow-sm" />
 
       {/* Tooltip box */}
-      <div className="bg-white text-[#FE5102] text-xs font-medium px-2 py-1 rounded shadow whitespace-nowrap">
+      <div className="bg-white dark:bg-gray-900 text-[#FE5102] text-xs font-medium px-2 py-1 rounded shadow whitespace-nowrap">
         {text}
       </div>
     </div>
@@ -96,9 +95,9 @@ const HelpAndRefreshSection: React.FC<HelpAndRefreshSectionProps> = ({ isMinimiz
       <Portal>
         <div
           style={{ position: "fixed", top: helpMenuPos.top, left: helpMenuPos.left }}
-          className="w-80 bg-white border border-gray-200 rounded-2xl shadow-lg z-[9999]">
+          className="w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg z-[9999]">
           <div className="py-4">
-            <div className="px-4 text-xs mb-1 text-[#292929]">
+            <div className="px-4 text-xs mb-1 text-[#292929] dark:text-gray-100">
               <p>Help Center</p>
             </div>
             {[
@@ -111,7 +110,7 @@ const HelpAndRefreshSection: React.FC<HelpAndRefreshSectionProps> = ({ isMinimiz
               <a
                 key={i}
                 href="#"
-                className="flex items-center px-4 py-2 text-sm text-[#6B7280] hover:bg-[#FFF5F0]">
+                className="flex items-center px-4 py-2 text-sm text-[#6B7280] dark:text-gray-400 hover:bg-[#FFF5F0] dark:hover:bg-gray-800">
                 {q}
               </a>
             ))}
@@ -124,7 +123,7 @@ const HelpAndRefreshSection: React.FC<HelpAndRefreshSectionProps> = ({ isMinimiz
     <>
       <Link
         to="#"
-        className={`flex items-center gap-3 p-2 my-1 rounded-md text-sm text-gray-600 hover:bg-gray-100 ${
+        className={`flex items-center gap-3 p-2 my-1 rounded-md text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 ${
           isMinimized ? "justify-center" : ""
         }`}
         onMouseEnter={(e) => handleMouseEnter("Refresh", e)}
@@ -139,7 +138,7 @@ const HelpAndRefreshSection: React.FC<HelpAndRefreshSectionProps> = ({ isMinimiz
       <button
         ref={helpButtonRef}
         onClick={toggleHelpMenu}
-        className={`flex items-center gap-3 p-2 my-1 rounded-md text-sm text-gray-600 hover:bg-gray-100 ${
+        className={`flex items-center gap-3 p-2 my-1 rounded-md text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 ${
           isMinimized ? "justify-center" : "justify-between"
         }`}
         onMouseEnter={(e) => handleMouseEnter("Help Center", e)}

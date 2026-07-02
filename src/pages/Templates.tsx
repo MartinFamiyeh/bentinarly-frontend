@@ -54,23 +54,23 @@ const Templates = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen dark:text-gray-300">
         <p>Loading templates...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white h-screen rounded-l-xl flex flex-col overflow-y-auto">
-      <div className="py-6 px-8 border-b border-gray-200">
+    <div className="bg-white dark:bg-gray-900 h-screen rounded-l-xl flex flex-col overflow-y-auto">
+      <div className="py-6 px-8 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Survey Templates</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Survey Templates</h1>
           <input
             type="text"
             placeholder="Search templates..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102]"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE5102]"
           />
         </div>
       </div>
@@ -81,9 +81,11 @@ const Templates = () => {
             {templates.map((template) => (
               <div
                 key={template.id}
-                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{template.name}</h3>
-                <p className="text-sm text-gray-600 mb-4">{template.description}</p>
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  {template.title || "Untitled Template"}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{template.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-gray-500">
                     {template.category || "Uncategorized"}

@@ -21,6 +21,10 @@ import {
   isPersistedOptionId,
   isPersistedQuestionId,
 } from "../utils/questionTypes";
+import {
+  mapApiQuestionsToLocal,
+  mapLocalQuestionToApiPayload,
+} from "../utils/questionMappers";
 import { createSurveySnapshot } from "../utils/surveySnapshot";
 import { useSurveyDraft } from "../hooks/useSurveyDraft";
 import { useSnackbar } from "../contexts/SnackbarContext";
@@ -83,7 +87,9 @@ const Questionnaires: React.FC = () => {
   const [isPublishing, setIsPublishing] = useState(false);
   const [surveyOwnerId, setSurveyOwnerId] = useState<string>("");
   const [surveyOwnerName, setSurveyOwnerName] = useState<string>("");
+  const [apiSurveyStatus, setApiSurveyStatus] = useState<ApiTypes.SurveyStatus>(1);
   const [surveyProjectId, setSurveyProjectId] = useState<string | undefined>(undefined);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const draftKey = surveyId || survey.id || "new";
 
@@ -124,70 +130,14 @@ const Questionnaires: React.FC = () => {
     discardDraft();
   };
 
-  const mapQuestionTypeToApi = (type: Question["type"]): ApiTypes.QuestionType => {
-    // Mapping from UI question type string to backend numeric QuestionType enum
-    const mapping: Record<Question["type"], ApiTypes.QuestionType> = {
-      "single-choice": 1,
-      "multiple-choice": 2,
-      "short-answer": 3,
-      "long-answer": 4,
-      "rating-scale": 5,
-      "yes-no": 6,
-      "date": 7,
-      "time": 8,
-      "email": 9,
-      "phone": 10,
-      "dropdown": 11,
-      "file-upload": 12,
-      "single-grid": 13,
-      "ranking": 14,
-      "multiple-grid": 15,
-      "slider-scale": 16,
-      "likert-scale": 17,
-    };
-    return mapping[type];
+  const mapApiStatusToLocal = (status: ApiTypes.SurveyStatus): Survey["status"] => {
+    switch (status) {
+      case 1: return "draft";
+      case 2: return "published";
+      case 5: return "paused";
+      default: return "closed";
+    }
   };
-
-  // Reverse mapping from backend numeric type to UI string type
-  const mapApiTypeToQuestionType = (apiType: ApiTypes.QuestionType): QuestionType => {
-    const reverseMapping: Record<ApiTypes.QuestionType, QuestionType> = {
-      1: "single-choice",
-      2: "multiple-choice",
-      3: "short-answer",
-      4: "long-answer",
-      5: "rating-scale",
-      6: "yes-no",
-      7: "date",
-      8: "time",
-      9: "email",
-      10: "phone",
-      11: "dropdown",
-      12: "file-upload",
-      13: "single-grid",
-      14: "ranking",
-      15: "multiple-grid",
-      16: "slider-scale",
-      17: "likert-scale",
-    };
-    return reverseMapping[apiType];
-  };
-
-  const mapApiQuestionsToLocal = (questions: ApiTypes.QuestionDto[]): Question[] =>
-    questions.map((q, index) => ({
-      id: q.id,
-      type: mapApiTypeToQuestionType(q.type),
-      title: q.title || "",
-      description: q.description || "",
-      required: q.isRequired,
-      order: q.order || index + 1,
-      options:
-        q.options
-          ?.sort((a, b) => (a.order || 0) - (b.order || 0))
-          .map((opt) => ({
-            id: opt.id,
-            text: opt.text || "",
-          })) || [],
-    }));
 
   const mapLoadedSurvey = (
     surveyData: ApiTypes.SurveyDto,
@@ -205,7 +155,7 @@ const Questionnaires: React.FC = () => {
     },
     createdAt: surveyData.createdAt,
     updatedAt: surveyData.updatedAt,
-    status: surveyData.status === 1 ? "draft" : surveyData.status === 2 ? "published" : "closed",
+    status: mapApiStatusToLocal(surveyData.status),
   });
 
   const sensors = useSensors(
@@ -217,35 +167,57 @@ const Questionnaires: React.FC = () => {
 
   // Load survey from backend if surveyId exists
   useEffect(() => {
+    let cancelled = false;
+
     const loadSurvey = async () => {
       if (surveyId && surveyId !== "new") {
         setIsSurveyLoaded(false);
+        setLoadError(null);
         try {
           const surveyData = await surveysApi.getSurvey(surveyId, { includeQuestions: true });
-          const questions = await questionsApi.getQuestions(surveyId);
+          const questions =
+            surveyData.questions && surveyData.questions.length > 0
+              ? surveyData.questions
+              : await questionsApi.getQuestions(surveyId);
+
+          if (cancelled) return;
+
           const loadedSurvey = mapLoadedSurvey(surveyData, questions);
 
           setSurvey(loadedSurvey);
-          
-          // Store owner info for ShareModal
           setSurveyOwnerId(surveyData.creatorId);
-          setSurveyOwnerName(surveyData.creatorName || user?.firstName || user?.userName || "Unknown");
-          // Store projectId to preserve it when updating
-          setSurveyProjectId((surveyData as ApiTypes.SurveyDto & { projectId?: string }).projectId);
-          
+          setApiSurveyStatus(surveyData.status);
+          setSurveyOwnerName(
+            surveyData.creatorName || user?.firstName || user?.userName || "Unknown"
+          );
+          setSurveyProjectId(surveyData.projectId);
+
           const loadedSnapshot = createSurveySnapshot(loadedSurvey);
           setLastSavedSurvey(loadedSnapshot);
           offerDraftRestore(loadedSurvey, loadedSnapshot);
         } catch (error) {
+          if (cancelled) return;
           console.error("Error loading survey:", error);
+          const message =
+            error instanceof Error ? error.message : "Failed to load survey. Please try again.";
+          setLoadError(message);
+          showSnackbar(message, "error");
         } finally {
-          setIsSurveyLoaded(true);
+          if (!cancelled) {
+            setIsSurveyLoaded(true);
+          }
         }
       } else {
+        setLoadError(null);
         setIsSurveyLoaded(true);
       }
     };
+
     loadSurvey();
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [surveyId]);
 
@@ -399,7 +371,7 @@ const Questionnaires: React.FC = () => {
     }
   };
 
-  const handleSave = async (): Promise<string> => {
+  const handleSave = async (options?: { skipNavigate?: boolean }): Promise<string> => {
     if (survey.id !== "new" && !isSurveyLoaded) {
       throw new Error("Survey is still loading. Please try again.");
     }
@@ -460,11 +432,7 @@ const Questionnaires: React.FC = () => {
 
           const validOptions = question.options?.filter((opt) => opt.text?.trim()) || [];
           await questionsApi.createQuestion(savedSurveyId, {
-            type: mapQuestionTypeToApi(question.type),
-            title: questionTitle,
-            description: question.description,
-            isRequired: question.required,
-            order: question.order,
+            ...mapLocalQuestionToApiPayload({ ...question, title: questionTitle }),
             options: validOptions.map((opt, optIndex) => ({
               text: opt.text.trim(),
               order: optIndex,
@@ -475,31 +443,32 @@ const Questionnaires: React.FC = () => {
         savedSurveyId = survey.id;
 
         let currentProjectId = surveyProjectId;
-        if (currentProjectId === undefined) {
-          try {
-            const currentSurveyData = await surveysApi.getSurvey(survey.id);
+        let currentSurveyData: ApiTypes.SurveyDto | null = null;
+        try {
+          currentSurveyData = await surveysApi.getSurvey(survey.id);
+          if (currentProjectId === undefined) {
             currentProjectId = currentSurveyData.projectId;
             setSurveyProjectId(currentProjectId);
-
-            if (!currentProjectId && selectedProject?.id) {
-              currentProjectId = selectedProject.id;
-            }
-          } catch {
-            currentProjectId = selectedProject?.id;
           }
-        } else if (!currentProjectId && selectedProject?.id) {
-          currentProjectId = selectedProject.id;
+          if (!currentProjectId && selectedProject?.id) {
+            currentProjectId = selectedProject.id;
+          }
+        } catch {
+          currentProjectId = currentProjectId ?? selectedProject?.id;
         }
 
         const updatePayload: ApiTypes.UpdateSurveyDto = {
           title: survey.title,
           description: survey.description,
           settings: {
+            ...(currentSurveyData?.settings ?? {}),
             allowAnonymous: survey.settings.allowAnonymous,
             collectEmails: survey.settings.collectEmails,
             shuffleQuestions: survey.settings.shuffleQuestions,
             oneResponsePerPerson: survey.settings.oneResponsePerPerson,
           },
+          expectedResponses: currentSurveyData?.expectedResponses ?? 0,
+          rewardPerResponse: currentSurveyData?.rewardPerResponse,
         };
 
         if (currentProjectId !== undefined && currentProjectId !== null) {
@@ -514,16 +483,14 @@ const Questionnaires: React.FC = () => {
         const existingQuestions = await questionsApi.getQuestions(survey.id);
         const existingQuestionIds = new Set(existingQuestions.map((q) => q.id.toLowerCase()));
 
-        const persistedLocalQuestions = survey.questions.filter((q) => isPersistedQuestionId(q.id));
-        const localQuestionIds = new Set(persistedLocalQuestions.map((q) => q.id.toLowerCase()));
-        const titledLocalQuestions = survey.questions.filter((q) => q.title?.trim());
-        const shouldSyncDeletes =
-          isSurveyLoaded &&
-          (persistedLocalQuestions.length > 0 ||
-            (titledLocalQuestions.length === 0 && existingQuestions.length > 0));
+        const localPersistedQuestionIds = new Set(
+          survey.questions
+            .filter((q) => isPersistedQuestionId(q.id))
+            .map((q) => q.id.toLowerCase())
+        );
 
-        const questionsToDelete = shouldSyncDeletes
-          ? existingQuestions.filter((q) => !localQuestionIds.has(q.id.toLowerCase()))
+        const questionsToDelete = isSurveyLoaded
+          ? existingQuestions.filter((q) => !localPersistedQuestionIds.has(q.id.toLowerCase()))
           : [];
 
         for (const questionToDelete of questionsToDelete) {
@@ -531,6 +498,7 @@ const Questionnaires: React.FC = () => {
             await questionsApi.deleteQuestion(survey.id, questionToDelete.id);
           } catch (error) {
             console.error("Error deleting question:", error);
+            throw new Error("Failed to remove a deleted question from the server. Please try again.");
           }
         }
 
@@ -540,26 +508,13 @@ const Questionnaires: React.FC = () => {
             continue;
           }
 
-          let effectiveQuestionId = question.id;
-          let isExisting = existingQuestionIds.has(question.id.toLowerCase());
-
-          if (!isExisting && !isPersistedQuestionId(question.id)) {
-            const orderMatch = existingQuestions.find((eq) => eq.order === question.order);
-            if (orderMatch) {
-              effectiveQuestionId = orderMatch.id;
-              isExisting = true;
-            }
-          }
-
+          const isExisting = existingQuestionIds.has(question.id.toLowerCase());
+          const apiPayload = mapLocalQuestionToApiPayload({ ...question, title: questionTitle });
           const validOptions = question.options?.filter((opt) => opt.text?.trim()) || [];
 
           if (isExisting) {
-            await questionsApi.updateQuestion(survey.id, effectiveQuestionId, {
-              type: mapQuestionTypeToApi(question.type),
-              title: questionTitle,
-              description: question.description,
-              isRequired: question.required,
-              order: question.order,
+            await questionsApi.updateQuestion(survey.id, question.id, {
+              ...apiPayload,
               options: validOptions.map((opt, optIndex) => {
                 const optionPayload: { text: string; order: number; id?: string } = {
                   text: opt.text.trim(),
@@ -573,11 +528,7 @@ const Questionnaires: React.FC = () => {
             });
           } else {
             const newQuestion = await questionsApi.createQuestion(survey.id, {
-              type: mapQuestionTypeToApi(question.type),
-              title: questionTitle,
-              description: question.description,
-              isRequired: question.required,
-              order: question.order,
+              ...apiPayload,
               options: validOptions.map((opt, optIndex) => ({
                 text: opt.text.trim(),
                 order: optIndex,
@@ -609,7 +560,7 @@ const Questionnaires: React.FC = () => {
       clearDraftForSurvey(savedSurveyId, survey.id !== savedSurveyId ? survey.id : undefined);
       setIsSurveyLoaded(true);
 
-      if (survey.id === "new" && savedSurveyId !== "new") {
+      if (!options?.skipNavigate && survey.id === "new" && savedSurveyId !== "new") {
         navigate(`/survey/questionnaires/${savedSurveyId}`, { replace: true });
       }
 
@@ -637,9 +588,17 @@ const Questionnaires: React.FC = () => {
 
     setIsPublishing(true);
     try {
-      const savedSurveyId = await handleSave();
-      await surveysApi.publishSurvey(savedSurveyId);
-      setSurvey((prev) => ({ ...prev, status: "published", id: savedSurveyId }));
+      const savedSurveyId = await handleSave({ skipNavigate: true });
+      const publishedSurvey = await surveysApi.publishSurvey(savedSurveyId);
+      setApiSurveyStatus(publishedSurvey.status);
+      setSurvey((prev) => ({
+        ...prev,
+        status: mapApiStatusToLocal(publishedSurvey.status),
+        id: savedSurveyId,
+      }));
+      if (survey.id === "new" && savedSurveyId !== "new") {
+        navigate(`/survey/questionnaires/${savedSurveyId}`, { replace: true });
+      }
       showSnackbar("Survey published successfully.", "success");
     } catch (error) {
       console.error("Error publishing survey:", error);
@@ -649,6 +608,18 @@ const Questionnaires: React.FC = () => {
       );
     } finally {
       setIsPublishing(false);
+    }
+  };
+
+  const handleSaveClick = async () => {
+    try {
+      await handleSave();
+      showSnackbar("Survey saved successfully.", "success");
+    } catch (error) {
+      showSnackbar(
+        error instanceof Error ? error.message : "Failed to save survey. Please try again.",
+        "error"
+      );
     }
   };
 
@@ -673,22 +644,22 @@ const Questionnaires: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-white px-6 h-screen rounded-l-xl flex flex-col">
+    <div className="bg-white dark:bg-gray-900 px-6 h-screen rounded-l-xl flex flex-col">
       {/* Top toolbar */}
-      <div className="py-3 flex justify-between items-center flex-shrink-0">
+      <div className="py-3 flex justify-between items-center flex-shrink-0 border-b border-transparent dark:border-gray-800">
         <div className="flex items-center gap-4">
           <button
             onClick={handleNavigateAway}
             className="cursor-pointer hover:opacity-70 transition-opacity">
             <Back />
           </button>
-          <p className="font-semibold text-lg">{survey.title || "Untitled Survey"}</p>
+          <p className="font-semibold text-lg dark:text-gray-100">{survey.title || "Untitled Survey"}</p>
         </div>
         <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={handleUndo}
-            className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3 disabled:opacity-40"
+            className="flex items-center gap-2 bg-[#FAFAFA] dark:bg-gray-800 dark:text-gray-200 rounded-lg py-2 px-3 disabled:opacity-40"
             disabled={undoStack.length === 0}>
             <Undo />
             <p className="text-[14px]">Undo</p>
@@ -696,20 +667,20 @@ const Questionnaires: React.FC = () => {
           <button
             type="button"
             onClick={handleRedo}
-            className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3 disabled:opacity-40"
+            className="flex items-center gap-2 bg-[#FAFAFA] dark:bg-gray-800 dark:text-gray-200 rounded-lg py-2 px-3 disabled:opacity-40"
             disabled={redoStack.length === 0}>
             <Redo />
             <p className="text-[14px]">Redo</p>
           </button>
           <button
             type="button"
-            className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3 cursor-pointer"
+            className="flex items-center gap-2 bg-[#FAFAFA] dark:bg-gray-800 dark:text-gray-200 rounded-lg py-2 px-3 cursor-pointer"
             onClick={() => setIsPreviewSurvey(true)}>
             <Preview />
             <p className="text-[14px]">Preview</p>
           </button>
           <div
-            className="flex items-center gap-2 bg-[#FAFAFA] rounded-lg py-2 px-3 cursor-pointer"
+            className="flex items-center gap-2 bg-[#FAFAFA] dark:bg-gray-800 dark:text-gray-200 rounded-lg py-2 px-3 cursor-pointer"
             onClick={() => setIsShareModalOpen(true)}>
             <Share />
             <p className="text-[14px]">Share</p>
@@ -717,15 +688,15 @@ const Questionnaires: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleSave}
-              disabled={isSaving || isPublishing || !survey.title?.trim()}
+              onClick={handleSaveClick}
+              disabled={isSaving || isPublishing || !survey.title?.trim() || Boolean(loadError)}
               className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed px-3 py-1 rounded-lg text-white font-semibold text-sm transition-colors">
               {isSaving ? "Saving..." : "Save"}
             </button>
             <button
               type="button"
               className="bg-[#FE5102] hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed px-3 py-1 rounded-lg text-white font-semibold text-sm transition-colors"
-              disabled={isSaving || isPublishing || !survey.title?.trim()}
+              disabled={isSaving || isPublishing || !survey.title?.trim() || Boolean(loadError)}
               onClick={handlePublish}>
               {isPublishing ? "Publishing..." : "Publish"}
             </button>
@@ -737,10 +708,22 @@ const Questionnaires: React.FC = () => {
       </div>
       {/* Scrollable form area */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <div className="flex-1 bg-[#EFEFEF] rounded-lg overflow-y-auto">
+        <div className="flex-1 bg-[#EFEFEF] dark:bg-gray-800 rounded-lg overflow-y-auto">
+          {loadError ? (
+            <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+              <p className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Could not load survey</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{loadError}</p>
+              <button
+                type="button"
+                onClick={() => navigate("/projects/dashboard")}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-semibold hover:bg-gray-700">
+                Back to dashboard
+              </button>
+            </div>
+          ) : (
           <div className="max-w-4xl mx-auto p-4">
             {/* Header */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-4">
               <input
                 type="text"
                 value={survey.title}
@@ -749,7 +732,7 @@ const Questionnaires: React.FC = () => {
                   const value = e.target.value;
                   setSurvey((prev) => ({ ...prev, title: value }));
                 }}
-                className="text-2xl font-bold text-gray-900 bg-transparent border-none outline-none w-full"
+                className="text-2xl font-bold text-gray-900 dark:text-gray-100 bg-transparent border-none outline-none w-full"
                 placeholder="Survey Title"
               />
               <input
@@ -760,7 +743,7 @@ const Questionnaires: React.FC = () => {
                   const value = e.target.value;
                   setSurvey((prev) => ({ ...prev, description: value }));
                 }}
-                className="text-gray-600 bg-transparent border-none outline-none w-full mt-2"
+                className="text-gray-600 dark:text-gray-400 bg-transparent border-none outline-none w-full mt-2"
                 placeholder="Type description here"
                 maxLength={100}
                 style={{
@@ -809,7 +792,7 @@ const Questionnaires: React.FC = () => {
 
             {/* Empty State */}
             {survey.questions.length === 0 && !isPreviewMode && (
-              <div className="flex flex-col items-center justify-center py-24 text-center text-gray-500 h-[50vh]">
+              <div className="flex flex-col items-center justify-center py-24 text-center text-gray-500 dark:text-gray-400 h-[50vh]">
                 <div className="text-gray-400 mb-4">
                   <svg
                     className="w-16 h-16 mx-auto"
@@ -824,18 +807,19 @@ const Questionnaires: React.FC = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No questions yet</h3>
-                <p className="text-gray-500 mb-4">Add your first question to get started</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No questions yet</h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">Add your first question to get started</p>
                 <div onClick={() => addQuestion()} className="cursor-pointer">
                   <AddQuestion />
                 </div>
               </div>
             )}
           </div>
+          )}
         </div>
       </DndContext>
       <div className="flex py-4 justify-between items-center">
-        <p className="text-[#292929]">
+        <p className="text-[#292929] dark:text-gray-200">
           Total Questions: <span className="font-bold">{survey.questions.length}</span>
         </p>
         <div className="cursor-pointer">
@@ -849,6 +833,11 @@ const Questionnaires: React.FC = () => {
         surveyId={survey.id}
         surveyOwnerId={surveyOwnerId}
         surveyOwnerName={surveyOwnerName}
+        surveyStatus={apiSurveyStatus}
+        onSurveyStatusChange={(status) => {
+          setApiSurveyStatus(status);
+          setSurvey((prev) => ({ ...prev, status: mapApiStatusToLocal(status) }));
+        }}
       />
 
       {isPreviewSurvey && (

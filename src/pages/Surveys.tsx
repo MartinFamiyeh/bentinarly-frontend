@@ -8,6 +8,7 @@ import { useLoading } from "../contexts/LoadingContext";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import { useAuth } from "../contexts/AuthContext";
 import { getParticipantStatus } from "../utils/participantSurvey";
+import { getTimeOfDayGreeting } from "../utils/timeOfDayGreeting";
 import * as ApiTypes from "../types/api";
 
 const EmptySurveysIllustration = NoSurveysIllustration as unknown as FunctionComponent<
@@ -83,7 +84,7 @@ const Surveys = () => {
     });
 
   return (
-    <div className="h-screen rounded-l-xl bg-white shadow-sm overflow-y-auto">
+    <div className="h-screen rounded-l-xl bg-white dark:bg-gray-900 shadow-sm overflow-y-auto">
       <Topbar
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}
@@ -99,7 +100,9 @@ const Surveys = () => {
           style={{
             backgroundImage: `linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url(${GreetingBackground})`,
           }}>
-          <h2 className="text-lg font-semibold text-white">Good Morning {displayName},</h2>
+          <h2 className="text-lg font-semibold text-white">
+            {getTimeOfDayGreeting()} {displayName},
+          </h2>
           <p className="mt-1 text-sm text-white/95">
             Your voice shapes the future of Africa. Take a survey, share your experience, power
             local innovation, and get rewarded for your insights.
@@ -115,7 +118,7 @@ const Surveys = () => {
         ) : (
           <div className="flex flex-col items-center justify-center gap-4 py-16">
             <EmptySurveysIllustration className="max-w-xs" aria-hidden />
-            <p className="text-sm text-[#696969]">No surveys available.</p>
+            <p className="text-sm text-[#696969] dark:text-gray-400">No surveys available.</p>
           </div>
         )}
       </div>

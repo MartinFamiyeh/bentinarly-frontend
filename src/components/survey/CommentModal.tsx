@@ -163,6 +163,7 @@ const CommentModal = ({ isOpen, onClose, onResolve, onDelete }: CommentModalProp
         <div className="px-6">
           <input
             className="w-full px-3 py-3 bg-gray-100 rounded-md text-sm focus:ring-0 focus:outline-none disabled:opacity-50"
+            value={comment}
             onChange={(e) => {
               setComment(e.target.value);
             }}
@@ -193,12 +194,12 @@ const CommentModal = ({ isOpen, onClose, onResolve, onDelete }: CommentModalProp
             </p>
             <div className="flex gap-4">
               <button
-                onClick={onClose}
+                onClick={() => setIsDeleteConfirmOpen(false)}
                 className="px-6 py-2 rounded text-[#696969] text-sm bg-[#F4F4F4] hover:bg-gray-200 w-full transition-all duration-300">
                 Cancel
               </button>
               <button
-                onClick={onClose}
+                onClick={executeDelete}
                 className="px-6 py-2 rounded text-white text-sm bg-[#D00808] hover:bg-[#D00808]/90 w-full transition-all duration-300">
                 Delete
               </button>

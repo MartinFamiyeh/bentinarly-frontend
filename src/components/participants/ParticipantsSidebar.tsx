@@ -11,7 +11,7 @@ interface SidebarProps {
 const ParticipantsSidebar = ({ isMinimized, toggle }: SidebarProps) => {
   return (
     <aside
-      className={`h-screen rounded-r-xl bg-white shadow-sm flex flex-col transition-all duration-300 ease-in-out z-40 overflow-visible ${
+      className={`h-screen rounded-r-xl bg-white dark:bg-gray-900 shadow-sm flex flex-col transition-all duration-300 ease-in-out z-40 overflow-visible ${
         isMinimized ? "w-20" : "w-64"
       }`}>
       <SidebarHeader isMinimized={isMinimized} toggle={toggle} />

@@ -47,13 +47,13 @@ const CurrencyValue = ({ amount, variant }: CurrencyValueProps) => (
   <p className="leading-none">
     <span
       className={`mr-1 text-base font-medium ${
-        variant === "primary" ? "text-white/80" : "text-[#696969]"
+        variant === "primary" ? "text-white/80" : "text-[#696969] dark:text-gray-400"
       }`}>
       GHS
     </span>
     <span
       className={`text-[28px] font-bold tracking-tight ${
-        variant === "primary" ? "text-white" : "text-[#292929]"
+        variant === "primary" ? "text-white" : "text-[#292929] dark:text-gray-100"
       }`}>
       {formatGhsAmount(amount)}
     </span>
@@ -103,9 +103,9 @@ type DefaultStatCardProps = {
 };
 
 const DefaultStatCard = ({ label, icon, footer, children }: DefaultStatCardProps) => (
-  <div className="flex min-h-[156px] flex-col justify-between rounded-2xl border border-[#EEEEEE] bg-white p-5 shadow-sm">
+  <div className="flex min-h-[156px] flex-col justify-between rounded-2xl border border-[#EEEEEE] dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
     <div className="flex items-start justify-between gap-3">
-      <p className="text-sm font-medium text-[#696969]">{label}</p>
+      <p className="text-sm font-medium text-[#696969] dark:text-gray-400">{label}</p>
       <IconBadge icon={icon} variant="default" />
     </div>
 
